@@ -46,6 +46,7 @@
   --skip-offset: 1rem;
   --skip-layer: 30;
   --header-layer: 5;
+  --header-height: 4.5rem;
   --intro-layer: 20;
   --tint: var(--color-page);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);

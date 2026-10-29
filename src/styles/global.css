@@ -3,6 +3,9 @@
 *::after {
   box-sizing: border-box;
 }
+html {
+  scroll-padding-block-start: var(--header-height);
+}
 body {
   margin: 0;
   background: var(--color-page);
@@ -98,7 +101,7 @@ time {
 }
 [aria-current='page'] {
   color: var(--color-text);
-  font-weight: var(--weight-heading);
+  font-weight: 600;
 }
 .language-switcher {
   margin-inline-start: auto;
