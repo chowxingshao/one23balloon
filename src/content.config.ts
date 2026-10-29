@@ -7,6 +7,7 @@ import {
   entryLocaleSchema,
   entrySlugSchema,
 } from './lib/content/schemas.ts';
+import { createLandingSchema } from './lib/landing/schema.ts';
 
 function localizedGlob(collection: string): Loader {
   return {
@@ -77,5 +78,9 @@ export const collections = {
   projects: defineCollection({
     loader: localizedGlob('projects'),
     schema: ({ image }) => createPublicationSchema(image),
+  }),
+  landing: defineCollection({
+    loader: glob({ pattern: '*.yaml', base: './src/content/landing' }),
+    schema: ({ image }) => createLandingSchema(image),
   }),
 };
