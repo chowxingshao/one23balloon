@@ -274,16 +274,41 @@ describe('one23balloon site build', () => {
   }, 300_000);
 
   it('keeps Three.js out of the initial page script but ships it as a lazy chunk', async () => {
-    const document = await page('index.html');
-    const scripts = [...document.querySelectorAll('script[type="module"]')];
-    expect(scripts.length).toBeGreaterThan(0);
-    for (const script of scripts) {
-      const src = script.getAttribute('src');
-      const code = src
-        ? await read(src.replace(/^\/one23balloon\//, ''))
-        : (script.textContent ?? '');
-      expect(code, src ?? 'inline script').not.toContain('WebGLRenderer');
+    // Follows static imports only: dynamic import() is how scenes load lazily.
+    const staticImports =
+      /(?:^|[;\s}])(?:import|export)\s*(?:[\w$*{}\s,]+from\s*)?["']([^"']+)["']/g;
+    const base = '/one23balloon/';
+    const resolveFrom = (from: string, specifier: string) =>
+      specifier.startsWith(base)
+        ? specifier.slice(base.length)
+        : new URL(specifier, `https://build.invalid/${from}`).pathname.slice(1);
+    const visited = new Set<string>();
+    const walk = async (code: string, from: string, label: string) => {
+      expect(code, label).not.toContain('WebGLRenderer');
+      for (const [, specifier] of code.matchAll(staticImports)) {
+        if (!specifier!.startsWith('.') && !specifier!.startsWith(base))
+          continue;
+        const path = resolveFrom(from, specifier!);
+        if (visited.has(path)) continue;
+        visited.add(path);
+        await walk(await read(path), path, `${path} (from ${label})`);
+      }
+    };
+    for (const pagePath of ['index.html', 'zh/index.html']) {
+      const document = await page(pagePath);
+      const scripts = [...document.querySelectorAll('script[type="module"]')];
+      expect(scripts.length).toBeGreaterThan(0);
+      for (const script of scripts) {
+        const src = script.getAttribute('src');
+        if (src) {
+          const path = resolveFrom(pagePath, src);
+          visited.add(path);
+          await walk(await read(path), path, src);
+        } else
+          await walk(script.textContent ?? '', pagePath, `inline ${pagePath}`);
+      }
     }
+    expect(visited.size).toBeGreaterThan(0);
     const chunks = (await readdir(join(fixture.outputDir, '_astro'))).filter(
       (file) => file.endsWith('.js'),
     );
@@ -293,5 +318,8 @@ describe('one23balloon site build', () => {
       ),
     );
     expect(withThree).toContain(true);
+    // The walk must not have wandered into the lazy Three.js chunk.
+    for (const [index, file] of chunks.entries())
+      if (withThree[index]) expect(visited.has(`_astro/${file}`)).toBe(false);
   });
 });
