@@ -7,6 +7,7 @@ import {
 import {
   mountIsland,
   observeIntersection,
+  whenIdle,
   type IslandScene,
   type Observe,
 } from '../../src/lib/canvas-island/lifecycle.ts';
@@ -73,6 +74,45 @@ describe('detectCapability', () => {
   });
 });
 
+describe('whenIdle', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it('runs on an idle callback with a 2 s timeout and can be cancelled', () => {
+    const request = vi.fn((_run: () => void, _options?: unknown) => 7);
+    const cancel = vi.fn();
+    vi.stubGlobal('requestIdleCallback', request);
+    vi.stubGlobal('cancelIdleCallback', cancel);
+    const run = vi.fn();
+    const stop = whenIdle(run);
+    expect(request).toHaveBeenCalledWith(expect.any(Function), {
+      timeout: 2000,
+    });
+    expect(run).not.toHaveBeenCalled();
+    request.mock.calls[0]![0]();
+    expect(run).toHaveBeenCalledOnce();
+    stop();
+    expect(cancel).toHaveBeenCalledWith(7);
+  });
+
+  it('falls back to a short timeout without requestIdleCallback', () => {
+    vi.useFakeTimers();
+    vi.stubGlobal('requestIdleCallback', undefined);
+    const run = vi.fn();
+    whenIdle(run);
+    vi.advanceTimersByTime(199);
+    expect(run).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    expect(run).toHaveBeenCalledOnce();
+    const cancelled = vi.fn();
+    whenIdle(cancelled)();
+    vi.advanceTimersByTime(500);
+    expect(cancelled).not.toHaveBeenCalled();
+  });
+});
+
 describe('observeIntersection', () => {
   afterEach(() => vi.unstubAllGlobals());
 
@@ -123,6 +163,11 @@ describe('mountIsland', () => {
     resize: vi.fn(),
     dispose: vi.fn(),
   });
+  // Runs the idle step straight away so tests only wait for promises.
+  const now = (run: () => void) => {
+    run();
+    return () => undefined;
+  };
   function manualVisibility() {
     let notify: (visible: boolean) => void = () => undefined;
     const stop = vi.fn();
@@ -171,6 +216,7 @@ describe('mountIsland', () => {
       load: async () => factory,
       capability: capable,
       observe: visibility.observe,
+      idle: now,
     });
     expect(island.state).toBe('idle');
     visibility.show(true);
@@ -194,6 +240,7 @@ describe('mountIsland', () => {
       load: async () => async () => scene,
       capability: capable,
       observe: visibility.observe,
+      idle: now,
     });
     visibility.show(true);
     await flush();
@@ -215,6 +262,7 @@ describe('mountIsland', () => {
       },
       capability: capable,
       observe: visibility.observe,
+      idle: now,
     });
     visibility.show(true);
     await flush();
@@ -230,6 +278,7 @@ describe('mountIsland', () => {
       load: async () => async () => scene,
       capability: capable,
       observe: visibility.observe,
+      idle: now,
     });
     visibility.show(true);
     await flush();
@@ -249,6 +298,7 @@ describe('mountIsland', () => {
         new Promise<IslandScene>((done) => (resolve = done)),
       capability: capable,
       observe: visibility.observe,
+      idle: now,
     });
     visibility.show(true);
     await flush();
@@ -268,6 +318,7 @@ describe('mountIsland', () => {
       load: async () => async () => scene,
       capability: capable,
       observe: visibility.observe,
+      idle: now,
     });
     visibility.show(true);
     await flush();
@@ -278,5 +329,42 @@ describe('mountIsland', () => {
       );
     expect(scene.dispose).toHaveBeenCalledOnce();
     expect(island.state).toBe('fallback');
+  });
+
+  it('waits for the browser to be idle before loading, and cancels on dispose', async () => {
+    const load = vi.fn(async () => async () => fakeScene());
+    const visibility = manualVisibility();
+    let idleRun: () => void = () => undefined;
+    const cancel = vi.fn();
+    const island = mountIsland({
+      element: element(),
+      load,
+      capability: capable,
+      observe: visibility.observe,
+      idle: (run) => {
+        idleRun = run;
+        return cancel;
+      },
+    });
+    visibility.show(true);
+    await flush();
+    expect(load).not.toHaveBeenCalled();
+    expect(island.state).toBe('idle');
+    idleRun();
+    await flush();
+    expect(island.state).toBe('live');
+
+    const pendingLoad = vi.fn();
+    const second = mountIsland({
+      element: element(),
+      load: pendingLoad,
+      capability: capable,
+      observe: visibility.observe,
+      idle: () => cancel,
+    });
+    visibility.show(true);
+    second.dispose();
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(pendingLoad).not.toHaveBeenCalled();
   });
 });

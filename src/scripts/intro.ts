@@ -14,9 +14,14 @@ export function playIntro(options: {
   capability: Capability;
   storage: Storage | undefined;
   load: IntroLoader;
+  /** Runs once when the intro ends, or straight away if it does not play. */
+  onFinish?: () => void;
 }): () => void {
-  const { root, capability, storage, load } = options;
-  if (!shouldPlayIntro(storage, capability)) return () => undefined;
+  const { root, capability, storage, load, onFinish } = options;
+  if (!shouldPlayIntro(storage, capability)) {
+    onFinish?.();
+    return () => undefined;
+  }
   markIntroPlayed(storage);
 
   const doc = root.ownerDocument;
@@ -47,6 +52,7 @@ export function playIntro(options: {
       duration: 400,
       easing: 'ease-out',
     });
+    onFinish?.();
     if (fade)
       fade.finished.then(
         () => overlay.remove(),
@@ -63,6 +69,11 @@ export function playIntro(options: {
     capability,
     observe: (_element, onChange) => {
       onChange(true);
+      return () => undefined;
+    },
+    // The intro covers first paint, so it loads at once instead of waiting for idle.
+    idle: (run) => {
+      run();
       return () => undefined;
     },
     load: () => load(finish),

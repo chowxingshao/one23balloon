@@ -53,11 +53,20 @@ export function initLanding(
     initPalettePicker(root),
     (options.motion ?? initLandingMotion)(root),
   ];
-  for (const element of root.querySelectorAll<HTMLElement>('[data-island]')) {
+  let disposed = false;
+  const mount = (element: HTMLElement) => {
     const load = loaders[element.dataset.island ?? ''];
-    if (!load) continue;
+    if (!load || disposed) return;
     const island = mountIsland({ element, load, capability });
     cleanups.push(() => island.dispose());
+  };
+  // The hero scene sits under the intro overlay, so it is built only once the
+  // intro is over (playIntro reports that at once when the intro does not play).
+  const deferred: HTMLElement[] = [];
+  for (const element of root.querySelectorAll<HTMLElement>('[data-island]')) {
+    if (element.dataset.island === 'hero' && root.hasAttribute('data-intro'))
+      deferred.push(element);
+    else mount(element);
   }
   if (root.hasAttribute('data-intro'))
     cleanups.push(
@@ -66,9 +75,11 @@ export function initLanding(
         capability,
         storage: options.storage ?? sessionStore(),
         load: options.intro ?? introLoader,
+        onFinish: () => deferred.forEach(mount),
       }),
     );
   return () => {
+    disposed = true;
     for (const cleanup of cleanups.splice(0).reverse()) cleanup();
   };
 }

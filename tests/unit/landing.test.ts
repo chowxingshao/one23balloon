@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Capability } from '../../src/lib/canvas-island/capability.ts';
+import { markIntroPlayed } from '../../src/lib/landing/intro-plan.ts';
 import { initLanding } from '../../src/scripts/landing.ts';
 
 const capable: Capability = {
@@ -17,6 +18,11 @@ beforeEach(() => {
     <div data-island="unknown"><canvas></canvas></div>
   </div>`);
   vi.stubGlobal('CustomEvent', dom.window.CustomEvent);
+  // Islands wait for idle time; run that step at once so tests only await promises.
+  vi.stubGlobal('requestIdleCallback', (run: () => void) => {
+    run();
+    return 0;
+  });
 });
 afterEach(() => {
   dom.window.close();
@@ -35,25 +41,33 @@ function memoryStorage(): Storage {
 }
 
 describe('initLanding', () => {
-  it('mounts known islands, enhances pickers, starts motion and the intro, then disposes everything', async () => {
-    const scene = {
-      start: vi.fn(),
-      stop: vi.fn(),
-      resize: vi.fn(),
-      dispose: vi.fn(),
-    };
+  const fakeScene = () => ({
+    start: vi.fn(),
+    stop: vi.fn(),
+    resize: vi.fn(),
+    dispose: vi.fn(),
+  });
+  const played = () => {
+    const storage = memoryStorage();
+    markIntroPlayed(storage);
+    return storage;
+  };
+
+  it('mounts known islands, enhances pickers, starts motion, then disposes everything', async () => {
+    const scene = fakeScene();
     const motionDispose = vi.fn();
     const motion = vi.fn(() => motionDispose);
-    const intro = vi.fn(() => new Promise<never>(() => undefined));
+    const intro = vi.fn();
     const dispose = initLanding(root(), {
       capability: capable,
-      storage: memoryStorage(),
+      storage: played(),
       loaders: { hero: async () => async () => scene },
       intro,
       motion,
     });
     await flush();
     expect(hero().dataset.islandState).toBe('live');
+    expect(intro).not.toHaveBeenCalled();
     expect(
       doc()
         .querySelector('[data-island="unknown"]')!
@@ -63,8 +77,6 @@ describe('initLanding', () => {
       doc().querySelector<HTMLElement>('[data-palette-picker]')!.hidden,
     ).toBe(false);
     expect(motion).toHaveBeenCalledWith(root());
-    expect(intro).toHaveBeenCalledOnce();
-    expect(doc().querySelector('.intro')).not.toBeNull();
 
     dispose();
     expect(scene.dispose).toHaveBeenCalledOnce();
@@ -73,7 +85,44 @@ describe('initLanding', () => {
     expect(
       doc().querySelector<HTMLElement>('[data-palette-picker]')!.hidden,
     ).toBe(true);
+  });
+
+  it('builds the hero scene only after the intro finishes', async () => {
+    const scene = fakeScene();
+    const heroLoad = vi.fn(async () => async () => scene);
+    const intro = vi.fn(() => new Promise<never>(() => undefined));
+    initLanding(root(), {
+      capability: capable,
+      storage: memoryStorage(),
+      loaders: { hero: heroLoad },
+      intro,
+      motion: () => () => undefined,
+    });
+    await flush();
+    expect(intro).toHaveBeenCalledOnce();
+    expect(doc().querySelector('.intro')).not.toBeNull();
+    expect(heroLoad).not.toHaveBeenCalled();
+    expect(hero().hasAttribute('data-island-state')).toBe(false);
+
+    doc().querySelector<HTMLButtonElement>('.intro-skip')!.click();
+    await flush();
+    expect(hero().dataset.islandState).toBe('live');
+  });
+
+  it('does not mount the hero when disposed while the intro plays', async () => {
+    const heroLoad = vi.fn(async () => async () => fakeScene());
+    const dispose = initLanding(root(), {
+      capability: capable,
+      storage: memoryStorage(),
+      loaders: { hero: heroLoad },
+      intro: () => new Promise<never>(() => undefined),
+      motion: () => () => undefined,
+    });
+    dispose();
+    await flush();
     expect(doc().querySelector('.intro')).toBeNull();
+    expect(heroLoad).not.toHaveBeenCalled();
+    expect(hero().hasAttribute('data-island-state')).toBe(false);
   });
 
   it('keeps photo fallbacks and skips the intro without WebGL', () => {

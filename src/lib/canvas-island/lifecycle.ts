@@ -15,12 +15,15 @@ export type Observe = (
   element: Element,
   onChange: (visible: boolean) => void,
 ) => () => void;
+export type Schedule = (run: () => void) => () => void;
 export type IslandOptions = {
   element: HTMLElement;
   load: () => Promise<SceneFactory>;
   capability: Capability;
   allowReducedMotion?: boolean;
   observe?: Observe;
+  /** Defers the first load; defaults to waiting for the browser to be idle. */
+  idle?: Schedule;
   onState?: (state: IslandState) => void;
 };
 export type Island = { readonly state: IslandState; dispose(): void };
@@ -43,6 +46,19 @@ export const observeIntersection: Observe = (element, onChange) => {
   return () => observer.disconnect();
 };
 
+// Runs once the main thread is idle (at most 2 s later), so scene chunks never
+// compete with first paint and input.
+export const whenIdle: Schedule = (run) => {
+  if (typeof globalThis.requestIdleCallback === 'function') {
+    const handle = globalThis.requestIdleCallback(() => run(), {
+      timeout: 2000,
+    });
+    return () => globalThis.cancelIdleCallback?.(handle);
+  }
+  const timer = setTimeout(run, 200);
+  return () => clearTimeout(timer);
+};
+
 export function mountIsland(options: IslandOptions): Island {
   const {
     element,
@@ -50,6 +66,7 @@ export function mountIsland(options: IslandOptions): Island {
     capability,
     allowReducedMotion = false,
     observe = observeIntersection,
+    idle = whenIdle,
     onState,
   } = options;
   const doc = element.ownerDocument;
@@ -123,10 +140,14 @@ export function mountIsland(options: IslandOptions): Island {
     }
   };
 
+  let idleScheduled = false;
   cleanups.push(
     observe(element, (isVisible) => {
       visible = isVisible;
-      if (isVisible) void ensureLoaded();
+      if (isVisible && !idleScheduled) {
+        idleScheduled = true;
+        cleanups.push(idle(() => void ensureLoaded()));
+      }
       sync();
     }),
   );
