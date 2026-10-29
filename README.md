@@ -60,27 +60,28 @@ docs/                   Setup, architecture, and decisions
 
 Versions were resolved from the npm registry on 2026-10-08. Every direct dependency has a purpose:
 
-| Dependency                 | Exact version | Reason                                                                                              |
-| -------------------------- | ------------- | --------------------------------------------------------------------------------------------------- |
-| `astro`                    | 7.3.7         | Build static HTML with typed Astro pages and content support.                                       |
-| `@astrojs/mdx`             | 8.0.3         | Compile MDX through Astro's supported integration.                                                  |
-| `@astrojs/sitemap`         | 3.7.4         | Generate canonical sitemap artifacts.                                                               |
-| `@astrojs/rss`             | 4.0.19        | Generate static RSS feeds.                                                                          |
-| `gsap`                     | 3.15.0        | Provide scoped animation and ScrollTrigger APIs.                                                    |
-| `sharp`                    | 0.35.5        | Process content images through Astro's real build-time Image pipeline under pnpm.                   |
-| `typescript`               | 6.0.3         | Type-check source with the newest stable release compatible with Astro check and TypeScript ESLint. |
-| `@astrojs/check`           | 0.9.10        | Diagnose Astro templates and their TypeScript.                                                      |
-| `@types/node`              | 24.19.1       | Type the Node 24 filesystem and tooling APIs.                                                       |
-| `eslint`                   | 10.12.0       | Run static source checks.                                                                           |
-| `@eslint/js`               | 10.0.1        | Provide ESLint's recommended JavaScript rules.                                                      |
-| `typescript-eslint`        | 8.71.1        | Parse and lint TypeScript with supported ESLint rules.                                              |
-| `eslint-plugin-astro`      | 3.2.1         | Parse and lint Astro templates.                                                                     |
-| `eslint-plugin-jsx-a11y-x` | 0.2.0         | Provide Astro accessibility rules compatible with ESLint 10.                                        |
-| `prettier`                 | 3.9.9         | Format source and documentation consistently.                                                       |
-| `prettier-plugin-astro`    | 1.1.0         | Format Astro templates.                                                                             |
-| `vitest`                   | 5.0.3         | Test application logic using Astro's Vite configuration.                                            |
-| `jsdom`                    | 30.1.2        | Provide a DOM environment for motion and form behavior tests.                                       |
-| `@types/jsdom`             | 30.0.0        | Type real HTML/XML fixture inspection using the installed jsdom API.                                |
+| Dependency                 | Exact version | Reason                                                                                               |
+| -------------------------- | ------------- | ---------------------------------------------------------------------------------------------------- |
+| `astro`                    | 7.3.7         | Build static HTML with typed Astro pages and content support.                                        |
+| `@astrojs/mdx`             | 8.0.3         | Compile MDX through Astro's supported integration.                                                   |
+| `@astrojs/sitemap`         | 3.7.4         | Generate canonical sitemap artifacts.                                                                |
+| `@astrojs/rss`             | 4.0.19        | Generate static RSS feeds.                                                                           |
+| `gsap`                     | 3.15.0        | Provide scoped animation and ScrollTrigger APIs.                                                     |
+| `sharp`                    | 0.35.5        | Process content images through Astro's real build-time Image pipeline under pnpm.                    |
+| `typescript`               | 6.0.3         | Type-check source with the newest stable release compatible with Astro check and TypeScript ESLint.  |
+| `@astrojs/check`           | 0.9.10        | Diagnose Astro templates and their TypeScript.                                                       |
+| `@types/node`              | 24.19.1       | Type the Node 24 filesystem and tooling APIs.                                                        |
+| `eslint`                   | 10.12.0       | Run static source checks.                                                                            |
+| `@eslint/js`               | 10.0.1        | Provide ESLint's recommended JavaScript rules.                                                       |
+| `typescript-eslint`        | 8.71.1        | Parse and lint TypeScript with supported ESLint rules.                                               |
+| `eslint-plugin-astro`      | 3.2.1         | Parse and lint Astro templates.                                                                      |
+| `eslint-plugin-jsx-a11y-x` | 0.2.0         | Provide Astro accessibility rules compatible with ESLint 10.                                         |
+| `prettier`                 | 3.9.9         | Format source and documentation consistently.                                                        |
+| `prettier-plugin-astro`    | 1.1.0         | Format Astro templates.                                                                              |
+| `vitest`                   | 5.0.3         | Test application logic using Astro's Vite configuration.                                             |
+| `jsdom`                    | 30.1.2        | Provide a DOM environment for motion and form behavior tests.                                        |
+| `@types/jsdom`             | 30.0.0        | Type real HTML/XML fixture inspection using the installed jsdom API.                                 |
+| `subset-font`              | 2.9.0         | Subset self-hosted Fraunces and Noto SC fonts to the characters the site uses (`pnpm fonts:subset`). |
 
 React, a UI library, Tailwind, and backend adapters are absent. Zod is imported from the installed Astro version's supported `astro/zod` export. The pnpm lockfile freezes transitive resolutions. `pnpm-workspace.yaml` permits only esbuild's required install script, excludes the incompatible optional legacy JSX accessibility peer, and records the exact Astro release exception generated by pnpm's release-age policy.
 
@@ -92,7 +93,7 @@ CI runs for pull requests, pushes to main, and reusable workflow calls. It insta
 
 See [contributing](CONTRIBUTING.md) for Conventional Commits, fixed-layer SemVer, release and migration rules, branch protection setup, and the reviewed client-copy governance checklist. [CLAUDE.md](CLAUDE.md) shares the same architecture and workflow references. [Troubleshooting](docs/troubleshooting.md) covers local gates and generated setup conflicts. [UPDATING.md](UPDATING.md) explains how a copy started from this template pulls later upstream changes.
 
-The template uses the [MIT license](LICENSE), copyright 2026 chowxingshao, as confirmed by the owner. Preserve the MIT notice in reused code and the Source Sans 3 [font license](public/fonts/OFL.txt) and all required third-party notices. Review licensing and governance explicitly when creating a client site. [Security reporting](SECURITY.md) has no confirmed private contact or response SLA; GitHub private reporting setup is documented but not claimed enabled. The [Contributor Covenant 2.1](CODE_OF_CONDUCT.md) retains its designated conduct-contact placeholder pending maintainer confirmation.
+The template uses the [MIT license](LICENSE), copyright 2026 chowxingshao, as confirmed by the owner. Preserve the MIT notice in reused code and the Source Sans 3 [font license](public/fonts/OFL.txt) plus the Fraunces, Noto Serif SC, and Noto Sans SC licenses beside it in `public/fonts/` and all required third-party notices. Review licensing and governance explicitly when creating a client site. [Security reporting](SECURITY.md) has no confirmed private contact or response SLA; GitHub private reporting setup is documented but not claimed enabled. The [Contributor Covenant 2.1](CODE_OF_CONDUCT.md) retains its designated conduct-contact placeholder pending maintainer confirmation.
 
 ## Fresh-copy acceptance
 

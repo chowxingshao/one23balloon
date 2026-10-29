@@ -16,6 +16,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "build": "astro build",
+    "fonts:subset": "node --experimental-strip-types scripts/subset-fonts.ts",
     "verify:container": "node --experimental-strip-types scripts/verify-container.ts",
     "configure:project": "node --experimental-strip-types scripts/configure-project.ts",
     "verify:fresh": "node --experimental-strip-types scripts/verify-fresh.ts"
@@ -39,6 +40,7 @@
     "jsdom": "30.1.2",
     "prettier": "3.9.9",
     "prettier-plugin-astro": "1.1.0",
+    "subset-font": "2.9.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.1",
     "vitest": "5.0.3"

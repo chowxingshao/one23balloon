@@ -89,4 +89,26 @@ describe('one23balloon site build', () => {
       await invalid.dispose();
     }
   }, 300_000);
+
+  it('preloads Latin fonts everywhere and Chinese subsets only on the Chinese page', async () => {
+    const preloads = async (path: string) =>
+      [
+        ...(await page(path)).querySelectorAll(
+          'link[rel="preload"][as="font"]',
+        ),
+      ].map((link) => link.getAttribute('href'));
+    const latin = [
+      '/one23balloon/fonts/source-sans-3-latin.woff2',
+      '/one23balloon/fonts/fraunces-latin.woff2',
+    ];
+    expect(await preloads('index.html')).toEqual(latin);
+    expect(await preloads('zh/index.html')).toEqual([
+      ...latin,
+      '/one23balloon/fonts/noto-serif-sc-subset.woff2',
+      '/one23balloon/fonts/noto-sans-sc-subset.woff2',
+    ]);
+    expect(await read('index.html')).toContain(
+      'unicode-range: U+3000-303F, U+3400-4DBF, U+4E00-9FFF, U+FF00-FFEF',
+    );
+  });
 });
