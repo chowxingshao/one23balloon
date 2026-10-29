@@ -1,4 +1,4 @@
-import { Color, MeshPhysicalMaterial } from 'three';
+import { Color, MeshPhysicalMaterial, type Texture } from 'three';
 import {
   palettes,
   type PaletteColour,
@@ -62,6 +62,7 @@ function apply(material: MeshPhysicalMaterial, value: Look): void {
 export class PaletteMaterials {
   private readonly tracked: Tracked[] = [];
   private readonly sharedBySlot = new Map<Slot, MeshPhysicalMaterial>();
+  private environment: Texture | null = null;
 
   constructor(
     private paletteId: PaletteId,
@@ -75,8 +76,19 @@ export class PaletteMaterials {
   create(slot: Slot): MeshPhysicalMaterial {
     const material = new MeshPhysicalMaterial();
     apply(material, look(paletteColour(this.paletteId, slot)));
+    material.envMap = this.environment;
     this.tracked.push({ material, slot, start: -1 });
     return material;
+  }
+
+  // Per-material envMapIntensity only takes effect when the material has its own envMap;
+  // otherwise the renderer substitutes scene.environmentIntensity.
+  setEnvironment(texture: Texture): void {
+    this.environment = texture;
+    for (const entry of this.tracked) {
+      entry.material.envMap = texture;
+      entry.material.needsUpdate = true;
+    }
   }
 
   shared(slot: Slot): MeshPhysicalMaterial {

@@ -1,6 +1,17 @@
 import { Raycaster, Vector2, type Camera, type Object3D } from 'three';
 import type { Balloon } from './balloon.ts';
 
+// Raycaster ignores `visible`, so skip hits on popped balloons and anything else.
+export function firstPoppable(
+  hits: Array<{ object: Object3D }>,
+): Balloon | undefined {
+  for (const hit of hits) {
+    const balloon = hit.object.userData.balloon as Balloon | undefined;
+    if (balloon?.poppable) return balloon;
+  }
+  return undefined;
+}
+
 export function createPicker(
   canvas: HTMLCanvasElement,
   camera: Camera,
@@ -16,9 +27,8 @@ export function createPicker(
       -(((event.clientY - rect.top) / rect.height) * 2 - 1),
     );
     raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster.intersectObjects(targets(), false)[0];
-    const balloon = hit?.object.userData.balloon as Balloon | undefined;
-    if (balloon?.poppable) onPick(balloon);
+    const balloon = firstPoppable(raycaster.intersectObjects(targets(), false));
+    if (balloon) onPick(balloon);
   };
   canvas.addEventListener('pointerdown', handle);
   return () => canvas.removeEventListener('pointerdown', handle);

@@ -5,6 +5,7 @@ import {
   Group,
   Mesh,
   MeshBasicMaterial,
+  Texture,
   Vector3,
 } from 'three';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -19,6 +20,7 @@ import {
   popScale,
 } from '../../src/scenes/balloon-motion.ts';
 import { Confetti } from '../../src/scenes/confetti.ts';
+import { firstPoppable } from '../../src/scenes/picking.ts';
 import {
   easeInOut,
   mixSurface,
@@ -109,6 +111,28 @@ describe('Balloon', () => {
   });
 });
 
+describe('firstPoppable', () => {
+  it('skips popped balloons and unrelated objects to find a poppable one', () => {
+    const make = () =>
+      Balloon.create(new BoxGeometry(), new MeshBasicMaterial(), 1, false);
+    const popped = make();
+    popped.pop(0);
+    popped.update(1);
+    const visible = make();
+    const other = new Mesh(new BoxGeometry(), new MeshBasicMaterial());
+    expect(popped.poppable).toBe(false);
+    expect(
+      firstPoppable([
+        { object: other },
+        { object: popped.mesh },
+        { object: visible.mesh },
+      ]),
+    ).toBe(visible);
+    expect(firstPoppable([{ object: popped.mesh }])).toBeUndefined();
+    expect(firstPoppable([])).toBeUndefined();
+  });
+});
+
 describe('Confetti', () => {
   it('adds particles, removes them after their lifetime, and disposes', () => {
     const parent = new Group();
@@ -152,6 +176,16 @@ describe('PaletteMaterials', () => {
     expect(hex(latex.color)).toBe('#b5475b');
     expect(hex(chrome.color)).toBe('#d4af6a');
     expect(materials.shared(1)).toBe(materials.shared(1));
+  });
+
+  it('applies the environment map to existing and new materials', () => {
+    const materials = new PaletteMaterials('jewel', () => 0);
+    const before = materials.create(0);
+    const texture = new Texture();
+    materials.setEnvironment(texture);
+    const after = materials.create('chrome');
+    expect(before.envMap).toBe(texture);
+    expect(after.envMap).toBe(texture);
   });
 
   it('wraps slot numbers onto the palette', () => {
