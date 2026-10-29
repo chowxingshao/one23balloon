@@ -1,0 +1,14 @@
+---
+import { paletteIds, palettes } from '../../lib/landing/palettes.ts';
+// One CSS source for tints, generated from palettes.ts so colours never drift.
+const rules = (scheme: 'tint' | 'tintDark') =>
+  paletteIds
+    .map(
+      (id) =>
+        `[data-palette='${id}'],.landing[data-palette='${id}'] [data-palette-follow]{--tint:${palettes[id][scheme]}}`,
+    )
+    .join('');
+const css = `${rules('tint')}@media (prefers-color-scheme: dark){${rules('tintDark')}}`;
+---
+
+<style is:inline set:html={css} />

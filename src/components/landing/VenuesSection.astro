@@ -1,0 +1,27 @@
+---
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  data: LandingData;
+}
+const { data } = Astro.props;
+---
+
+<section class="venues" aria-labelledby="venues-title">
+  <div class="shell">
+    <h2 id="venues-title" data-reveal>
+      {data.venues.title}
+    </h2>
+  </div>
+  <div class="marquee" data-marquee>
+    <ul class="marquee-list">
+      {data.venues.items.map((venue) => (
+        <li>{venue}</li>
+      ))}
+    </ul>
+    <ul class="marquee-list marquee-copy" aria-hidden="true">
+      {data.venues.items.map((venue) => (
+        <li>{venue}</li>
+      ))}
+    </ul>
+  </div>
+</section>

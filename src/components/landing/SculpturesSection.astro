@@ -1,0 +1,39 @@
+---
+import ArchPhoto from './ArchPhoto.astro';
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  data: LandingData;
+}
+const { data } = Astro.props;
+---
+
+<section
+  class="sculptures band"
+  data-palette="blush-champagne"
+  aria-labelledby="sculptures-title"
+>
+  <div class="shell sculptures-grid">
+    <div>
+      <header class="section-head" data-reveal>
+        <h2 id="sculptures-title">{data.sculptures.title}</h2>
+        <p class="lede">{data.sculptures.lede}</p>
+      </header>
+      <div class="sculpture-photos">
+        {data.sculptures.photos.map((photo) => (
+          <figure data-reveal>
+            <ArchPhoto photo={photo} sizes="(min-width: 64rem) 18vw, 45vw" />
+            <figcaption>{photo.caption}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+    <div class="stage sculpture-stage" data-island="sculptures">
+      <canvas class="island-canvas" aria-hidden="true"></canvas>
+      <ul class="piece-names" aria-hidden="true">
+        {data.sculptures.pieces.map((piece) => (
+          <li>{piece.name}</li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>

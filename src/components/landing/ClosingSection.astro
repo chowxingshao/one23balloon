@@ -1,0 +1,38 @@
+---
+import ArchPhoto from './ArchPhoto.astro';
+import PalettePicker from './PalettePicker.astro';
+import WhatsAppLink from './WhatsAppLink.astro';
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  data: LandingData;
+}
+const { data } = Astro.props;
+---
+
+<section class="closing" data-palette-follow aria-labelledby="closing-title">
+  <div class="closing-copy">
+    <h2 id="closing-title" class="display" data-reveal>
+      {data.closing.title}
+    </h2>
+    <p class="lede" data-reveal>
+      {data.closing.body}
+    </p>
+    <PalettePicker copy={data.palettes} />
+    <div class="actions" data-reveal>
+      <WhatsAppLink
+        number={data.whatsapp}
+        message={data.closing.message}
+        label={data.closing.cta}
+        variant="primary"
+        paletteLink
+      />
+    </div>
+  </div>
+  <div class="stage closing-stage" data-island="release">
+    <ArchPhoto
+      photo={data.closing.photo}
+      sizes="(min-width: 64rem) 45vw, 100vw"
+    />
+    <canvas class="island-canvas" aria-hidden="true"></canvas>
+  </div>
+</section>

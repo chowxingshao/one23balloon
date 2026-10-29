@@ -1,0 +1,42 @@
+---
+import ArchPhoto from './ArchPhoto.astro';
+import PalettePicker from './PalettePicker.astro';
+import WhatsAppLink from './WhatsAppLink.astro';
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  data: LandingData;
+}
+const { data } = Astro.props;
+---
+
+<section class="hero" data-palette-follow aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <p class="eyebrow" data-reveal>
+      {data.hero.eyebrow}
+    </p>
+    <h1 id="hero-title" class="display" data-reveal>
+      {data.hero.title}
+    </h1>
+    <p class="lede" data-reveal>
+      {data.hero.lede}
+    </p>
+    <div class="actions" data-reveal>
+      <WhatsAppLink
+        number={data.whatsapp}
+        message={data.hero.message}
+        label={data.hero.cta}
+        variant="primary"
+        paletteLink
+      />
+    </div>
+    <PalettePicker copy={data.palettes} />
+  </div>
+  <div class="stage hero-stage" data-island="hero">
+    <ArchPhoto
+      photo={data.hero.photo}
+      sizes="(min-width: 64rem) 50vw, 100vw"
+      loading="eager"
+    />
+    <canvas class="island-canvas" aria-hidden="true"></canvas>
+  </div>
+</section>

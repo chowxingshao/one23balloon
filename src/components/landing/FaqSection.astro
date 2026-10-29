@@ -1,0 +1,24 @@
+---
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  faq: LandingData['faq'];
+}
+const { faq } = Astro.props;
+const published = faq.items.filter((item) => !item.draft);
+---
+
+{published.length > 0 && (
+  <section class="faq band" aria-labelledby="faq-title">
+    <div class="shell">
+      <h2 id="faq-title" data-reveal>
+        {faq.title}
+      </h2>
+      {published.map((item) => (
+        <details data-reveal>
+          <summary>{item.question}</summary>
+          <p>{item.answer}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+)}

@@ -1,0 +1,38 @@
+---
+import type { LandingData } from '../../lib/landing/content.ts';
+import { defaultPaletteId, palettes } from '../../lib/landing/palettes.ts';
+interface Props {
+  copy: LandingData['palettes'];
+}
+const { copy } = Astro.props;
+---
+
+<div
+  class="palette-picker"
+  role="radiogroup"
+  aria-label={copy.label}
+  data-palette-picker
+  hidden
+>
+  <p class="picker-label" aria-hidden="true">
+    {copy.label}
+  </p>
+  {copy.items.map((item) => (
+    <button
+      type="button"
+      role="radio"
+      class="palette-option"
+      aria-checked={item.id === defaultPaletteId ? 'true' : 'false'}
+      tabindex={item.id === defaultPaletteId ? 0 : -1}
+      data-palette-option={item.id}
+      data-message={item.message}
+    >
+      <span class="swatches" aria-hidden="true">
+        {palettes[item.id].colours.slice(0, 4).map((colour) => (
+          <span class="swatch" style={`--swatch: ${colour.hex}`} />
+        ))}
+      </span>
+      <span>{item.name}</span>
+    </button>
+  ))}
+</div>

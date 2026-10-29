@@ -1,0 +1,36 @@
+---
+import ArchPhoto from './ArchPhoto.astro';
+import WhatsAppLink from './WhatsAppLink.astro';
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  data: LandingData;
+}
+const { data } = Astro.props;
+---
+
+<section class="services band" aria-labelledby="services-title">
+  <div class="shell">
+    <header class="section-head" data-reveal>
+      <h2 id="services-title">{data.services.title}</h2>
+      <p class="lede">{data.services.lede}</p>
+    </header>
+    <ul class="service-list">
+      {data.services.items.map((service) => (
+        <li class="service" data-palette={service.palette} data-reveal>
+          <ArchPhoto
+            photo={service.photo}
+            sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 100vw"
+          />
+          <h3>{service.title}</h3>
+          <p>{service.body}</p>
+          <WhatsAppLink
+            number={data.whatsapp}
+            message={service.message}
+            label={data.services.cta}
+            accessibleLabel={`${data.services.cta}: ${service.title}`}
+          />
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

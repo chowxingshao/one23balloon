@@ -133,4 +133,82 @@ describe('one23balloon site build', () => {
       'Balloon installations for weddings, launches, openings',
     );
   });
+
+  it('renders every landing section in static HTML', async () => {
+    for (const path of ['index.html', 'zh/index.html']) {
+      const document = await page(path);
+      expect(document.querySelectorAll('h1'), path).toHaveLength(1);
+      expect(document.querySelectorAll('.service'), path).toHaveLength(6);
+      expect(document.querySelectorAll('.gallery-item img'), path).toHaveLength(
+        12,
+      );
+      expect(
+        document.querySelectorAll('.sculpture-photos img'),
+        path,
+      ).toHaveLength(2);
+      expect(
+        [...document.querySelectorAll('[data-island]')].map((island) =>
+          island.getAttribute('data-island'),
+        ),
+        path,
+      ).toEqual(['hero', 'sculptures', 'release']);
+      for (const image of document.querySelectorAll('main img'))
+        expect(image.getAttribute('alt'), path).toBeTruthy();
+      expect(document.querySelectorAll('.faq details'), path).toHaveLength(2);
+      expect(document.querySelector('.steps'), path).toBeNull();
+      expect(
+        document.querySelector('[data-palette-picker]')?.hasAttribute('hidden'),
+        path,
+      ).toBe(true);
+    }
+  });
+
+  it('links every call to action to WhatsApp with the localized message', async () => {
+    const wa = (text: string) =>
+      `https://wa.me/60109017633?text=${encodeURIComponent(text)}`;
+    const en = await page('index.html');
+    const links = [...en.querySelectorAll('a[href^="https://wa.me/"]')].map(
+      (link) => link.getAttribute('href'),
+    );
+    expect(links).toHaveLength(9);
+    expect(links).toContain(
+      wa("Hi one23balloon, I'd like to plan a balloon setup."),
+    );
+    expect(links).toContain(
+      wa("Hi one23balloon, I'd like to ask about a car handover setup."),
+    );
+    const zh = await page('zh/index.html');
+    expect(
+      zh
+        .querySelector('.site-header a[href^="https://wa.me/"]')
+        ?.getAttribute('href'),
+    ).toBe(wa('你好 one23balloon，我想咨询气球布置。'));
+    expect(zh.querySelector('.landing-footer')?.textContent).toContain(
+      '小红书',
+    );
+  });
+
+  it('fails the build when the Chinese landing structure drifts', async () => {
+    const zh = await readFile(
+      new URL('../../src/content/landing/zh.yaml', import.meta.url),
+      'utf8',
+    );
+    const drifted = await buildFixture({
+      preset: 'project',
+      content: {
+        'src/content/landing/zh.yaml': zh.replace(
+          "whatsapp: '60109017633'",
+          "whatsapp: '60123456789'",
+        ),
+      },
+    });
+    try {
+      expect(drifted.exitCode).not.toBe(0);
+      expect(drifted.stdout + drifted.stderr).toContain(
+        'must match en in: whatsapp',
+      );
+    } finally {
+      await drifted.dispose();
+    }
+  }, 300_000);
 });

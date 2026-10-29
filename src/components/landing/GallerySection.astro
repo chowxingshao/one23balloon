@@ -1,0 +1,63 @@
+---
+import ArchPhoto from './ArchPhoto.astro';
+import { getSiteConfig } from '../../lib/config/site.ts';
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  data: LandingData;
+}
+const { data } = Astro.props;
+const instagram = getSiteConfig().social.instagram;
+---
+
+<section class="gallery band" aria-labelledby="gallery-title">
+  <header class="section-head shell" data-reveal>
+    <h2 id="gallery-title">{data.gallery.title}</h2>
+    <p class="lede">{data.gallery.lede}</p>
+  </header>
+  {/* A scrollable region must be keyboard focusable so the track can be scrolled without a pointer. */}
+  <div
+    class="gallery-viewport"
+    role="region"
+    aria-labelledby="gallery-title" /* eslint-disable-next-line astro/jsx-a11y/no-noninteractive-tabindex */
+    tabindex="0"
+    data-gallery
+  >
+    <ol class="gallery-track" data-gallery-track>
+      {data.gallery.items.map((item) => (
+        <li class="gallery-item">
+          <figure>
+            <ArchPhoto
+              photo={item}
+              sizes="(min-width: 64rem) 26rem, 80vw"
+              shape="card"
+            />
+            <figcaption>
+              <span>{item.location}</span>
+              <span class="sep" aria-hidden="true"></span>
+              <span>{item.theme}</span>
+              <span class="dots">
+                <span class="visually-hidden">
+                  {item.colours.map((colour) => colour.name).join(', ')}
+                </span>
+                {item.colours.map((colour) => (
+                  <span
+                    class="dot"
+                    style={`--dot: ${colour.hex}`}
+                    aria-hidden="true"
+                  />
+                ))}
+              </span>
+            </figcaption>
+          </figure>
+        </li>
+      ))}
+    </ol>
+  </div>
+  {instagram && (
+    <p class="shell more">
+      <a href={instagram} rel="noopener">
+        {data.gallery.more}
+      </a>
+    </p>
+  )}
+</section>
