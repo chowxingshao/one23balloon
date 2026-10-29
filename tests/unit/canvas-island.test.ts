@@ -6,6 +6,7 @@ import {
 } from '../../src/lib/canvas-island/capability.ts';
 import {
   mountIsland,
+  observeIntersection,
   type IslandScene,
   type Observe,
 } from '../../src/lib/canvas-island/lifecycle.ts';
@@ -69,6 +70,31 @@ describe('detectCapability', () => {
       }).webgl,
     ).toBe(false);
     expect(detectCapability({}).webgl).toBe(false);
+  });
+});
+
+describe('observeIntersection', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('follows the latest entry for the element', () => {
+    let callback: (entries: Array<{ isIntersecting: boolean }>) => void =
+      () => undefined;
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(next: typeof callback) {
+          callback = next;
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    const onChange = vi.fn();
+    observeIntersection({} as Element, onChange);
+    callback([{ isIntersecting: true }, { isIntersecting: false }]);
+    expect(onChange).toHaveBeenLastCalledWith(false);
+    callback([{ isIntersecting: false }, { isIntersecting: true }]);
+    expect(onChange).toHaveBeenLastCalledWith(true);
   });
 });
 

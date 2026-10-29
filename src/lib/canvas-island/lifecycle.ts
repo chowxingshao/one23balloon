@@ -30,9 +30,13 @@ export const observeIntersection: Observe = (element, onChange) => {
     onChange(true);
     return () => undefined;
   }
-  // Start loading a little before the island scrolls into view.
+  // Start loading a little before the island scrolls into view. Entries are
+  // queued in time order, so the last one is the element's current state.
   const observer = new IntersectionObserver(
-    (entries) => onChange(entries.some((entry) => entry.isIntersecting)),
+    (entries) => {
+      const latest = entries.at(-1);
+      if (latest) onChange(latest.isIntersecting);
+    },
     { rootMargin: '200px 0px' },
   );
   observer.observe(element);
