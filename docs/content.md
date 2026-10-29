@@ -54,11 +54,11 @@ Only create a collection when the project needs it. For example, `services`, `te
 
 ## Demonstration content
 
-The shipped pages, welcome post, project description, and SVG are clearly marked samples. Replace them with approved project content before client publication. They describe no fictional client achievements or results. MDX is available for entries that need markup or imported components; standard Markdown is sufficient for prose.
+The canvas-base demonstration pages, welcome post, project description, and SVG now live in `tests/fixtures/demo/` and are copied into fixtures by the `demo` preset of `buildFixture`; they are clearly marked samples. A client copy replaces them with approved project content under `src/content/`. They describe no fictional client achievements or results. MDX is available for entries that need markup or imported components; standard Markdown is sufficient for prose.
 
 ## Build fixtures
 
-Tests use `buildFixture` from `tests/helpers/build.ts`. It copies the project into a separate temporary directory, reuses installed dependencies, deep-merges `config` overrides (replacing arrays), writes the supplied project-relative `content` file overrides, and launches Astro through the running Node executable without a shell. It returns the exit code, stdout, stderr, output directory, and an async `dispose()` callback. Call `dispose()` after assertions. Paths must stay inside the fixture and cannot overwrite dependency or generated-cache directories. Tests may inject a temporary route to inspect real generated collection data; no test route is added to the starter's source.
+Tests use `buildFixture` from `tests/helpers/build.ts`. Its default `demo` preset builds with the demonstration config and the content in `tests/fixtures/demo/`; the `project` preset builds the real site. It copies the project into a separate temporary directory, reuses installed dependencies, deep-merges `config` overrides (replacing arrays), writes the supplied project-relative `content` file overrides, and launches Astro through the running Node executable without a shell. It returns the exit code, stdout, stderr, output directory, and an async `dispose()` callback. Call `dispose()` after assertions. Paths must stay inside the fixture and cannot overwrite dependency or generated-cache directories. Tests may inject a temporary route to inspect real generated collection data; no test route is added to the starter's source.
 
 ## Metadata and feeds
 
@@ -73,3 +73,7 @@ The source guidance asks for RSS from posts and projects while also connecting R
 `robots.txt` advertises the absolute base-aware `sitemap.xml` URL. That file aliases the integration's index and references existing numbered sitemap parts. The `__build` path is reserved for internal build data and must never be used for public content or endpoint routes.
 
 When extending collections, also extend the manifest union, rendering wrappers, navigation eligibility, metadata/feed/sitemap behavior, and fixture coverage. Decide how drafts and translation fallbacks apply before exposing a new collection. Run `pnpm verify:fresh` after reusable changes; its own normal integration test does not launch recursive acceptance.
+
+## Client landing collection
+
+This project adds a `landing` data collection: one YAML file per locale in `src/content/landing/`, validated by `src/lib/landing/schema.ts`. Every photo needs `alt` text and the Instagram post it came from. Translations must keep the same ids, photos, palettes, counts and draft flags as the default locale.

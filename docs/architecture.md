@@ -43,3 +43,11 @@ MIT licensing covers the template's code; third-party assets retain their own no
 ## Release source boundary
 
 `scripts/verify-fresh.ts` copies authored release source into an owned temporary project, with no dependency junction. It excludes local state, credential directories, build/cache output, temporary evidence, and maintenance-only `docs/superpowers/`; the source guidance and plan remain unchanged in the maintenance repository. Fresh template copies keep governance and legal notices. Hash snapshots prove original and copied source remain unchanged through frozen install, check, lint, test, and build. This acceptance command is separate from the small copy-boundary integration tests to prevent recursion. Symlink sources and destination ancestors are rejected; cleanup validates the temporary parent, prefix, ownership marker, and real path.
+
+## one23balloon landing (client layer)
+
+The home route renders `src/components/landing/LandingView.astro` from the typed `landing` data collection (`src/content/landing/<locale>.yaml`, schema in `src/lib/landing/schema.ts`). `getLanding()` checks that every locale matches the default locale's structure, photos and contact number, and fails the build otherwise. All copy, photos and WhatsApp links are static HTML.
+
+Client scripts progressively enhance from `src/scripts/landing.ts`: the palette picker, GSAP motion, a once-per-session intro and three 3D islands. `src/lib/canvas-island/` is engine-agnostic. It detects capability, mounts a scene when its island nears the viewport, pauses it off-screen or in hidden tabs, and falls back to the photo on reduced motion, missing WebGL, load failure or context loss. It is a candidate for extraction into canvas-base. `src/scenes/` holds the Three.js scenes, loaded by dynamic import ([decision 0007](decisions/0007-three-for-3d-balloons.md)).
+
+Fixed-layer tests use the `demo` preset of `buildFixture`, which builds with the canvas-base demonstration config and content from `tests/fixtures/demo/`. Client tests use the `project` preset.

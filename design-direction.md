@@ -30,13 +30,13 @@ Base (dark scheme, "evening gala"):
 
 Celebration palettes, used for section tints, 3D materials and palette picker. Material: L latex, P pearl, C chrome.
 
-| Palette                | Section tint (light) | Colours                                               |
-| ---------------------- | -------------------- | ----------------------------------------------------- |
-| Blush and champagne    | #F5ECE6              | #E8B4B2 L, #F3DCCB L, #D9B47A C, #FBF4EC P, #C9898C L |
-| Chrome blue and silver | #EDF0F4              | #6F8FB8 C, #C7CCD4 C, #F4F6F8 P, #A9C3E0 L, #2E4A72 L |
-| Sage and cream         | #EFF0E8              | #A7B79A L, #E9E1CF L, #FAF6EE P, #CBB27C C, #6F8466 L |
-| Rose and gold          | #F6ECEA              | #B5475B L, #D4AF6A C, #E8A0A8 L, #FFF5EE P, #7D2338 L |
-| Jewel tones            | #F3EFE8              | #2F5D8C L, #C94F6D L, #E8B04B L, #3E8E7E L, #C7CCD4 C |
+| Palette                | Section tint (light) | Section tint (dark) | Colours                                               |
+| ---------------------- | -------------------- | ------------------- | ----------------------------------------------------- |
+| Blush and champagne    | #F5ECE6              | #2A201F             | #E8B4B2 L, #F3DCCB L, #D9B47A C, #FBF4EC P, #C9898C L |
+| Chrome blue and silver | #EDF0F4              | #1C222B             | #6F8FB8 C, #C7CCD4 C, #F4F6F8 P, #A9C3E0 L, #2E4A72 L |
+| Sage and cream         | #EFF0E8              | #1F231D             | #A7B79A L, #E9E1CF L, #FAF6EE P, #CBB27C C, #6F8466 L |
+| Rose and gold          | #F6ECEA              | #2B1D20             | #B5475B L, #D4AF6A C, #E8A0A8 L, #FFF5EE P, #7D2338 L |
+| Jewel tones            | #F3EFE8              | #1E2026             | #2F5D8C L, #C94F6D L, #E8B04B L, #3E8E7E L, #C7CCD4 C |
 
 Text always sits on paper, surface or a section tint, never on a saturated balloon colour. Ink and muted text meet WCAG AA on every tint in both schemes; rose links meet AA on paper and surface. Recheck every value after any change.
 
