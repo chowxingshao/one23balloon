@@ -37,6 +37,7 @@ export const demoContent: Record<string, string> = {
   'src/content/posts/en/welcome.mdx': fixture('welcome.mdx'),
   'src/content/projects/en/example-project.md': fixture('example-project.md'),
   'src/assets/example-project.svg': fixture('example-project.svg'),
+  'src/content/landing/en.yaml': fixture('landing.yaml'),
 };
 
 // Client-locale content that the single-locale demo config would reject.

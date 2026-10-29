@@ -67,4 +67,26 @@ describe('one23balloon site build', () => {
       expect(data.sameAs).toContain('https://www.instagram.com/one23balloon/');
     }
   });
+
+  it('validates the Chinese landing content through the real collection loader', async () => {
+    const zh = await readFile(
+      new URL('../../src/content/landing/zh.yaml', import.meta.url),
+      'utf8',
+    );
+    const invalid = await buildFixture({
+      preset: 'project',
+      content: {
+        'src/content/landing/zh.yaml': zh.replace(
+          'palette: rose-gold',
+          'palette: neon',
+        ),
+      },
+    });
+    try {
+      expect(invalid.exitCode).not.toBe(0);
+      expect(invalid.stdout + invalid.stderr).toContain('palette');
+    } finally {
+      await invalid.dispose();
+    }
+  }, 300_000);
 });
