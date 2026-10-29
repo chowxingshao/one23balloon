@@ -35,8 +35,15 @@ export function initLandingMotion(root: HTMLElement): () => void {
       );
       if (!viewport || !track) return;
       viewport.classList.add('is-pinned');
-      const distance = () =>
-        Math.max(0, track.scrollWidth - viewport.clientWidth);
+      // The viewport's inline padding frames the first and last card, so the
+      // track must travel past it too or the last card ends clipped.
+      const distance = () => {
+        const style = getComputedStyle(viewport);
+        const padding =
+          (parseFloat(style.paddingInlineStart) || 0) +
+          (parseFloat(style.paddingInlineEnd) || 0);
+        return Math.max(0, track.scrollWidth + padding - viewport.clientWidth);
+      };
       gsap.to(track, {
         x: () => -distance(),
         ease: 'none',

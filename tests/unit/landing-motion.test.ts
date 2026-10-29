@@ -90,4 +90,27 @@ describe('initLandingMotion', () => {
     dispose();
     expect(motion.revert).toHaveBeenCalledOnce();
   });
+
+  it('travels the gallery past the viewport padding so the last card shows', async () => {
+    const motion = setup();
+    const { initLandingMotion } = await motion.load();
+    initLandingMotion(root());
+    const gallery = root().querySelector<HTMLElement>('[data-gallery]')!;
+    const track = root().querySelector<HTMLElement>('[data-gallery-track]')!;
+    Object.defineProperty(track, 'scrollWidth', {
+      value: 4872,
+      configurable: true,
+    });
+    Object.defineProperty(gallery, 'clientWidth', { value: 1265 });
+    vi.stubGlobal('getComputedStyle', () => ({
+      paddingInlineStart: '48px',
+      paddingInlineEnd: '48px',
+    }));
+    for (const entry of motion.added) entry.run();
+    const vars = motion.to.mock.calls[1][1];
+    expect(vars.x()).toBe(-(4872 + 96 - 1265));
+    expect(vars.scrollTrigger.end()).toBe(`+=${4872 + 96 - 1265}`);
+    Object.defineProperty(track, 'scrollWidth', { value: 600 });
+    expect(vars.x()).toBe(-0);
+  });
 });
