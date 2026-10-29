@@ -18,6 +18,7 @@ interface Props {
   noindex?: boolean;
   image?: string;
   structuredData?: Record<string, unknown>;
+  headerCta?: { href: string; label: string };
 }
 const {
   title,
@@ -27,6 +28,7 @@ const {
   noindex = false,
   image,
   structuredData,
+  headerCta,
 } = Astro.props;
 const site = getSiteConfig();
 const ui = await getUi(locale);
@@ -109,15 +111,22 @@ const fontFaces = fonts
       />
     ))}
     <style is:inline set:html={fontFaces} />
+    <slot name="head" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">
       {ui.accessibility.skipContent}
     </a>
-    <SiteHeader locale={locale} current={route} />
+    <SiteHeader locale={locale} current={route} cta={headerCta} />
     <main id="main-content" class="site-main" tabindex="-1">
       <slot />
     </main>
-    <SiteFooter locale={locale} />
+    {Astro.slots.has('footer') ? (
+      <SiteFooter locale={locale}>
+        <slot name="footer" slot="extra" />
+      </SiteFooter>
+    ) : (
+      <SiteFooter locale={locale} />
+    )}
   </body>
 </html>

@@ -111,4 +111,26 @@ describe('one23balloon site build', () => {
       'unicode-range: U+3000-303F, U+3400-4DBF, U+4E00-9FFF, U+FF00-FFEF',
     );
   });
+
+  it('hides single-link navigation and keeps the language switcher', async () => {
+    const document = await page('index.html');
+    expect(
+      document.querySelector('.site-header nav[aria-label="Main navigation"]'),
+    ).toBeNull();
+    expect(
+      [...document.querySelectorAll('.language-switcher a')].map((link) => [
+        link.getAttribute('lang'),
+        link.getAttribute('href'),
+      ]),
+    ).toEqual([
+      ['en', '/one23balloon/'],
+      ['zh', '/one23balloon/zh/'],
+    ]);
+  });
+
+  it('keeps the site description in the footer of pages without a footer slot', async () => {
+    expect(await read('404.html')).toContain(
+      'Balloon installations for weddings, launches, openings',
+    );
+  });
 });
