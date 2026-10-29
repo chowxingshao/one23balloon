@@ -30,6 +30,8 @@
   line-height: var(--line-title);
 }
 .landing:lang(zh) .display {
+  /* Break Chinese headlines at punctuation, not inside words such as 时刻. */
+  word-break: keep-all;
   letter-spacing: 0.04em;
   line-height: 1.25;
 }
@@ -103,7 +105,10 @@
   font-size: clamp(2.75rem, 12cqi, 7.5rem);
 }
 .landing:lang(zh) .hero h1 {
-  max-inline-size: 9em;
+  /* Sized so the longest phrase (9 characters with tracking, about 9.4em)
+     always fits the column on one line. */
+  max-inline-size: 10em;
+  font-size: clamp(2rem, 10cqi, 7.5rem);
 }
 .closing h2 {
   margin-block: 0 var(--space-md);
