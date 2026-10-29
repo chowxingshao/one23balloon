@@ -54,12 +54,24 @@ One page, at `/` (English) and `/zh/` (Simplified Chinese):
 - [ ] Full Xiaohongshu profile URL.
 - [ ] Booking steps: lead time, deposit, quote process, setup and takedown.
 - [ ] FAQ answers.
+- [ ] Confirm the two published FAQ answers (service area; custom colours), derived from the Instagram bio.
+- [ ] Confirm gallery locations and themes not stated in the post captions.
 - [ ] Approval of all English copy.
 - [ ] Approval of all Simplified Chinese copy.
 - [ ] Permission to show each photo with a recognisable customer face.
   - [ ] `service-weddings.jpg` (post DaDTmrpSMZP): small printed photo of a child on an easel at the left edge.
   - [ ] `gallery-03.jpg` (post Dcpi_vnS3oh): strip of small vintage family photos on an easel at the right edge.
   - Every other photo in `src/assets/work/` shows no face (see `docs/photo-sources.md`).
+- [ ] Permission to show customer names printed on backdrops (or blur them). From `docs/photo-sources.md`:
+  - [ ] `hero-arch.jpg`: customer first name and a date.
+  - [ ] `service-weddings.jpg`: the couple's names and a date.
+  - [ ] `gallery-01.jpg`: customer first name.
+  - [ ] `gallery-03.jpg`: customer first name.
+  - [ ] `gallery-05.jpg`: a child's name.
+  - [ ] `gallery-10.jpg`: a child's first name.
+  - [ ] `gallery-11.jpg`: customer first name and a date.
+  - [ ] `gallery-12.jpg`: children's first names.
+  - [ ] `closing.jpg`: customer first name, on the arch and on an easel sign.
 - [ ] Permission to show the registration number on the site.
 
 ## Tone and voice
