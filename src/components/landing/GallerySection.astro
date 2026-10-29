@@ -14,10 +14,12 @@ const instagram = getSiteConfig().social.instagram;
   data-palette="chrome-blue"
   aria-labelledby="gallery-title"
 >
-  <header class="section-head shell" data-reveal>
-    <h2 id="gallery-title">{data.gallery.title}</h2>
-    <p class="lede">{data.gallery.lede}</p>
-  </header>
+  <div class="shell">
+    <header class="section-head" data-reveal>
+      <h2 id="gallery-title">{data.gallery.title}</h2>
+      <p class="lede">{data.gallery.lede}</p>
+    </header>
+  </div>
   {/* A scrollable region must be keyboard focusable so the track can be scrolled without a pointer. */}
   <div
     class="gallery-viewport"

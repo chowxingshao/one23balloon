@@ -63,18 +63,21 @@ time {
   margin-inline: auto;
   padding-inline: var(--space-page);
 }
+/* The bar spans the viewport; its contents align to the shell. */
 .site-header {
   position: sticky;
   inset-block-start: 0;
   z-index: var(--header-layer);
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-sm) var(--space-md);
   padding-block: var(--space-sm);
   background: color-mix(in srgb, var(--color-page) 90%, transparent);
   backdrop-filter: blur(12px);
   border-block-end: var(--border-width) solid var(--color-border);
+}
+.site-header-inner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-md);
 }
 .site-name {
   color: var(--color-text);
@@ -84,7 +87,7 @@ time {
   text-decoration: none;
   overflow-wrap: anywhere;
 }
-.site-header > .nav-primary {
+.site-header-inner > .nav-primary {
   margin-inline-start: auto;
 }
 .nav-list {
@@ -107,7 +110,7 @@ time {
   margin-inline-start: auto;
   font-size: var(--font-size-small);
 }
-.site-header > .nav-primary + .language-switcher {
+.site-header-inner > .nav-primary + .language-switcher {
   margin-inline-start: 0;
 }
 .header-cta {
