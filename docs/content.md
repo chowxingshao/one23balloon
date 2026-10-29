@@ -13,14 +13,14 @@ description: A concise description for search results and previews.
 slug: example-project
 draft: false
 publishedAt: '2026-10-08'
-cover: ../../../assets/example-project.svg
+cover: ../../../assets/<image>.svg
 coverAlt: Describe the information conveyed by the illustration.
 ---
 ```
 
 `publishedAt` is required for posts and projects. Use a quoted ISO calendar date (`'2026-10-08'`) or a timezone-qualified datetime (`'2026-10-08T12:30:00+08:00'` or `'2026-10-08T04:30:00Z'`). Date-only values represent midnight UTC. Seconds are optional in timezone-qualified datetimes. Invalid calendar dates, local datetimes without a timezone, and ambiguous formats fail validation. The validated value is a JavaScript `Date`.
 
-Optional `cover` paths resolve relative to the content file through Astro's `image()` schema. Put source images in `src/assets/`; the example path above works from a file in `src/content/projects/en/`. A missing image fails the build. Every cover requires nonempty descriptive `coverAlt`. Omit both fields when no cover is needed. Do not point local covers at `public/` or supply an unvalidated string to rendering code.
+Optional `cover` paths resolve relative to the content file through Astro's `image()` schema. Put source images in `src/assets/`; a cover such as `../../../assets/<image>.svg` resolves from a file in `src/content/projects/en/`. The demonstration example (`example-project.md` and its SVG) lives in `tests/fixtures/demo/` and is written into the project only inside demo fixture builds. A missing image fails the build. Every cover requires nonempty descriptive `coverAlt`. Omit both fields when no cover is needed. Do not point local covers at `public/` or supply an unvalidated string to rendering code.
 
 The directory determines locale; do not add a frontmatter locale. Each collection entry's ID is `<locale>/<slug>`, such as `en/example-project`. Duplicate identities within a collection fail the build, including duplicates across Markdown and MDX files. The same slug may occur in different locales or collections. Nested paths under a locale are not supported; use the stable slug for routing.
 
