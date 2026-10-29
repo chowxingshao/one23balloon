@@ -4,7 +4,7 @@
 
 A reusable static website starter built with Astro, strict TypeScript, Markdown/MDX, and plain CSS. Use it for content-focused sites such as portfolios, blogs, company introductions, resumes, and landing pages.
 
-This foundation includes validated public site configuration, replaceable demonstration pages, typed content and routing, SEO, accessible forms, scoped motion, Docker serving, opt-in deployment setup, a build-only brief reader, and quality tools. The demo identity and origin are deliberately marked in `site.config.ts`. Author, email, social links, analytics, and form endpoint are empty.
+This foundation includes validated public site configuration, replaceable demonstration pages, typed content and routing, SEO, accessible forms, scoped motion, Docker serving, opt-in deployment setup, a build-only brief reader, and quality tools. In this copy `site.config.ts` carries the one23balloon identity: name, author, the GitHub Pages origin under `/one23balloon/`, English and Chinese locales, and the Instagram and Xiaohongshu links. Email, analytics and the form endpoint are empty, and the blog, projects and RSS features are off.
 
 ## Quick start
 
