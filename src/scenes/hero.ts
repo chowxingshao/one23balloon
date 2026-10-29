@@ -184,7 +184,7 @@ export async function createHeroScene(
     camera.position.x +=
       ((portrait ? 0 : pointer.x * 0.35) - camera.position.x) * 0.04;
     camera.position.y += (0.2 - pointer.y * 0.2 - camera.position.y) * 0.04;
-    camera.lookAt(portrait ? 0 : 0.7, -0.1, 0);
+    camera.lookAt(portrait ? 0 : 0.7, portrait ? -0.55 : -0.1, 0);
     for (const { balloon, base, phase } of garland) {
       balloon.mesh.position.set(
         base.x + Math.sin(time * 0.7 + phase) * 0.015,
@@ -209,10 +209,12 @@ export async function createHeroScene(
     stop: () => loop.stop(),
     resize: (width, height) => {
       fitCamera(camera, renderer, width, height);
-      // Portrait screens stack the copy above the stage, so centre the arch.
+      // Portrait screens stack the copy above the stage, so centre the arch
+      // and stand the dog inside its foot, where the narrow frame still shows it.
       portrait = camera.aspect < 1;
       stage.position.x = portrait ? -heroArch.centerX : 0;
-      camera.position.z = portrait ? 12 : 9;
+      dog.group.position.x = portrait ? heroArch.centerX - 0.25 : -0.35;
+      camera.position.z = portrait ? 12.5 : 9;
       renderer.render(scene, camera);
     },
     dispose: () => {

@@ -87,11 +87,12 @@ export async function createSculptureScene(
     pieces.forEach((piece, index) =>
       piece.holder.position.set(
         portrait ? 0 : (index - 1) * 3.4,
-        portrait ? (1 - index) * 3.1 - 0.6 : -0.9,
+        // Centre the stack (dog ears to cake pedestal) in the space above the names.
+        portrait ? (1 - index) * 3.1 - 1 : -0.9,
         0,
       ),
     );
-    camera.position.set(0, portrait ? 0 : 0.6, portrait ? 17 : 11);
+    camera.position.set(0, portrait ? 0 : 0.6, portrait ? 18.5 : 11);
     camera.lookAt(0, portrait ? -0.3 : 0.1, 0);
   };
   layout(false);
