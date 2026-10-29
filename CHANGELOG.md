@@ -10,6 +10,8 @@ All notable template changes are documented here using Keep a Changelog conventi
 
 ### Fixed
 
+- one23balloon landing review fixes: section bands keep their own palettes while only the hero and closing follow the picker; the hero headline no longer breaks mid-word in English or splits 时刻 in Chinese; islands wait for idle time and the hero scene waits for the intro; the intro stays invisible until live, gives up after 1.2 s and ends within 3.5 s; islands follow the latest intersection entry; the share image no longer shows a customer name; the gallery heading aligns to the page grid; the sticky header background spans the viewport; gallery captions pause between location and theme for screen readers; stage photos gain a 1440px source; `pnpm fonts:subset` records the charset only after every font is written. The client checklist in `brief.md` now lists printed customer names, the two published FAQ answers and unstated gallery details.
+
 - Added `.gitattributes` to normalize line endings to LF, so Windows checkouts (`core.autocrlf=true`) no longer produce CRLF files that fail `pnpm lint` and `pnpm verify:fresh`.
 - Vercel previews require an API-verified successful production push bootstrap, preventing a PR from becoming a new project's first production deployment.
 
