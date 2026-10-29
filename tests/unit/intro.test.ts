@@ -2,6 +2,7 @@ import { JSDOM } from 'jsdom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Capability } from '../../src/lib/canvas-island/capability.ts';
 import {
+  introGrid,
   introLayout,
   introStorageKey,
   markIntroPlayed,
@@ -50,6 +51,21 @@ describe('shouldPlayIntro', () => {
     expect(shouldPlayIntro(undefined, capable)).toBe(false);
     expect(shouldPlayIntro(throwing, capable)).toBe(false);
     expect(() => markIntroPlayed(throwing)).not.toThrow();
+  });
+});
+
+describe('introGrid', () => {
+  it('keeps the balloon count near the target and follows the aspect ratio', () => {
+    for (const target of [60, 30])
+      for (const aspect of [16 / 9, 1, 0.46]) {
+        const { cols, rows } = introGrid(target, aspect);
+        expect(cols * rows).toBeGreaterThanOrEqual(target * 0.75);
+        expect(cols * rows).toBeLessThanOrEqual(target * 1.25);
+        expect(cols).toBeGreaterThanOrEqual(3);
+        expect(rows).toBeGreaterThanOrEqual(3);
+        if (aspect >= 1) expect(cols).toBeGreaterThanOrEqual(rows);
+        else expect(rows).toBeGreaterThanOrEqual(cols);
+      }
   });
 });
 

@@ -7,7 +7,11 @@ import {
 } from 'three';
 import type { Capability } from '../lib/canvas-island/capability.ts';
 import type { IslandScene } from '../lib/canvas-island/lifecycle.ts';
-import { introLayout, type IntroCell } from '../lib/landing/intro-plan.ts';
+import {
+  introGrid,
+  introLayout,
+  type IntroCell,
+} from '../lib/landing/intro-plan.ts';
 import { mulberry32 } from '../lib/random.ts';
 import { Balloon, createBalloonGeometry } from './balloon.ts';
 import { Confetti } from './confetti.ts';
@@ -48,8 +52,7 @@ export async function createIntroScene(
   const build = () => {
     const halfHeight = Math.tan((camera.fov * Math.PI) / 360) * DEPTH;
     const halfWidth = halfHeight * camera.aspect;
-    const cols = high ? 13 : 8;
-    const rows = Math.max(5, Math.round(cols * (halfHeight / halfWidth)));
+    const { cols, rows } = introGrid(high ? 60 : 30, halfWidth / halfHeight);
     const layout = introLayout({
       cols,
       rows,

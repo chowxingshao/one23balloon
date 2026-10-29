@@ -34,6 +34,18 @@ export type IntroCell = {
   popAt: number;
 };
 
+// A grid of about `target` balloons whose cols/rows ratio follows the viewport aspect.
+export function introGrid(
+  target: number,
+  aspect: number,
+): { cols: number; rows: number } {
+  const ratio = Math.max(0.1, aspect);
+  let rows = Math.max(3, Math.round(Math.sqrt(target / ratio)));
+  let cols = Math.max(3, Math.round(target / rows));
+  if (ratio >= 1 ? cols < rows : rows < cols) [cols, rows] = [rows, cols];
+  return { cols, rows };
+}
+
 // A slightly jittered grid that inflates within 0.35 s and pops centre-out from 1.1 s.
 export function introLayout(options: {
   cols: number;
