@@ -14,6 +14,7 @@ import { dirname, join, posix, relative, resolve, sep, win32 } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { siteConfig } from '../../site.config.ts';
 import type { SiteConfig } from '../../src/lib/config/schema.ts';
+import { demoContent, demoSiteConfig, projectOnlyPaths } from './demo.ts';
 
 const projectRoot = fileURLToPath(new URL('../../', import.meta.url));
 const omitted = new Set([
@@ -95,6 +96,7 @@ export async function buildFixture(
   options: {
     config?: Partial<SiteConfig>;
     content?: Record<string, string>;
+    preset?: 'demo' | 'project';
   } = {},
 ): Promise<{
   exitCode: number;
@@ -130,14 +132,28 @@ export async function buildFixture(
       join(root, 'node_modules'),
       process.platform === 'win32' ? 'junction' : 'dir',
     );
-    if (options.config) {
-      const config = deepMerge(siteConfig, options.config);
+    const preset = options.preset ?? 'demo';
+    if (preset === 'demo')
+      for (const path of projectOnlyPaths)
+        await rm(resolveFixturePath(root, path), {
+          recursive: true,
+          force: true,
+        });
+    if (preset === 'demo' || options.config) {
+      const config = deepMerge(
+        preset === 'demo' ? demoSiteConfig : siteConfig,
+        options.config ?? {},
+      );
       await writeFile(
         join(root, 'site.config.ts'),
         `export const siteConfig = ${JSON.stringify(config, null, 2)};\n`,
       );
     }
-    for (const [path, contents] of Object.entries(options.content ?? {})) {
+    const content = {
+      ...(preset === 'demo' ? demoContent : {}),
+      ...options.content,
+    };
+    for (const [path, contents] of Object.entries(content)) {
       const target = resolveFixturePath(root, path);
       await mkdir(dirname(target), { recursive: true });
       await writeFile(target, contents);
