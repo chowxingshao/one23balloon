@@ -8,6 +8,10 @@ import {
   markIntroPlayed,
   shouldPlayIntro,
 } from '../../src/lib/landing/intro-plan.ts';
+import type {
+  IslandScene,
+  SceneFactory,
+} from '../../src/lib/canvas-island/lifecycle.ts';
 import { playIntro } from '../../src/scripts/intro.ts';
 
 const capable: Capability = {
@@ -66,6 +70,11 @@ describe('introGrid', () => {
         if (aspect >= 1) expect(cols).toBeGreaterThanOrEqual(rows);
         else expect(rows).toBeGreaterThanOrEqual(cols);
       }
+  });
+
+  it('treats a non-finite aspect as square', () => {
+    for (const aspect of [Number.NaN, Infinity, -Infinity])
+      expect(introGrid(60, aspect)).toEqual(introGrid(60, 1));
   });
 });
 
@@ -197,5 +206,132 @@ describe('playIntro', () => {
     });
     await flush();
     expect(overlay()).toBeNull();
+  });
+
+  const fakeScene = () => ({
+    start: vi.fn(),
+    stop: vi.fn(),
+    resize: vi.fn(),
+    dispose: vi.fn(),
+  });
+
+  it('stays hidden until the scene is live', async () => {
+    let resolve: (factory: SceneFactory) => void = () => undefined;
+    playIntro({
+      root: root(),
+      capability: capable,
+      storage: memoryStorage(),
+      load: () => new Promise<SceneFactory>((done) => (resolve = done)),
+    });
+    expect(overlay()?.getAttribute('data-island-state')).toBe('loading');
+    resolve(async () => fakeScene());
+    await flush();
+    expect(overlay()?.getAttribute('data-island-state')).toBe('live');
+  });
+
+  it('disposes a scene that finishes building after the intro was skipped', async () => {
+    let resolve: (scene: IslandScene) => void = () => undefined;
+    const factory = vi.fn(
+      () => new Promise<IslandScene>((done) => (resolve = done)),
+    );
+    const scene = fakeScene();
+    playIntro({
+      root: root(),
+      capability: capable,
+      storage: memoryStorage(),
+      load: async () => factory,
+    });
+    await flush();
+    expect(factory).toHaveBeenCalledOnce();
+    overlay()!.querySelector('button')!.click();
+    resolve(scene);
+    await flush();
+    expect(scene.dispose).toHaveBeenCalledOnce();
+    expect(scene.start).not.toHaveBeenCalled();
+  });
+
+  it('never builds the scene when skipped before the chunk loads', async () => {
+    let resolve: (factory: SceneFactory) => void = () => undefined;
+    const factory = vi.fn(async () => fakeScene());
+    playIntro({
+      root: root(),
+      capability: capable,
+      storage: memoryStorage(),
+      load: () => new Promise<SceneFactory>((done) => (resolve = done)),
+    });
+    overlay()!.querySelector('button')!.click();
+    resolve(factory);
+    await flush();
+    expect(factory).not.toHaveBeenCalled();
+  });
+
+  describe('time limits', () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    it('gives up if the scene is not live within 1.2 s', async () => {
+      const onFinish = vi.fn();
+      playIntro({
+        root: root(),
+        capability: capable,
+        storage: memoryStorage(),
+        load: pending,
+        onFinish,
+      });
+      await vi.advanceTimersByTimeAsync(1199);
+      expect(overlay()).not.toBeNull();
+      await vi.advanceTimersByTimeAsync(1);
+      expect(overlay()).toBeNull();
+      expect(onFinish).toHaveBeenCalledOnce();
+    });
+
+    it('ends after 3.5 s even if the scene never reports it is done', async () => {
+      playIntro({
+        root: root(),
+        capability: capable,
+        storage: memoryStorage(),
+        load: async () => async () => fakeScene(),
+      });
+      await vi.advanceTimersByTimeAsync(3499);
+      expect(overlay()?.getAttribute('data-island-state')).toBe('live');
+      await vi.advanceTimersByTimeAsync(1);
+      expect(overlay()).toBeNull();
+    });
+  });
+
+  it('runs finish once, fading out without blocking input', () => {
+    const fade = { finished: new Promise<void>(() => undefined) };
+    const animate = vi.fn(() => fade);
+    (dom.window.HTMLElement.prototype as { animate?: unknown }).animate =
+      animate;
+    const onFinish = vi.fn();
+    const finish = playIntro({
+      root: root(),
+      capability: capable,
+      storage: memoryStorage(),
+      load: pending,
+      onFinish,
+    });
+    finish();
+    finish();
+    expect(onFinish).toHaveBeenCalledOnce();
+    expect(animate).toHaveBeenCalledOnce();
+    expect(animate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ fill: 'forwards' }),
+    );
+    expect(overlay()?.style.pointerEvents).toBe('none');
+  });
+
+  it('reports finish straight away when the intro does not play', () => {
+    const onFinish = vi.fn();
+    playIntro({
+      root: root(),
+      capability: { ...capable, webgl: false },
+      storage: memoryStorage(),
+      load: pending,
+      onFinish,
+    });
+    expect(onFinish).toHaveBeenCalledOnce();
   });
 });

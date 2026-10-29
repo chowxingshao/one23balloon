@@ -39,7 +39,7 @@ export function introGrid(
   target: number,
   aspect: number,
 ): { cols: number; rows: number } {
-  const ratio = Math.max(0.1, aspect);
+  const ratio = Math.max(0.1, Number.isFinite(aspect) ? aspect : 1);
   let rows = Math.max(3, Math.round(Math.sqrt(target / ratio)));
   let cols = Math.max(3, Math.round(target / rows));
   if (ratio >= 1 ? cols < rows : rows < cols) [cols, rows] = [rows, cols];

@@ -402,15 +402,23 @@
 [data-island-state='live'] > .photo {
   opacity: 0;
 }
+/* The intro overlay is invisible and click-through until its scene is live,
+   so a slow scene chunk never leaves a blank screen (see scripts/intro.ts). */
 .intro {
   position: fixed;
   inset: 0;
   z-index: var(--intro-layer);
   background: var(--color-page);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s var(--ease-out);
+}
+.intro[data-island-state='live'] {
+  opacity: 1;
+  pointer-events: auto;
 }
 .intro .island-canvas {
   opacity: 1;
-  pointer-events: auto;
 }
 .intro-skip {
   position: absolute;

@@ -8,13 +8,19 @@ import { markIntroPlayed, shouldPlayIntro } from '../lib/landing/intro-plan.ts';
 
 export type IntroLoader = (onDone: () => void) => Promise<SceneFactory>;
 
-// The page is already rendered and interactive underneath; the overlay only decorates.
+// The scene must be live within this long, and the whole intro is capped.
+export const introLiveTimeout = 1200;
+export const introMaxDuration = 3500;
+
+// The page is already rendered and interactive underneath; the overlay only
+// decorates. It stays transparent and click-through until its scene is live
+// (see landing.css), so a slow chunk never blanks the page.
+// onFinish runs once: when the intro ends, or straight away if it does not play.
 export function playIntro(options: {
   root: HTMLElement;
   capability: Capability;
   storage: Storage | undefined;
   load: IntroLoader;
-  /** Runs once when the intro ends, or straight away if it does not play. */
   onFinish?: () => void;
 }): () => void {
   const { root, capability, storage, load, onFinish } = options;
@@ -43,15 +49,19 @@ export function playIntro(options: {
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') finish();
   };
+  const view = doc.defaultView ?? globalThis;
+  const timers: number[] = [];
   function finish() {
     if (finished) return;
     finished = true;
+    for (const timer of timers) view.clearTimeout(timer);
     doc.removeEventListener('keydown', onKeyDown);
     mounted.island?.dispose();
-    const fade = overlay.animate?.([{ opacity: 1 }, { opacity: 0 }], {
-      duration: 400,
-      easing: 'ease-out',
-    });
+    overlay.style.pointerEvents = 'none';
+    const fade = overlay.animate?.(
+      [{ opacity: getComputedOpacity(overlay) }, { opacity: 0 }],
+      { duration: 400, easing: 'ease-out', fill: 'forwards' },
+    );
     onFinish?.();
     if (fade)
       fade.finished.then(
@@ -64,6 +74,12 @@ export function playIntro(options: {
   // A click anywhere, including the skip button, ends the intro.
   overlay.addEventListener('click', finish);
   doc.addEventListener('keydown', onKeyDown);
+  timers.push(
+    view.setTimeout(() => {
+      if (mounted.island?.state !== 'live') finish();
+    }, introLiveTimeout),
+    view.setTimeout(finish, introMaxDuration),
+  );
   mounted.island = mountIsland({
     element: overlay,
     capability,
@@ -82,4 +98,12 @@ export function playIntro(options: {
     },
   });
   return finish;
+}
+
+// Fade from wherever the overlay is, so an intro that never went live does not flash.
+function getComputedOpacity(element: HTMLElement): number {
+  const value = Number.parseFloat(
+    element.ownerDocument.defaultView?.getComputedStyle(element).opacity ?? '',
+  );
+  return Number.isFinite(value) ? value : 1;
 }

@@ -117,8 +117,8 @@ describe('observeIntersection', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('follows the latest entry for the element', () => {
-    let callback: (entries: Array<{ isIntersecting: boolean }>) => void =
-      () => undefined;
+    let callback: (entries: Array<{ isIntersecting: boolean }>) => void = () =>
+      undefined;
     vi.stubGlobal(
       'IntersectionObserver',
       class {
