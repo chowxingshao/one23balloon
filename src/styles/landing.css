@@ -1,4 +1,7 @@
+/* Bands wear their own fixed palette; the services band stays neutral so the
+   six service-card tints read. Only hero and closing follow the picker. */
 .landing .band,
+.landing .venues,
 .landing .hero,
 .landing .closing {
   background: var(--tint);

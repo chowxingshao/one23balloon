@@ -163,6 +163,67 @@ describe('one23balloon site build', () => {
     }
   });
 
+  it('gives each band a fixed palette and lets only hero and closing follow the picker', async () => {
+    for (const path of ['index.html', 'zh/index.html']) {
+      const document = await page(path);
+      expect(
+        [...document.querySelectorAll('.landing > section')].map((section) => [
+          section.classList[0],
+          section.getAttribute('data-palette'),
+          section.hasAttribute('data-palette-follow'),
+        ]),
+        path,
+      ).toEqual([
+        ['hero', null, true],
+        ['services', null, false],
+        ['gallery', 'chrome-blue', false],
+        ['sculptures', 'blush-champagne', false],
+        ['venues', 'sage-cream', false],
+        ['faq', 'rose-gold', false],
+        ['closing', null, true],
+      ]);
+      // Every service card keeps its own palette inside the neutral band.
+      expect(
+        document.querySelectorAll('.services .service[data-palette]'),
+        path,
+      ).toHaveLength(6);
+
+      const css = [...document.querySelectorAll('style')]
+        .map((style) => style.textContent ?? '')
+        .find((text) => text.includes('--tint:'));
+      expect(css, path).toBeDefined();
+      const selectors = [...css!.matchAll(/([^{}]+)\{--tint:[^}]+\}/g)].map(
+        (match) => match[1]!,
+      );
+      expect(selectors.length, path).toBeGreaterThan(0);
+      const landing = document.querySelector<HTMLElement>('[data-landing]')!;
+      const followers = [
+        ...document.querySelectorAll('[data-palette-follow]'),
+      ];
+      for (const id of [
+        'blush-champagne',
+        'chrome-blue',
+        'sage-cream',
+        'rose-gold',
+        'jewel',
+      ]) {
+        landing.setAttribute('data-palette', id);
+        // The picker's choice on the root must never tint the root itself,
+        // or it would cascade into every fixed band.
+        for (const selector of selectors)
+          expect(landing.matches(selector), `${path} ${selector}`).toBe(false);
+        for (const follower of followers)
+          expect(
+            selectors.some(
+              (selector) =>
+                selector.includes(`'${id}'`) && follower.matches(selector),
+            ),
+            `${path} ${id}`,
+          ).toBe(true);
+      }
+    }
+  });
+
   it('links every call to action to WhatsApp with the localized message', async () => {
     const wa = (text: string) =>
       `https://wa.me/60109017633?text=${encodeURIComponent(text)}`;

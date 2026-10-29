@@ -6,7 +6,11 @@ interface Props {
 const { data } = Astro.props;
 ---
 
-<section class="venues" aria-labelledby="venues-title">
+<section
+  class="venues"
+  data-palette="sage-cream"
+  aria-labelledby="venues-title"
+>
   <div class="shell">
     <h2 id="venues-title" data-reveal>
       {data.venues.title}

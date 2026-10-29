@@ -8,7 +8,11 @@ const published = faq.items.filter((item) => !item.draft);
 ---
 
 {published.length > 0 && (
-  <section class="faq band" aria-labelledby="faq-title">
+  <section
+    class="faq band"
+    data-palette="rose-gold"
+    aria-labelledby="faq-title"
+  >
     <div class="shell">
       <h2 id="faq-title" data-reveal>
         {faq.title}

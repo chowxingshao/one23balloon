@@ -9,7 +9,11 @@ const { data } = Astro.props;
 const instagram = getSiteConfig().social.instagram;
 ---
 
-<section class="gallery band" aria-labelledby="gallery-title">
+<section
+  class="gallery band"
+  data-palette="chrome-blue"
+  aria-labelledby="gallery-title"
+>
   <header class="section-head shell" data-reveal>
     <h2 id="gallery-title">{data.gallery.title}</h2>
     <p class="lede">{data.gallery.lede}</p>
