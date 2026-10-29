@@ -38,3 +38,9 @@ const { data, contentLocale } = Astro.props;
   <FaqSection faq={data.faq} />
   <ClosingSection data={data} />
 </div>
+
+<script>
+  import { installLandingLifecycle } from '../../scripts/landing.ts';
+
+  installLandingLifecycle(document);
+</script>

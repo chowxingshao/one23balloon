@@ -384,3 +384,49 @@
 .landing-footer p {
   margin-block: var(--space-xs) 0;
 }
+
+/* 3D islands: the photo stays in the DOM; the canvas fades in over it once live. */
+.island-canvas {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s var(--ease-out);
+}
+[data-island-state='live'] > .island-canvas {
+  opacity: 1;
+  pointer-events: auto;
+}
+[data-island-state='live'] > .photo {
+  opacity: 0;
+}
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: var(--intro-layer);
+  background: var(--color-page);
+}
+.intro .island-canvas {
+  opacity: 1;
+  pointer-events: auto;
+}
+.intro-skip {
+  position: absolute;
+  inset-block-end: var(--space-md);
+  inset-inline-end: var(--space-md);
+  min-block-size: 2.75rem;
+  padding: 0.5rem 1.2rem;
+  border: var(--border-width) solid var(--color-text);
+  border-radius: 999px;
+  background: var(--color-page);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro {
+    display: none;
+  }
+}

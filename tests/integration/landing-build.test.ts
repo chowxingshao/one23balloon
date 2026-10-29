@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { JSDOM } from 'jsdom';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -211,4 +211,26 @@ describe('one23balloon site build', () => {
       await drifted.dispose();
     }
   }, 300_000);
+
+  it('keeps Three.js out of the initial page script but ships it as a lazy chunk', async () => {
+    const document = await page('index.html');
+    const scripts = [...document.querySelectorAll('script[type="module"]')];
+    expect(scripts.length).toBeGreaterThan(0);
+    for (const script of scripts) {
+      const src = script.getAttribute('src');
+      const code = src
+        ? await read(src.replace(/^\/one23balloon\//, ''))
+        : (script.textContent ?? '');
+      expect(code, src ?? 'inline script').not.toContain('WebGLRenderer');
+    }
+    const chunks = (await readdir(join(fixture.outputDir, '_astro'))).filter(
+      (file) => file.endsWith('.js'),
+    );
+    const withThree = await Promise.all(
+      chunks.map(async (file) =>
+        (await read(`_astro/${file}`)).includes('WebGLRenderer'),
+      ),
+    );
+    expect(withThree).toContain(true);
+  });
 });
