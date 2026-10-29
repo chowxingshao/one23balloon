@@ -65,7 +65,6 @@ const chinese = collectCjk(
   ).join('\n'),
 ).join('');
 
-await writeFile(join(root, 'src/lib/fonts/zh-charset.txt'), chinese);
 for (const font of fonts) {
   const subset = await subsetFont(
     await upstream(font.source),
@@ -79,4 +78,7 @@ for (const font of fonts) {
   );
   console.log(`${font.output}: ${subset.length} bytes`);
 }
+// Written last: the fonts test compares this record with the copy, so a run
+// that fails part-way must not leave it claiming fonts that were not rebuilt.
+await writeFile(join(root, 'src/lib/fonts/zh-charset.txt'), chinese);
 console.log(`${[...chinese].length} Chinese characters`);
