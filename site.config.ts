@@ -16,7 +16,7 @@ export const siteConfig = {
     xiaohongshu: 'https://xhslink.com/m/625h2gZKgy6',
   },
   analyticsId: '',
-  defaultOgImage: '/og-default.png',
+  defaultOgImage: '/og-one23balloon.jpg',
   i18n: { defaultLocale: 'en', locales: ['en', 'zh'] },
   features: {
     blog: false,

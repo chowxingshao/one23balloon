@@ -57,6 +57,9 @@ One page, at `/` (English) and `/zh/` (Simplified Chinese):
 - [ ] Approval of all English copy.
 - [ ] Approval of all Simplified Chinese copy.
 - [ ] Permission to show each photo with a recognisable customer face.
+  - [ ] `service-weddings.jpg` (post DaDTmrpSMZP): small printed photo of a child on an easel at the left edge.
+  - [ ] `gallery-03.jpg` (post Dcpi_vnS3oh): strip of small vintage family photos on an easel at the right edge.
+  - Every other photo in `src/assets/work/` shows no face (see `docs/photo-sources.md`).
 - [ ] Permission to show the registration number on the site.
 
 ## Tone and voice
