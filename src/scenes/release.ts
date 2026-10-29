@@ -63,6 +63,9 @@ export async function createReleaseScene(
     new Vector3(-0.08, -4.2, 0),
   ]);
   let halfWidth = 2.5;
+  // Released just below the frame and retired once the string clears the top.
+  let floor = -3.4;
+  let ceiling = 4.6;
   const spread = () => (random() * 2 - 1) * halfWidth;
 
   const rising: Rising[] = Array.from(
@@ -82,7 +85,7 @@ export async function createReleaseScene(
       return {
         balloon,
         x: 0,
-        y: -4 - random() * 8,
+        y: 0,
         z: -1 + random() * 2,
         speed: 0.35 + random() * 0.3,
         phase: random() * Math.PI * 2,
@@ -118,9 +121,9 @@ export async function createReleaseScene(
     now = time;
     for (const entry of rising) {
       entry.y += entry.speed * delta;
-      if (entry.y > 5 || entry.balloon.state === 'hidden') {
+      if (entry.y > ceiling || entry.balloon.state === 'hidden') {
         entry.x = spread();
-        entry.y = -4.5;
+        entry.y = floor;
         entry.balloon.inflate(time);
       }
       entry.balloon.mesh.position.set(
@@ -141,14 +144,22 @@ export async function createReleaseScene(
     stop: () => loop.stop(),
     resize: (width, height) => {
       fitCamera(camera, renderer, width, height);
-      halfWidth =
-        Math.tan((camera.fov * Math.PI) / 360) *
-        camera.position.z *
-        camera.aspect *
-        0.85;
+      const halfHeight =
+        Math.tan((camera.fov * Math.PI) / 360) * camera.position.z;
+      const previous = halfWidth;
+      halfWidth = halfHeight * camera.aspect * 0.85;
+      floor = -halfHeight - 0.6;
+      ceiling = halfHeight + 1.8;
       if (!placed) {
-        for (const entry of rising) entry.x = spread();
+        // Most balloons start mid-flight so the section is never empty on arrival.
+        for (const entry of rising) {
+          entry.x = spread();
+          entry.y = floor - 1 + random() * (ceiling - floor) * 0.75;
+        }
         placed = true;
+      } else if (previous !== halfWidth) {
+        // Keep the spread matched to the frame when the aspect changes.
+        for (const entry of rising) entry.x *= halfWidth / previous;
       }
       renderer.render(scene, camera);
     },
