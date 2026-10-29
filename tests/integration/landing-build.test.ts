@@ -197,9 +197,7 @@ describe('one23balloon site build', () => {
       );
       expect(selectors.length, path).toBeGreaterThan(0);
       const landing = document.querySelector<HTMLElement>('[data-landing]')!;
-      const followers = [
-        ...document.querySelectorAll('[data-palette-follow]'),
-      ];
+      const followers = [...document.querySelectorAll('[data-palette-follow]')];
       for (const id of [
         'blush-champagne',
         'chrome-blue',

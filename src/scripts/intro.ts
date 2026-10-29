@@ -49,12 +49,11 @@ export function playIntro(options: {
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') finish();
   };
-  const view = doc.defaultView ?? globalThis;
-  const timers: number[] = [];
+  const timers: Array<ReturnType<typeof setTimeout>> = [];
   function finish() {
     if (finished) return;
     finished = true;
-    for (const timer of timers) view.clearTimeout(timer);
+    for (const timer of timers) clearTimeout(timer);
     doc.removeEventListener('keydown', onKeyDown);
     mounted.island?.dispose();
     overlay.style.pointerEvents = 'none';
@@ -75,10 +74,10 @@ export function playIntro(options: {
   overlay.addEventListener('click', finish);
   doc.addEventListener('keydown', onKeyDown);
   timers.push(
-    view.setTimeout(() => {
+    setTimeout(() => {
       if (mounted.island?.state !== 'live') finish();
     }, introLiveTimeout),
-    view.setTimeout(finish, introMaxDuration),
+    setTimeout(finish, introMaxDuration),
   );
   mounted.island = mountIsland({
     element: overlay,

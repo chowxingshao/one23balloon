@@ -320,7 +320,7 @@ describe('playIntro', () => {
       expect.anything(),
       expect.objectContaining({ fill: 'forwards' }),
     );
-    expect(overlay()?.style.pointerEvents).toBe('none');
+    expect((overlay() as HTMLElement | null)?.style.pointerEvents).toBe('none');
   });
 
   it('reports finish straight away when the intro does not play', () => {

@@ -81,7 +81,9 @@ describe('whenIdle', () => {
   });
 
   it('runs on an idle callback with a 2 s timeout and can be cancelled', () => {
-    const request = vi.fn((_run: () => void, _options?: unknown) => 7);
+    const request = vi.fn<
+      (run: () => void, options?: IdleRequestOptions) => number
+    >(() => 7);
     const cancel = vi.fn();
     vi.stubGlobal('requestIdleCallback', request);
     vi.stubGlobal('cancelIdleCallback', cancel);
