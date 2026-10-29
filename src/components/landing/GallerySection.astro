@@ -40,6 +40,8 @@ const instagram = getSiteConfig().social.instagram;
             <figcaption>
               <span>{item.location}</span>
               <span class="sep" aria-hidden="true"></span>
+              {/* Spoken pause so location and theme are not read as one phrase. */}
+              <span class="visually-hidden">{', '}</span>
               <span>{item.theme}</span>
               <span class="dots">
                 <span class="visually-hidden">
