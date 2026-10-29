@@ -50,7 +50,7 @@ Each section below exists in both locales with identical structure and images.
 
 ### Route identity
 
-`src/content/pages/en/home.md` and `src/content/pages/zh/home.md` remain the route and SEO identity (title, description, `structuredData`). Routing, sitemap and hreflang stay on the existing manifest. `not-found.md` gets a `zh` translation.
+`src/content/pages/en/home.md` and `src/content/pages/zh/home.md` remain the route and SEO identity (title, description, `structuredData`). Routing, sitemap and hreflang stay on the existing manifest. The 404 page renders in the default locale only (template behaviour), so `not-found.md` stays English.
 
 ### `landing` data collection
 
@@ -116,20 +116,26 @@ The palette picker progressively enhances: without JavaScript the WhatsApp links
 
 ```
 src/lib/canvas-island/        engine-agnostic, no Three.js import
-  lifecycle.ts                mount when visible, pause off-screen, resume, dispose
-  capability.ts               WebGL detection, reduced motion, quality tier (DPR cap, budget)
-  fallback.ts                 show/hide the static fallback element
+  capability.ts               WebGL detection, reduced motion, quality tier (DPR cap)
+  lifecycle.ts                mount when visible, pause off-screen, resume, dispose,
+                              fallback state via data-island-state
+src/lib/landing/              pure landing logic (palettes, schema, parity, intro plan)
 src/scenes/                   one23balloon-specific, imports three
-  materials.ts                latex, pearl, chrome materials; palette transitions
-  environment.ts              studio environment map
-  balloon.ts                  balloon mesh factory, pop and re-inflate
-  garland.ts                  arched-panel garland generator (hero)
-  sculptures.ts               balloon dog, tulip bouquet, tiered cake
-  intro.ts                    balloon wall and pop cascade
+  material-params.ts          pure latex, pearl, chrome surface values
+  materials.ts                palette materials and transitions
+  environment.ts, renderer.ts, loop.ts, picking.ts, palette-source.ts
+  balloon-motion.ts           pure pop and inflate curves
+  balloon.ts                  balloon mesh, pop and re-inflate state
   confetti.ts                 foil confetti particles
+  garland-layout.ts           pure arched-panel garland layout
+  sculpture-parts.ts          pure part data for dog, tulips, cake
+  sculpture-mesh.ts           builds sculptures from part data
+  hero.ts, sculptures.ts, release.ts, intro.ts   island scenes
 src/scripts/
-  landing-motion.ts           GSAP reveals, pinned gallery, marquee, balloon release
-  palette-picker.ts           shared palette state, link rewriting, scene recolouring
+  palette-picker.ts           shared palette state, link rewriting, palette events
+  landing-motion.ts           GSAP pinned gallery and marquee
+  intro.ts                    intro overlay, skip and session rule
+  landing.ts                  composes picker, motion, islands and intro
 ```
 
 `canvas-island` is written to be extracted into canvas-base later. It must have no balloon-specific code and its own unit tests.
@@ -181,6 +187,8 @@ Use the template's GSAP helpers and ScrollTrigger for reveals, the pinned galler
 Each gets a README justification and a decision record (`docs/decisions/0006-three-for-3d-balloons.md`, `docs/decisions/0007-cjk-font-subsetting.md`). Versions pinned exactly, matching the repository convention.
 
 ## Testing and validation
+
+Template coverage: the existing fixed-layer tests (routing, discovery, content, SEO, setup) depend on the demonstration config and content. The demo files move to `tests/fixtures/demo/`, and `buildFixture` gains a default `demo` preset that builds with the canvas-base demo config, demo content and a lightweight landing fixture. New client tests use the `project` preset.
 
 Unit tests:
 
