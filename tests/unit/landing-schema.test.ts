@@ -180,4 +180,10 @@ describe('landing parity', () => {
     zh.whatsapp = '60123456789';
     expect(parityProblems(valid(), zh)).toEqual(['whatsapp', 'gallery', 'faq']);
   });
+
+  it('reports a different image file behind the same source', () => {
+    const zh = valid();
+    zh.gallery.items[3].image = 'other-photo.jpg';
+    expect(parityProblems(valid(), zh)).toEqual(['gallery']);
+  });
 });

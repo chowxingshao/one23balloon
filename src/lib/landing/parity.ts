@@ -1,4 +1,13 @@
-type Photo = { source: string };
+type Photo = { source: string; image: unknown };
+
+// Strings in unit tests; Astro's processed ImageMetadata (with src) at runtime.
+function imageKey(image: unknown): string {
+  if (typeof image === 'string') return image;
+  const src = (image as { src?: unknown } | null | undefined)?.src;
+  return typeof src === 'string' ? src : String(image);
+}
+
+const photoKey = (photo: Photo) => [photo.source, imageKey(photo.image)];
 
 export type ParityInput = {
   whatsapp: string;
@@ -17,24 +26,24 @@ export type ParityInput = {
 function fingerprint(data: ParityInput): Record<string, string> {
   return {
     whatsapp: data.whatsapp,
-    hero: data.hero.photo.source,
+    hero: JSON.stringify(photoKey(data.hero.photo)),
     palettes: JSON.stringify(data.palettes.items.map((item) => item.id)),
     services: JSON.stringify(
       data.services.items.map((item) => [
         item.id,
         item.palette,
-        item.photo.source,
+        ...photoKey(item.photo),
       ]),
     ),
-    gallery: JSON.stringify(data.gallery.items.map((item) => item.source)),
+    gallery: JSON.stringify(data.gallery.items.map(photoKey)),
     sculptures: JSON.stringify([
       data.sculptures.pieces.map((piece) => piece.id),
-      data.sculptures.photos.map((photo) => photo.source),
+      data.sculptures.photos.map(photoKey),
     ]),
     venues: String(data.venues.items.length),
     steps: JSON.stringify([data.steps.draft, data.steps.items.length]),
     faq: JSON.stringify(data.faq.items.map((item) => item.draft)),
-    closing: data.closing.photo.source,
+    closing: JSON.stringify(photoKey(data.closing.photo)),
   };
 }
 
