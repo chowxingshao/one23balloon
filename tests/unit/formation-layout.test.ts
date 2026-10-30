@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { blockIds } from '../../src/lib/landing/blocks.ts';
+import { blockIds, blocks } from '../../src/lib/landing/blocks.ts';
 import type { FormationId } from '../../src/lib/landing/formations.ts';
 import {
   boundingRadius,
@@ -23,11 +23,11 @@ const ids: FormationId[] = [
 const counts = [30, 14];
 const aspects = [0.46, 1, 1.78];
 
-function overlapping(slots: Placed[]): Array<[number, number]> {
+function overlapping(slots: Placed[], gap = 0): Array<[number, number]> {
   const pairs: Array<[number, number]> = [];
   for (let i = 0; i < slots.length; i++)
     for (let j = i + 1; j < slots.length; j++)
-      if (!separated(slots[i]!, slots[j]!, 0)) pairs.push([i, j]);
+      if (!separated(slots[i]!, slots[j]!, gap)) pairs.push([i, j]);
   return pairs;
 }
 
@@ -100,6 +100,7 @@ describe('buildFormation', () => {
     const slots = buildFormation(id, { count, aspect, tier, serviceBlocks });
     expect(slots).toHaveLength(count);
     expect(overlapping(slots)).toEqual([]);
+    expect(overlapping(slots, 0.04)).toEqual([]);
   });
 
   it('spreads the hero at least 12 units deep', () => {
@@ -156,6 +157,34 @@ describe('buildFormation', () => {
       slots.filter((slot) => slot.family === 'latex').map((slot) => slot.hex),
     );
     expect(latex).toEqual(new Set(['#FFC21A', '#2340FF']));
+  });
+
+  it('cycles the release colours over latex balloons only', () => {
+    const slots = buildFormation('release', {
+      count: 30,
+      aspect: 1,
+      tier: 'high',
+      serviceBlocks,
+    });
+    const latex = new Set(
+      slots.filter((slot) => slot.family === 'latex').map((slot) => slot.hex),
+    );
+    expect(latex).toEqual(
+      new Set([blocks.sunflower.hex, blocks.cobalt.hex, blocks.lilac.hex]),
+    );
+  });
+
+  it('uses all six block colours on the hero latex balloons', () => {
+    const slots = buildFormation('hero', {
+      count: 30,
+      aspect: 1.78,
+      tier: 'high',
+      serviceBlocks,
+    });
+    const latex = new Set(
+      slots.filter((slot) => slot.family === 'latex').map((slot) => slot.hex),
+    );
+    expect(latex).toEqual(new Set(blockIds.map((id) => blocks[id].hex)));
   });
 
   it('assigns stable material families by index', () => {

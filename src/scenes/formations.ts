@@ -139,6 +139,7 @@ export function buildFormation(
   // Hidden reuses the hero layout, moved below the frame.
   const offsetY = id === 'hidden' ? -visibleHalfHeight(-10) * 2.2 : 0;
   const latex = latexColours(id, options.serviceBlocks);
+  let latexCount = 0;
   return placed.map((slot, index) => {
     const family = familyOf(index);
     const hex =
@@ -148,7 +149,7 @@ export function buildFormation(
           : chromeSilver
         : family === 'pearl'
           ? paper
-          : latex[index % latex.length]!;
+          : latex[latexCount++ % latex.length]!;
     return { ...slot, y: slot.y + offsetY, hex, family };
   });
 }
