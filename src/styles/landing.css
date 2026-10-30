@@ -110,6 +110,28 @@
   max-inline-size: 10em;
   font-size: clamp(2rem, 10cqi, 7.5rem);
 }
+/* The hero copy is the largest contentful paint, so it is never faded in:
+   it is visible in the first frame and only rises into place, in CSS, without
+   waiting for any script. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-copy > * {
+    animation: hero-rise 0.7s var(--ease-out) both;
+  }
+  .hero-copy > :nth-child(2) {
+    animation-delay: 0.06s;
+  }
+  .hero-copy > :nth-child(3) {
+    animation-delay: 0.12s;
+  }
+  .hero-copy > :nth-child(n + 4) {
+    animation-delay: 0.18s;
+  }
+}
+@keyframes hero-rise {
+  from {
+    translate: 0 1.25rem;
+  }
+}
 .closing h2 {
   margin-block: 0 var(--space-md);
   font-size: var(--font-size-title);
@@ -153,6 +175,14 @@
 }
 .palette-picker[hidden] {
   display: none;
+}
+/* With scripting on, the picker keeps its space (invisible and out of the tab
+   order) until the script enables it, so the hero does not shift. */
+@media (scripting: enabled) {
+  .palette-picker[hidden] {
+    display: flex;
+    visibility: hidden;
+  }
 }
 .picker-label {
   flex-basis: 100%;

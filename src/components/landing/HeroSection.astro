@@ -11,16 +11,12 @@ const { data } = Astro.props;
 
 <section class="hero" data-palette-follow aria-labelledby="hero-title">
   <div class="hero-copy">
-    <p class="eyebrow" data-reveal>
-      {data.hero.eyebrow}
-    </p>
-    <h1 id="hero-title" class="display" data-reveal>
+    <p class="eyebrow">{data.hero.eyebrow}</p>
+    <h1 id="hero-title" class="display">
       {data.hero.title}
     </h1>
-    <p class="lede" data-reveal>
-      {data.hero.lede}
-    </p>
-    <div class="actions" data-reveal>
+    <p class="lede">{data.hero.lede}</p>
+    <div class="actions">
       <WhatsAppLink
         number={data.whatsapp}
         message={data.hero.message}
