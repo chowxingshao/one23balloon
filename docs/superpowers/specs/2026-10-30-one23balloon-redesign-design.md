@@ -56,6 +56,19 @@ Studied on 2026-10-30. They set the motion and composition vocabulary; nothing i
 | Languages | Unchanged: `en` at `/one23balloon/`, `zh` at `/one23balloon/zh/`. |
 | Branch | `redesign-showcase`, delivered by pull request. Deploy happens only when the user merges. |
 
+## Refinements from planning (2026-10-30)
+
+The implementation plan settles details this spec left open. Where a sentence elsewhere in this document disagreed, it has been edited to match.
+
+1. The hero display size is `clamp(2.75rem, 10vw, 12rem)`, not 12vw. Unbounded is very wide, so "Every party," at 12vw overflows a 1440px viewport. The exact coefficient is confirmed in the Task 5 browser check.
+2. The footer wordmark is about 8.5vw, not 18vw, for the same reason, and is confirmed in Task 5.
+3. The celebrations grid has four column lists at 64rem and wider, two multi-columns from 40rem, and one below. The 1024px three-column step is dropped because per-column parallax needs real column elements.
+4. The depth-of-field (bokeh) pass is dropped. It needs `EffectComposer`, which conflicts with the two-pass front/back rendering. Depth reads through the narrow field of view, fog and scale.
+5. The back pass runs whenever the formation has balloons behind the headline plane (hero, drift), not only in the hero. That is what lets the drift formation sit behind the statement text.
+6. On the low tier, `drift` resolves to `hidden`, because without a back canvas the drifting balloons would cover the statement text.
+7. Service clusters use the two contrasting block colours from `clusterBlocks` plus chrome and pearl, not the card's own colour, which would vanish against the card. The release formation uses sunflower, cobalt and lilac against the pink flood.
+8. The header's one-line fit at 360px is checked in the browser (Task 5 and Task 15), because jsdom cannot measure layout. The schema caps the header pill label at 12 characters.
+
 ## Visual system
 
 ### Colour
@@ -82,7 +95,7 @@ Rules:
 
 ### Typography
 
-- Display: Unbounded 900, self-hosted, subset to Latin. Scale: hero `clamp(3.5rem, 12vw, 13rem)`, chapter titles `clamp(2.75rem, 7vw, 7.5rem)`, card titles `clamp(2rem, 4.5vw, 4.5rem)`. Line height 0.92 to 0.98, tracking -0.02em.
+- Display: Unbounded 900, self-hosted, subset to Latin. Scale: hero `clamp(2.75rem, 10vw, 12rem)`, chapter titles `clamp(2.75rem, 7vw, 7.5rem)`, card titles `clamp(2rem, 4.5vw, 4.5rem)`. Line height 0.92 to 0.98, tracking -0.02em.
 - Chinese display: Noto Sans SC 900, subset by `pnpm fonts:subset` from the `zh` content, line height 1.1.
 - Body: Source Sans 3 at `clamp(1.125rem, 1.4vw, 1.375rem)`, line height 1.55, measure 40rem. Chinese body: Noto Sans SC 400.
 - Removed: Fraunces and Noto Serif SC, with their licence files.
@@ -129,7 +142,7 @@ Wordmark `one23balloon` at the left in Unbounded, `EN / 中文` switcher and a W
 
 ### 5. Recent celebrations
 
-- Chapter title at chapter-title size, then a masonry grid of 40 to 50 photos in four columns (three at 1024px, two at 768px, one below).
+- Chapter title at chapter-title size, then a masonry grid of 40 to 50 photos in four column lists at 64rem and wider, two multi-columns from 40rem, one below.
 - The section enters tilted: it starts at `rotateX` about 18deg and a slight `skewY`, and flattens to 0 as its top reaches the top of the viewport (scrubbed).
 - Inside, columns translate at different speeds (alternate columns faster and slower) while the section is in view.
 - Each photo has a short caption below it with the occasion only, for example "21st birthday" or "百日宴". No venues or locations.
@@ -140,7 +153,7 @@ Wordmark `one23balloon` at the left in Unbounded, `EN / 中文` switcher and a W
 - A curtain wipe floods the viewport in `--pink` from bottom to top (scrubbed clip-path).
 - The cluster's "release" formation: balloons rise and leave the top of the frame.
 - Headline "Let's make yours." / "让我们为你布置。" at chapter-title size, with three buttons: WhatsApp (primary, ink), Instagram and Xiaohongshu (outlined ink).
-- Footer: the word `ONE23BALLOON` set edge to edge at about 18vw; letters drop in with a stagger as the footer enters. Below it, the SSM registration and rights line.
+- Footer: the word `ONE23BALLOON` set edge to edge at about 8.5vw, confirmed in the browser; letters drop in with a stagger as the footer enters. Below it, the SSM registration and rights line.
 
 ## Content model
 
@@ -194,7 +207,6 @@ closing: { title, whatsapp, message, instagram, xiaohongshu }
 - Perspective camera with a narrow field of view (about 30 degrees) so depth reads as scale change.
 - Balloons spread over at least 12 world units on the z axis.
 - Exponential fog towards `--paper` so far balloons lower in contrast.
-- High tier only: a bokeh depth-of-field pass. Mid and low tiers rely on fog and scale.
 
 ### No-overlap layout
 
@@ -208,21 +220,21 @@ closing: { title, whatsapp, message, instagram, xiaohongshu }
 | --- | --- | --- | --- |
 | `hero` | Hero | Wide ring around the headline, deep front to back | Mixed: all six block colours plus chrome |
 | `drift` | Statement, signature | Small, far back, slow drift | Mixed, low contrast |
-| `service-n` | Each service card | Tight cluster beside the card text | That card's colour plus chrome and paper |
+| `service-n` | Each service card | Tight cluster beside the card text | Two contrasting block colours (`clusterBlocks`) plus chrome and pearl |
 | `hidden` | Celebrations | Off screen, rendering paused | - |
-| `release` | Closing | Balloons rise out of the frame | Pink, sunflower, chrome |
+| `release` | Closing | Balloons rise out of the frame | Sunflower, cobalt, lilac and chrome |
 
 - ScrollTrigger maps each chapter to a target formation. Balloons move between formations with a critically damped spring per balloon. The no-overlap guarantee applies to resting formations; during a transition, paths may briefly cross.
 - Colour changes tween material colours in about 0.8s.
 
 ### Front and back layers
 
-Only in the hero, at the high and mid tiers:
+Only in the hero, at the high tier:
 
 - Each balloon is in layer `back` or `front` by its z position relative to the headline plane.
 - Each frame, the renderer draws the `back` layer, copies the result with `drawImage` to a 2D canvas positioned behind the headline, then clears and draws the `front` layer to the WebGL canvas above the headline. One WebGL context in total.
 - Low tier: the back canvas is not created, and the hero formation keeps balloons clear of the headline's bounding box.
-- Outside the hero the back canvas is hidden and only the front pass runs.
+- The back pass runs whenever the formation has balloons behind the headline plane (hero and drift).
 
 ### Poster still
 

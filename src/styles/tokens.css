@@ -1,42 +1,56 @@
-/* Gala atelier (see design-direction.md). Palette tints come from src/lib/landing/palettes.ts. */
+/* Colour block (see design-direction.md). Block values mirror src/lib/landing/blocks.ts; tests/unit/blocks.test.ts keeps them in sync. */
 :root {
-  color-scheme: light dark;
-  --color-page: #f7f1ea;
-  --color-surface: #efe6dc;
-  --color-text: #221b17;
-  --color-muted: #5a4d45;
-  --color-link: #9c4f5c;
-  --color-border: #d9cbbd;
-  --color-focus: #7d2338;
-  --color-on-ink: #f7f1ea;
+  color-scheme: light;
+  --color-page: #f4f4f1;
+  --color-surface: #e9e9e4;
+  --color-text: #121212;
+  --color-muted: #55554f;
+  --color-link: #121212;
+  --color-border: #d6d6d0;
+  --color-focus: #2340ff;
+  --color-on-ink: #f4f4f1;
+  --block-pink: #ff3e8a;
+  --block-pink-text: #121212;
+  --block-cobalt: #2340ff;
+  --block-cobalt-text: #ffffff;
+  --block-sunflower: #ffc21a;
+  --block-sunflower-text: #121212;
+  --block-emerald: #14b37d;
+  --block-emerald-text: #121212;
+  --block-tangerine: #ff6a2b;
+  --block-tangerine-text: #121212;
+  --block-lilac: #b69cff;
+  --block-lilac-text: #121212;
   --font-body: 'Source Sans 3', 'Noto Sans SC', system-ui, sans-serif;
-  --font-display: 'Fraunces', 'Noto Serif SC', Georgia, serif;
-  --font-size-body: 1.125rem;
+  --font-display: 'Unbounded', 'Noto Sans SC', system-ui, sans-serif;
+  --font-size-body: clamp(1.125rem, 1.4vw, 1.375rem);
   --font-size-small: 1rem;
-  --font-size-display: clamp(2.75rem, 7.5vw, 7.5rem);
-  --font-size-title: clamp(2.25rem, 5.5vw, 4.5rem);
-  --font-size-heading: clamp(1.75rem, 3.5vw, 3rem);
-  --font-size-lead: clamp(1.2rem, 1.8vw, 1.45rem);
+  --font-size-hero: clamp(2.75rem, 10vw, 12rem);
+  --font-size-display: clamp(2.75rem, 7vw, 7.5rem);
+  --font-size-title: clamp(2rem, 4.5vw, 4.5rem);
+  --font-size-heading: clamp(1.5rem, 2.6vw, 2.25rem);
+  --font-size-lead: clamp(1.2rem, 1.6vw, 1.5rem);
   --weight-body: 400;
-  --weight-heading: 400;
-  --weight-display: 300;
-  --line-body: 1.65;
-  --line-title: 1.04;
-  --line-heading: 1.15;
+  --weight-heading: 900;
+  --weight-display: 900;
+  --line-body: 1.55;
+  --line-title: 0.95;
+  --line-heading: 1.1;
   --tracking-title: -0.02em;
-  --tracking-eyebrow: 0.16em;
+  --tracking-eyebrow: 0.14em;
   --space-xs: 0.5rem;
   --space-sm: 1rem;
   --space-md: 1.5rem;
   --space-lg: 2.5rem;
   --space-2xl: 4rem;
   --space-xl: clamp(5rem, 10vw, 9rem);
-  --space-page: clamp(1rem, 5vw, 3rem);
-  --width-site: 80rem;
-  --width-reading: 44rem;
+  --space-page: clamp(1rem, 4vw, 3.5rem);
+  --gutter: max(1rem, 4vw);
+  --width-site: 90rem;
+  --width-reading: 40rem;
   --width-thumbnail: 16rem;
   --height-main: 50vh;
-  --radius-arch: 999px 999px 0.75rem 0.75rem;
+  --radius-photo: 1.25rem;
   --radius-card: 1.25rem;
   --border-width: 1px;
   --focus-width: 3px;
@@ -44,24 +58,13 @@
   --link-underline: 0.08em;
   --link-offset: 0.18em;
   --skip-offset: 1rem;
-  --skip-layer: 30;
+  --stage-back-layer: 0;
+  --content-layer: 1;
+  --stage-layer: 2;
   --header-layer: 5;
-  --header-height: 4.5rem;
-  --intro-layer: 20;
-  --tint: var(--color-page);
+  --skip-layer: 30;
+  --header-height: 4rem;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-page: #171311;
-    --color-surface: #241e1b;
-    --color-text: #f4ede4;
-    --color-muted: #c9bcb1;
-    --color-link: #e9a8b4;
-    --color-border: #4a3f39;
-    --color-focus: #f3c6cf;
-    --color-on-ink: #171311;
-  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
