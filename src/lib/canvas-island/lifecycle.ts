@@ -59,6 +59,61 @@ export const whenIdle: Schedule = (run) => {
   return () => clearTimeout(timer);
 };
 
+// Hands over to `next` once the window load event has fired, so heavy work
+// never competes with the page's own resources and first paint.
+export function afterLoad(doc: Document, next: Schedule = whenIdle): Schedule {
+  return (run) => {
+    const win = doc.defaultView;
+    if (!win || doc.readyState === 'complete') return next(run);
+    let cancelNext: (() => void) | undefined;
+    const onLoad = () => {
+      cancelNext = next(run);
+    };
+    win.addEventListener('load', onLoad, { once: true });
+    return () => {
+      win.removeEventListener('load', onLoad);
+      cancelNext?.();
+    };
+  };
+}
+
+// Signals that the visitor is engaging with the page. Scroll is listened for
+// in the capture phase because a document scroll does not bubble to the window.
+const interactionEvents = [
+  'pointerdown',
+  'pointermove',
+  'keydown',
+  'touchstart',
+  'wheel',
+  'scroll',
+] as const;
+
+// Hands over to `next` on the visitor's first interaction, for work that is
+// too heavy to start unprompted on low-end devices.
+export function afterInteraction(
+  target: EventTarget,
+  next: Schedule = whenIdle,
+): Schedule {
+  return (run) => {
+    const options = { capture: true, passive: true };
+    let cancelNext: (() => void) | undefined;
+    const stopListening = () => {
+      for (const type of interactionEvents)
+        target.removeEventListener(type, onInteraction, options);
+    };
+    function onInteraction() {
+      stopListening();
+      cancelNext = next(run);
+    }
+    for (const type of interactionEvents)
+      target.addEventListener(type, onInteraction, options);
+    return () => {
+      stopListening();
+      cancelNext?.();
+    };
+  };
+}
+
 export function mountIsland(options: IslandOptions): Island {
   const {
     element,

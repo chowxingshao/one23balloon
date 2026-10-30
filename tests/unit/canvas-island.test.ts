@@ -5,6 +5,8 @@ import {
   type Capability,
 } from '../../src/lib/canvas-island/capability.ts';
 import {
+  afterInteraction,
+  afterLoad,
   mountIsland,
   observeIntersection,
   whenIdle,
@@ -112,6 +114,107 @@ describe('whenIdle', () => {
     whenIdle(cancelled)();
     vi.advanceTimersByTime(500);
     expect(cancelled).not.toHaveBeenCalled();
+  });
+});
+
+describe('afterLoad', () => {
+  let dom: JSDOM;
+  beforeEach(() => {
+    dom = new JSDOM('<p></p>');
+  });
+  afterEach(() => dom.window.close());
+  const loading = () => {
+    Object.defineProperty(dom.window.document, 'readyState', {
+      configurable: true,
+      value: 'loading',
+    });
+  };
+  const manualNext = () => {
+    const cancel = vi.fn();
+    let pending: () => void = () => undefined;
+    const next = vi.fn((run: () => void) => {
+      pending = run;
+      return cancel;
+    });
+    return { next, cancel, run: () => pending() };
+  };
+
+  it('hands over to the next step at once when the page has loaded', () => {
+    const { next } = manualNext();
+    const run = vi.fn();
+    afterLoad(dom.window.document, next)(run);
+    expect(next).toHaveBeenCalledWith(run);
+  });
+
+  it('waits for the load event before the next step, and only once', () => {
+    loading();
+    const step = manualNext();
+    const run = vi.fn();
+    afterLoad(dom.window.document, step.next)(run);
+    expect(step.next).not.toHaveBeenCalled();
+    dom.window.dispatchEvent(new dom.window.Event('load'));
+    dom.window.dispatchEvent(new dom.window.Event('load'));
+    expect(step.next).toHaveBeenCalledOnce();
+    step.run();
+    expect(run).toHaveBeenCalledOnce();
+  });
+
+  it('cancels both before and after the load event', () => {
+    loading();
+    const early = manualNext();
+    afterLoad(dom.window.document, early.next)(vi.fn())();
+    dom.window.dispatchEvent(new dom.window.Event('load'));
+    expect(early.next).not.toHaveBeenCalled();
+
+    const late = manualNext();
+    const cancel = afterLoad(dom.window.document, late.next)(vi.fn());
+    dom.window.dispatchEvent(new dom.window.Event('load'));
+    cancel();
+    expect(late.cancel).toHaveBeenCalledOnce();
+  });
+});
+
+describe('afterInteraction', () => {
+  let dom: JSDOM;
+  beforeEach(() => {
+    dom = new JSDOM('<p></p>');
+  });
+  afterEach(() => dom.window.close());
+
+  it.each(['pointerdown', 'pointermove', 'keydown', 'touchstart', 'wheel'])(
+    'starts the next step on the first %s, once',
+    (type) => {
+      const next = vi.fn(() => () => undefined);
+      const run = vi.fn();
+      afterInteraction(dom.window, next)(run);
+      expect(next).not.toHaveBeenCalled();
+      dom.window.document.body.dispatchEvent(
+        new dom.window.Event(type, { bubbles: true }),
+      );
+      dom.window.dispatchEvent(new dom.window.Event('keydown'));
+      expect(next).toHaveBeenCalledOnce();
+      expect(next).toHaveBeenCalledWith(run);
+    },
+  );
+
+  it('starts on a document scroll, which does not bubble to the window', () => {
+    const next = vi.fn(() => () => undefined);
+    afterInteraction(dom.window, next)(vi.fn());
+    dom.window.document.dispatchEvent(new dom.window.Event('scroll'));
+    expect(next).toHaveBeenCalledOnce();
+  });
+
+  it('stops listening when cancelled, and cancels a started next step', () => {
+    const next = vi.fn(() => () => undefined);
+    afterInteraction(dom.window, next)(vi.fn())();
+    dom.window.dispatchEvent(new dom.window.Event('pointerdown'));
+    expect(next).not.toHaveBeenCalled();
+
+    const cancelNext = vi.fn();
+    const cancel = afterInteraction(dom.window, () => cancelNext)(vi.fn());
+    dom.window.dispatchEvent(new dom.window.Event('pointerdown'));
+    cancel();
+    expect(cancelNext).toHaveBeenCalledOnce();
   });
 });
 
