@@ -142,7 +142,7 @@ src/scripts/
 
 ### Lifecycle and performance
 
-- No 3D code on the critical path. Each canvas island dynamically imports its scene after the island is near the viewport and the browser is idle; the intro is the only island that starts immediately, and only when allowed.
+- No 3D code on the critical path. Each canvas island dynamically imports its scene after the island is near the viewport and the browser is idle; the intro is the only island that starts without waiting for its own visibility, and only when allowed. (Amended 2026-10-30 after Lighthouse measurement: no 3D work, WebGL probe or landing motion starts before the load event and an idle period; on the low tier the intro is skipped and islands mount only after the visitor's first interaction, with photos shown until then. See the quality report.)
 - One WebGL renderer per visible island; islands pause their render loop when off-screen or when the tab is hidden.
 - Quality tiers: device pixel ratio capped at 2 (desktop) and 1.5 (phones); balloon counts and geometry segments reduced on the low tier.
 - WebGL context loss disposes the scene and shows the fallback.
