@@ -25,6 +25,7 @@ describe('Chinese font subsets', () => {
   });
 
   it.each([
+    'source-sans-3-latin.woff2',
     'fraunces-latin.woff2',
     'noto-serif-sc-subset.woff2',
     'noto-sans-sc-subset.woff2',
