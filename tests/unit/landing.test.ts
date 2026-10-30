@@ -32,6 +32,20 @@ const doc = () => dom.window.document;
 const root = () => doc().querySelector<HTMLElement>('[data-landing]')!;
 const hero = () => doc().querySelector<HTMLElement>('[data-island="hero"]')!;
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+// Runs a scheduled step straight away, standing in for "after load and idle".
+const now = (run: () => void) => {
+  run();
+  return () => undefined;
+};
+function manualSchedule() {
+  let pending: (() => void) | undefined;
+  const cancel = vi.fn();
+  const schedule = vi.fn((run: () => void) => {
+    pending = run;
+    return cancel;
+  });
+  return { schedule, cancel, run: () => pending?.() };
+}
 function memoryStorage(): Storage {
   const values = new Map<string, string>();
   return {
@@ -60,6 +74,7 @@ describe('initLanding', () => {
     const intro = vi.fn();
     const dispose = initLanding(root(), {
       capability: capable,
+      start: now,
       storage: played(),
       loaders: { hero: async () => async () => scene },
       intro,
@@ -93,6 +108,7 @@ describe('initLanding', () => {
     const intro = vi.fn(() => new Promise<never>(() => undefined));
     initLanding(root(), {
       capability: capable,
+      start: now,
       storage: memoryStorage(),
       loaders: { hero: heroLoad },
       intro,
@@ -113,6 +129,7 @@ describe('initLanding', () => {
     const heroLoad = vi.fn(async () => async () => fakeScene());
     const dispose = initLanding(root(), {
       capability: capable,
+      start: now,
       storage: memoryStorage(),
       loaders: { hero: heroLoad },
       intro: () => new Promise<never>(() => undefined),
@@ -125,11 +142,101 @@ describe('initLanding', () => {
     expect(hero().hasAttribute('data-island-state')).toBe(false);
   });
 
+  it('does no 3D, motion or WebGL probing until the page has loaded and gone idle', async () => {
+    const start = manualSchedule();
+    const detect = vi.fn(() => capable);
+    const motion = vi.fn(() => () => undefined);
+    const intro = vi.fn(() => new Promise<never>(() => undefined));
+    initLanding(root(), {
+      capability: detect,
+      start: start.schedule,
+      storage: memoryStorage(),
+      loaders: { hero: async () => async () => fakeScene() },
+      intro,
+      motion,
+    });
+    await flush();
+    expect(
+      doc().querySelector<HTMLElement>('[data-palette-picker]')!.hidden,
+    ).toBe(false);
+    expect(detect).not.toHaveBeenCalled();
+    expect(motion).not.toHaveBeenCalled();
+    expect(intro).not.toHaveBeenCalled();
+    expect(hero().hasAttribute('data-island-state')).toBe(false);
+
+    start.run();
+    await flush();
+    expect(detect).toHaveBeenCalledOnce();
+    expect(motion).toHaveBeenCalledWith(root());
+    expect(intro).toHaveBeenCalledOnce();
+  });
+
+  it('waits for the window load event by default', async () => {
+    Object.defineProperty(doc(), 'readyState', {
+      configurable: true,
+      value: 'loading',
+    });
+    const motion = vi.fn(() => () => undefined);
+    initLanding(root(), {
+      capability: capable,
+      storage: played(),
+      loaders: { hero: async () => async () => fakeScene() },
+      motion,
+    });
+    await flush();
+    expect(motion).not.toHaveBeenCalled();
+    dom.window.dispatchEvent(new dom.window.Event('load'));
+    await flush();
+    expect(motion).toHaveBeenCalledOnce();
+    expect(hero().dataset.islandState).toBe('live');
+  });
+
+  it('cancels the pending start when disposed first', () => {
+    const start = manualSchedule();
+    const motion = vi.fn(() => () => undefined);
+    const dispose = initLanding(root(), {
+      capability: capable,
+      start: start.schedule,
+      storage: played(),
+      motion,
+    });
+    dispose();
+    expect(start.cancel).toHaveBeenCalledOnce();
+    start.run();
+    expect(motion).not.toHaveBeenCalled();
+  });
+
+  it('on the low tier, skips the intro and builds the hero only once the visitor engages', async () => {
+    const engage = manualSchedule();
+    const heroLoad = vi.fn(async () => async () => fakeScene());
+    const intro = vi.fn();
+    initLanding(root(), {
+      capability: { ...capable, tier: 'low' },
+      start: now,
+      engage: engage.schedule,
+      storage: memoryStorage(),
+      loaders: { hero: heroLoad },
+      intro,
+      motion: () => () => undefined,
+    });
+    await flush();
+    expect(intro).not.toHaveBeenCalled();
+    expect(doc().querySelector('.intro')).toBeNull();
+    expect(hero().dataset.islandState).toBe('idle');
+    expect(heroLoad).not.toHaveBeenCalled();
+
+    engage.run();
+    await flush();
+    expect(heroLoad).toHaveBeenCalledOnce();
+    expect(hero().dataset.islandState).toBe('live');
+  });
+
   it('keeps photo fallbacks and skips the intro without WebGL', () => {
     const load = vi.fn();
     const intro = vi.fn();
     initLanding(root(), {
       capability: { ...capable, webgl: false },
+      start: now,
       storage: memoryStorage(),
       loaders: { hero: load },
       intro,

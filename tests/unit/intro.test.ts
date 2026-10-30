@@ -56,6 +56,12 @@ describe('shouldPlayIntro', () => {
     expect(shouldPlayIntro(throwing, capable)).toBe(false);
     expect(() => markIntroPlayed(throwing)).not.toThrow();
   });
+
+  it('never plays on the low tier, where it would block the phone at load', () => {
+    expect(shouldPlayIntro(memoryStorage(), { ...capable, tier: 'low' })).toBe(
+      false,
+    );
+  });
 });
 
 describe('introGrid', () => {

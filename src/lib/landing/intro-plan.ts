@@ -3,11 +3,19 @@ import { mulberry32 } from '../random.ts';
 
 export const introStorageKey = 'one23balloon:intro-played';
 
+// Low-tier devices (phones, few cores or little memory) skip the intro: its
+// scene build blocks the main thread for seconds there, just as the page loads.
 export function shouldPlayIntro(
   storage: Pick<Storage, 'getItem'> | undefined,
   capability: Capability,
 ): boolean {
-  if (!capability.webgl || capability.reducedMotion || !storage) return false;
+  if (
+    !capability.webgl ||
+    capability.reducedMotion ||
+    capability.tier === 'low' ||
+    !storage
+  )
+    return false;
   try {
     return storage.getItem(introStorageKey) !== '1';
   } catch {
