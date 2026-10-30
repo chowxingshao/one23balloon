@@ -54,7 +54,7 @@ Scale (from `src/styles/tokens.css`):
 - Buttons, the header pill and the statement photo pills are full pills.
 - Nothing is overlaid on a photo. Captions sit below it.
 - Shell up to 90rem with a `--gutter` of `max(1rem, 4vw)`. Chapters run 100dvh or taller.
-- Every multi-column layout collapses to one column below 768px, with full-width photos and no tilt.
+- Every multi-column layout collapses to one column below 768px, with full-width photos and no tilt. The one exception is the celebrations grid, which keeps two multi-columns from 40rem (640px) and becomes one column below that.
 
 ## Chapters and motion
 

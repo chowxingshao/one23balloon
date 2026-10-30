@@ -105,7 +105,7 @@ Rules:
 
 - One radius scale: `--radius-photo: 1.25rem` for photos and cards, full pill for buttons and the header pill.
 - Shell up to 90rem with a 4vw gutter (16px minimum). Chapters run 100dvh or taller; nothing uses `100vh`.
-- Every multi-column layout states its collapse below 768px: one column, full-width photos, no tilt.
+- Every multi-column layout states its collapse below 768px: one column, full-width photos, no tilt. The one exception is the celebrations grid, which keeps two multi-columns from 40rem (640px) and becomes one column below that.
 
 ## Page structure
 
@@ -117,7 +117,7 @@ Wordmark `one23balloon` at the left in Unbounded, `EN / 中文` switcher and a W
 
 ### 1. Hero
 
-- Headline over two lines, about 12vw: en "Every party, bigger." / zh "每一场派对，更盛大。". One short lede line (20 words maximum) and no other text. The header pill is the call to action.
+- Headline over two lines, about 10vw: en "Every party, bigger." / zh "每一场派对，更盛大。". One short lede line (20 words maximum) and no other text. The header pill is the call to action.
 - The 3D cluster surrounds the headline: some balloons render behind the letters and some in front (see "Front and back layers").
 - Before the 3D starts, the committed poster still occupies the same place, so the first paint already shows balloons.
 - Scroll (scrubbed, pinned for about one viewport on desktop): SplitText splits the headline into its two halves per line; left halves move left and right halves move right while the cluster pushes toward the camera, then the chapter releases.
@@ -126,7 +126,7 @@ Wordmark `one23balloon` at the left in Unbounded, `EN / 中文` switcher and a W
 
 - One large sentence, set at chapter-title size, with four small rounded photo pills placed inline between words: en "We style [photo] weddings, [photo] grand openings, [photo] birthdays and [photo] 100-day parties across KL and Selangor." The zh sentence carries the same four pills.
 - Scroll (scrubbed): words fill from `--muted` at 25% opacity to `--ink` in reading order; each photo pill scales from 0 to 1 as its word fills.
-- No 3D here; the stage is in its "drift" formation and moves behind the text.
+- No 3D here; the stage is in its "drift" formation and moves behind the text. On the low tier there is no back canvas, so the balloons are hidden here.
 
 ### 3. What we do
 
@@ -199,7 +199,7 @@ closing: { title, whatsapp, message, instagram, xiaohongshu }
 ### Stage
 
 - One `BalloonStage` replaces the hero, sculptures, release and intro scenes. It owns one `THREE.WebGLRenderer` on a fixed, full-viewport, `aria-hidden`, `pointer-events: none` canvas.
-- Balloons are instanced: one instanced mesh per material family (latex, chrome), about 30 balloons at the high and mid tiers and 14 at the low tier.
+- Balloons are instanced: one instanced mesh per material family (latex, chrome), 30 balloons at the high tier and 14 at the low tier.
 - Kept and reused: `src/lib/canvas-island/` (lifecycle, capability tiering), `src/scenes/renderer.ts`, `materials.ts`, `material-params.ts`, `balloon.ts`, `environment.ts`, `loop.ts`. Removed: `garland-layout.ts`, `hero.ts`, `intro.ts`, `confetti.ts`, `release.ts`, `sculpture-*.ts`, `sculptures.ts`, `picking.ts`, `palette-source.ts` and the balloon dog.
 
 ### Depth
@@ -219,7 +219,7 @@ closing: { title, whatsapp, message, instagram, xiaohongshu }
 | Formation | Chapter | Shape | Colours |
 | --- | --- | --- | --- |
 | `hero` | Hero | Wide ring around the headline, deep front to back | Mixed: all six block colours plus chrome |
-| `drift` | Statement, signature | Small, far back, slow drift | Mixed, low contrast |
+| `drift` (low tier: resolves to `hidden`) | Statement, signature | Small, far back, slow drift | Mixed, low contrast |
 | `service-n` | Each service card | Tight cluster beside the card text | Two contrasting block colours (`clusterBlocks`) plus chrome and pearl |
 | `hidden` | Celebrations | Off screen, rendering paused | - |
 | `release` | Closing | Balloons rise out of the frame | Sunflower, cobalt, lilac and chrome |
@@ -229,7 +229,7 @@ closing: { title, whatsapp, message, instagram, xiaohongshu }
 
 ### Front and back layers
 
-Only in the hero, at the high tier:
+At the high tier:
 
 - Each balloon is in layer `back` or `front` by its z position relative to the headline plane.
 - Each frame, the renderer draws the `back` layer, copies the result with `drawImage` to a 2D canvas positioned behind the headline, then clears and draws the `front` layer to the WebGL canvas above the headline. One WebGL context in total.
@@ -245,7 +245,7 @@ Only in the hero, at the high tier:
 
 ### Lifecycle and performance
 
-- Tiering stays as implemented in the performance follow-up: on the low tier, the stage loads on the first scroll or tap; on the mid and high tiers it loads when the page is idle.
+- Tiering stays as implemented in the performance follow-up: on the low tier, the stage loads on the first scroll or tap; on the high tier it loads when the page is idle.
 - Three.js is still reached only by dynamic import.
 - Rendering pauses when the tab is hidden, while the `hidden` formation is active, and when the stage is off screen at the end of the release.
 - Targets: mobile Lighthouse performance 90 or higher for both locales; accessibility, best practices and SEO 100. CLS below 0.1.
@@ -310,7 +310,7 @@ Unchanged contracts: titles, descriptions, canonical and hreflang from the manif
 | Risk | Mitigation |
 | --- | --- |
 | Enough colourful, rule-compliant photos may not exist on Instagram | Stop at what qualifies; the grid works from 30 photos. Report the count. |
-| Two-layer hero rendering costs frame time | High and mid tiers only; measured in the performance pass; fall back to front-only if a mid-tier frame exceeds 16ms. |
+| Two-layer hero rendering costs frame time | High tier only; measured in the performance pass; fall back to front-only if a high-tier hero frame exceeds 16ms. |
 | ScrollSmoother conflicts with pinned stacks or the 3D stage | Smoother runs desktop only; pins are created after the smoother; verified in browser evidence. |
 | Very large type breaks layouts in Chinese or at 360px | Separate zh line lengths in content; integration test for header fit; screenshots at 360px. |
 | Mobile Lighthouse regresses below 90 | Poster still as LCP, stage deferred on low tier, fonts subset, photos lazy below the fold. |
