@@ -23,7 +23,7 @@ export type LandingOptions = {
   motion?: (root: HTMLElement) => () => void;
   /** When 3D and motion work may begin; defaults to after load and idle. */
   start?: Schedule;
-  /** When the low-tier hero may load; defaults to the first interaction. */
+  /** When low-tier islands may start; defaults to the first interaction. */
   engage?: Schedule;
 };
 
@@ -79,8 +79,9 @@ export function initLanding(
   const cleanups: Array<() => void> = [initPalettePicker(root)];
   let disposed = false;
 
-  // Nothing below runs before the load event and an idle period: not even the
-  // WebGL probe, whose context creation can hold up first paint.
+  // Nothing below runs before the load event and an idle period, so the
+  // WebGL probe (whose context creation can stall the page) and scene chunks
+  // never compete with first paint.
   const begin = () => {
     if (disposed) return;
     const capability =
@@ -88,15 +89,19 @@ export function initLanding(
         ? options.capability()
         : (options.capability ?? detectCapability(browserProbe()));
     cleanups.push((options.motion ?? loadLandingMotion)(root));
+    // On the low tier the in-view hero would build at once, blocking the phone
+    // while the page is being read, so no island (and no WebGL probe) starts
+    // until the visitor engages. The photos show until then, as without WebGL.
+    if (capability.tier === 'low')
+      cleanups.push(engage(() => islands(capability)));
+    else islands(capability);
+  };
+  const islands = (capability: Capability) => {
+    if (disposed) return;
     const mount = (element: HTMLElement) => {
-      const name = element.dataset.island ?? '';
-      const load = loaders[name];
+      const load = loaders[element.dataset.island ?? ''];
       if (!load || disposed) return;
-      // A low-tier hero is in view at load, so it waits for the visitor to
-      // engage rather than block the phone while the page is being read.
-      const idle =
-        name === 'hero' && capability.tier === 'low' ? engage : undefined;
-      const island = mountIsland({ element, load, capability, idle });
+      const island = mountIsland({ element, load, capability });
       cleanups.push(() => island.dispose());
     };
     // The hero scene sits under the intro overlay, so it is built only once the

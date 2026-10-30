@@ -158,8 +158,9 @@ export function mountIsland(options: IslandOptions): Island {
 
   if (
     !canvas ||
-    !capability.webgl ||
-    (capability.reducedMotion && !allowReducedMotion)
+    (capability.reducedMotion && !allowReducedMotion) ||
+    // Checked last: answering it may create a probe context.
+    !capability.webgl
   ) {
     setState('fallback');
     return island;

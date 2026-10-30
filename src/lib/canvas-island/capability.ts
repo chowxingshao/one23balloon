@@ -36,8 +36,14 @@ export function detectCapability(probe: CapabilityProbe): Capability {
     (probe.hardwareConcurrency ?? 8) <= 4 ||
     (probe.deviceMemory ?? 8) <= 4;
   const tier: QualityTier = low ? 'low' : 'high';
+  // Creating the probe context can stall the main thread (and, early on, first
+  // paint), so it happens only when something first needs the answer.
+  let webgl: boolean | undefined;
   return {
-    webgl: webglAvailable(probe),
+    get webgl() {
+      webgl ??= webglAvailable(probe);
+      return webgl;
+    },
     reducedMotion: matches('(prefers-reduced-motion: reduce)'),
     tier,
     pixelRatio: Math.min(probe.devicePixelRatio ?? 1, low ? 1.5 : 2),

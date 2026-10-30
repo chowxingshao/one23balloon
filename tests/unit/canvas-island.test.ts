@@ -53,6 +53,19 @@ describe('detectCapability', () => {
     ).toMatchObject({ tier: 'low', pixelRatio: 1.5 });
   });
 
+  it('creates the probe context only when WebGL is first asked about, once', () => {
+    const createCanvas = vi.fn(canvasWith({}));
+    const capability = detectCapability({
+      matchMedia: media({ '(pointer: coarse)': true }),
+      createCanvas,
+    });
+    expect(capability.tier).toBe('low');
+    expect(createCanvas).not.toHaveBeenCalled();
+    expect(capability.webgl).toBe(true);
+    expect(capability.webgl).toBe(true);
+    expect(createCanvas).toHaveBeenCalledOnce();
+  });
+
   it('reports reduced motion', () => {
     expect(
       detectCapability({

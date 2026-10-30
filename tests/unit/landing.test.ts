@@ -206,27 +206,37 @@ describe('initLanding', () => {
     expect(motion).not.toHaveBeenCalled();
   });
 
-  it('on the low tier, skips the intro and builds the hero only once the visitor engages', async () => {
+  it('on the low tier, skips the intro and leaves WebGL alone until the visitor engages', async () => {
     const engage = manualSchedule();
+    const probe = vi.fn(() => true);
     const heroLoad = vi.fn(async () => async () => fakeScene());
+    const motion = vi.fn(() => () => undefined);
     const intro = vi.fn();
     initLanding(root(), {
-      capability: { ...capable, tier: 'low' },
+      capability: () => ({
+        ...capable,
+        tier: 'low',
+        get webgl() {
+          return probe();
+        },
+      }),
       start: now,
       engage: engage.schedule,
       storage: memoryStorage(),
       loaders: { hero: heroLoad },
       intro,
-      motion: () => () => undefined,
+      motion,
     });
     await flush();
-    expect(intro).not.toHaveBeenCalled();
-    expect(doc().querySelector('.intro')).toBeNull();
-    expect(hero().dataset.islandState).toBe('idle');
-    expect(heroLoad).not.toHaveBeenCalled();
+    expect(motion).toHaveBeenCalledOnce();
+    expect(probe).not.toHaveBeenCalled();
+    expect(hero().hasAttribute('data-island-state')).toBe(false);
 
     engage.run();
     await flush();
+    expect(probe).toHaveBeenCalled();
+    expect(intro).not.toHaveBeenCalled();
+    expect(doc().querySelector('.intro')).toBeNull();
     expect(heroLoad).toHaveBeenCalledOnce();
     expect(hero().dataset.islandState).toBe('live');
   });

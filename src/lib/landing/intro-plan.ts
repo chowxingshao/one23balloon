@@ -10,10 +10,10 @@ export function shouldPlayIntro(
   capability: Capability,
 ): boolean {
   if (
-    !capability.webgl ||
     capability.reducedMotion ||
     capability.tier === 'low' ||
-    !storage
+    !storage ||
+    !capability.webgl
   )
     return false;
   try {
