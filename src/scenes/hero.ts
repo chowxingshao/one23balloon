@@ -26,7 +26,7 @@ import { FrameLoop } from './loop.ts';
 import { PaletteMaterials } from './materials.ts';
 import { currentPalette, onPaletteChange } from './palette-source.ts';
 import { createPicker } from './picking.ts';
-import { createRenderer, fitCamera } from './renderer.ts';
+import { compileScene, createRenderer, fitCamera } from './renderer.ts';
 import { buildSculpture } from './sculpture-mesh.ts';
 import { dogParts } from './sculpture-parts.ts';
 
@@ -204,6 +204,7 @@ export async function createHeroScene(
     renderer.render(scene, camera);
   });
 
+  await compileScene(renderer, scene, camera);
   return {
     start: () => loop.start(),
     stop: () => loop.stop(),

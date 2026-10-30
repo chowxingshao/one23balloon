@@ -5,8 +5,11 @@ import {
   Group,
   Mesh,
   MeshBasicMaterial,
+  PerspectiveCamera,
+  Scene,
   Texture,
   Vector3,
+  type WebGLRenderer,
 } from 'three';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { paletteChangeEvent } from '../../src/lib/landing/events.ts';
@@ -21,6 +24,7 @@ import {
 } from '../../src/scenes/balloon-motion.ts';
 import { Confetti } from '../../src/scenes/confetti.ts';
 import { firstPoppable } from '../../src/scenes/picking.ts';
+import { compileScene } from '../../src/scenes/renderer.ts';
 import {
   easeInOut,
   mixSurface,
@@ -222,5 +226,40 @@ describe('palette source', () => {
   it('falls back to the default palette', () => {
     dom = new JSDOM('<div></div>');
     expect(currentPalette(dom.window.document)).toBe('blush-champagne');
+  });
+});
+
+describe('compileScene', () => {
+  afterEach(() => vi.useRealTimers());
+  const scene = new Scene();
+  const camera = new PerspectiveCamera();
+
+  it('waits for the parallel compile to finish', async () => {
+    let finish: () => void = () => undefined;
+    const compileAsync = vi.fn(
+      () => new Promise<void>((resolve) => (finish = resolve)),
+    );
+    const renderer = { compileAsync } as unknown as WebGLRenderer;
+    let done = false;
+    void compileScene(renderer, scene, camera).then(() => (done = true));
+    await Promise.resolve();
+    expect(compileAsync).toHaveBeenCalledWith(scene, camera);
+    expect(done).toBe(false);
+    finish();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(done).toBe(true);
+  });
+
+  it('stops waiting after the limit, leaving the rest to the first render', async () => {
+    vi.useFakeTimers();
+    const renderer = {
+      compileAsync: () => new Promise<void>(() => undefined),
+    } as unknown as WebGLRenderer;
+    let done = false;
+    void compileScene(renderer, scene, camera, 500).then(() => (done = true));
+    await vi.advanceTimersByTimeAsync(499);
+    expect(done).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(done).toBe(true);
   });
 });

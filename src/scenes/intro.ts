@@ -19,7 +19,7 @@ import { studioEnvironment } from './environment.ts';
 import { FrameLoop } from './loop.ts';
 import { PaletteMaterials } from './materials.ts';
 import { currentPalette } from './palette-source.ts';
-import { createRenderer, fitCamera } from './renderer.ts';
+import { compileScene, createRenderer, fitCamera } from './renderer.ts';
 
 type Cell = { balloon: Balloon; cell: IntroCell; inflated: boolean };
 const DEPTH = 3;
@@ -99,6 +99,13 @@ export async function createIntroScene(
     }
   });
 
+  // The overlay already has its size, so lay the wall out now and compile its
+  // materials before the scene goes live.
+  if (canvas.clientWidth && canvas.clientHeight) {
+    fitCamera(camera, renderer, canvas.clientWidth, canvas.clientHeight);
+    build();
+  }
+  await compileScene(renderer, scene, camera);
   return {
     start: () => loop.start(),
     stop: () => loop.stop(),
