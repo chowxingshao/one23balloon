@@ -1,65 +1,65 @@
 import { gsap } from 'gsap';
-import { motionEnabled, registerMotion } from '../lib/motion/index.ts';
+import { ScrollSmoother } from 'gsap/ScrollSmoother';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
+import { motionEnabled, refreshOnLoad } from '../lib/motion/index.ts';
+import { chapters } from './chapters/index.ts';
+import { initFormationTriggers } from './formation-triggers.ts';
 
-const motionQuery = '(prefers-reduced-motion: no-preference)';
+const motion = '(prefers-reduced-motion: no-preference)';
+export const motionQueries = {
+  motion,
+  desktop: `${motion} and (min-width: 64rem)`,
+  smooth: `${motion} and (min-width: 64rem) and (pointer: fine)`,
+} as const;
 
 export function initLandingMotion(root: HTMLElement): () => void {
   if (!motionEnabled()) return () => undefined;
-  registerMotion();
+  gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
+  const doc = root.ownerDocument;
   const media = gsap.matchMedia();
 
-  media.add(
-    motionQuery,
-    () => {
-      const marquee = root.querySelector<HTMLElement>('[data-marquee]');
-      if (!marquee) return;
-      // Two identical lists side by side loop seamlessly at -100%.
-      marquee.classList.add('is-running');
-      gsap.to(marquee.querySelectorAll('.marquee-list'), {
-        xPercent: -100,
-        duration: 40,
-        ease: 'none',
-        repeat: -1,
-      });
-      return () => marquee.classList.remove('is-running');
-    },
-    root,
-  );
+  // Added first so pins created below measure against the smoothed scroller.
+  media.add(motionQueries.smooth, () => {
+    const wrapper = doc.querySelector<HTMLElement>('#smooth-wrapper');
+    const content = doc.querySelector<HTMLElement>('#smooth-content');
+    if (!wrapper || !content) return;
+    const smoother = ScrollSmoother.create({
+      wrapper,
+      content,
+      smooth: 1.1,
+      effects: false,
+    });
+    return () => smoother.kill();
+  });
 
   media.add(
-    `(min-width: 64rem) and ${motionQuery}`,
-    () => {
-      const viewport = root.querySelector<HTMLElement>('[data-gallery]');
-      const track = viewport?.querySelector<HTMLElement>(
-        '[data-gallery-track]',
-      );
-      if (!viewport || !track) return;
-      viewport.classList.add('is-pinned');
-      // The viewport's inline padding frames the first and last card, so the
-      // track must travel past it too or the last card ends clipped.
-      const distance = () => {
-        const style = getComputedStyle(viewport);
-        const padding =
-          (parseFloat(style.paddingInlineStart) || 0) +
-          (parseFloat(style.paddingInlineEnd) || 0);
-        return Math.max(0, track.scrollWidth + padding - viewport.clientWidth);
+    { motion: motionQueries.motion, desktop: motionQueries.desktop },
+    (context) => {
+      const { motion: allowed, desktop } = context.conditions as {
+        motion: boolean;
+        desktop: boolean;
       };
-      gsap.to(track, {
-        x: () => -distance(),
-        ease: 'none',
-        scrollTrigger: {
-          trigger: viewport,
-          start: 'center center',
-          end: () => `+=${distance()}`,
-          pin: true,
-          scrub: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-      return () => viewport.classList.remove('is-pinned');
+      if (!allowed) return;
+      const cleanups: Array<() => void> = [];
+      for (const [id, setup] of Object.entries(chapters)) {
+        const section = root.querySelector<HTMLElement>(
+          `[data-chapter="${id}"]`,
+        );
+        if (!section) continue;
+        const cleanup = setup(section, { root, desktop });
+        if (cleanup) cleanups.push(cleanup);
+      }
+      cleanups.push(initFormationTriggers(root));
+      return () => {
+        for (const cleanup of cleanups.reverse()) cleanup();
+      };
     },
-    root,
   );
 
-  return () => media.revert();
+  const stopRefresh = refreshOnLoad(root);
+  return () => {
+    stopRefresh();
+    media.revert();
+  };
 }

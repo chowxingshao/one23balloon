@@ -2,6 +2,7 @@
 import SiteHeader from '../components/SiteHeader.astro';
 import SeoHead from '../components/SeoHead.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import SmoothWrapper from '../components/SmoothWrapper.astro';
 import { getSiteConfig } from '../lib/config/site.ts';
 import { cjkUnicodeRange } from '../lib/fonts/charset.ts';
 import { getUi, localeDirection } from '../lib/i18n/ui.ts';
@@ -19,6 +20,7 @@ interface Props {
   image?: string;
   structuredData?: Record<string, unknown>;
   headerCta?: { href: string; label: string };
+  smooth?: boolean;
 }
 const {
   title,
@@ -29,6 +31,7 @@ const {
   image,
   structuredData,
   headerCta,
+  smooth = false,
 } = Astro.props;
 const site = getSiteConfig();
 const ui = await getUi(locale);
@@ -118,15 +121,18 @@ const fontFaces = fonts
       {ui.accessibility.skipContent}
     </a>
     <SiteHeader locale={locale} current={route} cta={headerCta} />
-    <main id="main-content" class="site-main" tabindex="-1">
-      <slot />
-    </main>
-    {Astro.slots.has('footer') ? (
-      <SiteFooter locale={locale}>
-        <slot name="footer" slot="extra" />
-      </SiteFooter>
-    ) : (
-      <SiteFooter locale={locale} />
-    )}
+    <slot name="stage" />
+    <SmoothWrapper enabled={smooth}>
+      <main id="main-content" class="site-main" tabindex="-1">
+        <slot />
+      </main>
+      {Astro.slots.has('footer') ? (
+        <SiteFooter locale={locale}>
+          <slot name="footer" slot="extra" />
+        </SiteFooter>
+      ) : (
+        <SiteFooter locale={locale} />
+      )}
+    </SmoothWrapper>
   </body>
 </html>
