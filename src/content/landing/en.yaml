@@ -1,0 +1,272 @@
+whatsapp: '60109017633'
+meta:
+  instagramLabel: Instagram
+  xiaohongshuLabel: Xiaohongshu
+  registration: SSM CT0152510-K
+  rights: All rights reserved.
+intro:
+  skip: Skip intro
+hero:
+  eyebrow: Kuala Lumpur and Selangor
+  title: Celebrations, composed in colour
+  lede: Custom balloon installations for weddings, grand openings, milestone birthdays and baby celebrations, designed around your palette and styled on site.
+  cta: WhatsApp us
+  message: Hi one23balloon, I'd like to plan a balloon setup.
+  photo:
+    image: ../../assets/work/hero-arch.jpg
+    alt: Cream pearl balloons beside a white arched panel with an oversized peach-pink satin bow and white flowers.
+    source: https://www.instagram.com/p/Dd0QfR4yIIR/
+palettes:
+  label: Choose a palette
+  items:
+    - id: blush-champagne
+      name: Blush and champagne
+      message: Hi one23balloon, I'd like a setup in Blush and champagne.
+    - id: chrome-blue
+      name: Chrome blue and silver
+      message: Hi one23balloon, I'd like a setup in Chrome blue and silver.
+    - id: sage-cream
+      name: Sage and cream
+      message: Hi one23balloon, I'd like a setup in Sage and cream.
+    - id: rose-gold
+      name: Rose and gold
+      message: Hi one23balloon, I'd like a setup in Rose and gold.
+    - id: jewel
+      name: Jewel tones
+      message: Hi one23balloon, I'd like a setup in Jewel tones.
+services:
+  title: Celebrations we style
+  lede: Every setup starts from your occasion, your space and your colours.
+  cta: Ask on WhatsApp
+  items:
+    - id: weddings
+      title: Weddings and proposals
+      body: Garlands, arches and bouquets for proposals, registrations, bride-to-be parties and the big day.
+      palette: rose-gold
+      message: Hi one23balloon, I'd like to ask about balloon styling for a wedding or proposal.
+      photo:
+        image: ../../assets/work/service-weddings.jpg
+        alt: A blue and silver chrome balloon garland beside an arched welcome backdrop in a hotel lobby.
+        source: https://www.instagram.com/p/DaDTmrpSMZP/
+    - id: openings
+      title: Grand openings and corporate events
+      body: Statement backdrops for openings, anniversaries, annual dinners, launches and live-stream rooms.
+      palette: chrome-blue
+      message: Hi one23balloon, I'd like to ask about balloon styling for an opening or corporate event.
+      photo:
+        image: ../../assets/work/service-openings.jpg
+        alt: Clear balloons filled with blue and silver balloons, set on chrome bases below a Grand Opening script sign.
+        source: https://www.instagram.com/p/DS434OuklLZ/
+    - id: birthdays
+      title: Milestone birthdays
+      body: Surprises in hotel suites, Airbnbs, KTV rooms, restaurants and at home, from 18th to 90th.
+      palette: blush-champagne
+      message: Hi one23balloon, I'd like to ask about a birthday balloon setup.
+      photo:
+        image: ../../assets/work/service-birthdays.jpg
+        alt: A hotel room birthday setup with pale blue, white and silver balloons, a silver moon and hanging star garlands.
+        source: https://www.instagram.com/p/De1fts-ya9W/
+    - id: baby
+      title: Baby celebrations and gender reveals
+      body: Full-month, 100-day and first-birthday parties, and gender reveals styled in soft, timeless palettes.
+      palette: sage-cream
+      message: Hi one23balloon, I'd like to ask about a baby celebration or gender reveal setup.
+      photo:
+        image: ../../assets/work/service-baby.jpg
+        alt: An ocean-themed first-birthday backdrop with a sea turtle and jellyfish, framed by blue, navy and cream balloons.
+        source: https://www.instagram.com/p/Db-zyU_Skzy/
+    - id: cars
+      title: Car handovers
+      body: Bows, balloon clusters and a proper reveal for a new car, at home or at the showroom.
+      palette: jewel
+      message: Hi one23balloon, I'd like to ask about a car handover setup.
+      photo:
+        image: ../../assets/work/service-cars.jpg
+        alt: A white car with a large red bow in a showroom, surrounded by silver and white balloons and balloon gift boxes.
+        source: https://www.instagram.com/p/DSRfJm9ksre/
+    - id: bouquets
+      title: Bouquets and balloon sculptures
+      body: Hand-twisted roses, tulips, giant balloon cakes and lion dancers, made to give.
+      palette: blush-champagne
+      message: Hi one23balloon, I'd like to ask about balloon bouquets or sculptures.
+      photo:
+        image: ../../assets/work/service-bouquets.jpg
+        alt: A hand holding a bouquet of white twisted-balloon tulips with green stems and a white bow.
+        source: https://www.instagram.com/p/DJRXloTyrxN/
+gallery:
+  title: Recent work
+  lede: A few of the celebrations we have styled lately.
+  more: See more on Instagram
+  items:
+    - image: ../../assets/work/gallery-01.jpg
+      alt: A white and champagne bronze balloon garland around an arched name panel on a restaurant terrace.
+      source: https://www.instagram.com/p/Dcc7YApSTZ2/
+      location: Restaurant, Kuala Lumpur
+      theme: 21st birthday
+      colours:
+        - { hex: '#C29A74', name: Champagne bronze }
+        - { hex: '#F7F3EC', name: White }
+    - image: ../../assets/work/gallery-02.jpg
+      alt: A pink and white balloon garland around a hoop arch with a glowing Happy Birthday sign.
+      source: https://www.instagram.com/p/DcsLChQyV8G/
+      location: Kuala Lumpur
+      theme: 21st birthday
+      colours:
+        - { hex: '#E8A0A8', name: Pink }
+        - { hex: '#FFF5EE', name: White }
+    - image: ../../assets/work/gallery-03.jpg
+      alt: A chrome blue and gold balloon garland around an arched panel, beside a giant gold numeral.
+      source: https://www.instagram.com/p/Dcpi_vnS3oh/
+      location: Family dinner
+      theme: 90th birthday
+      colours:
+        - { hex: '#3F6FA3', name: Chrome blue }
+        - { hex: '#C9A24A', name: Chrome gold }
+    - image: ../../assets/work/gallery-04.jpg
+      alt: A giant pink satin bow over draped cream curtains with small red bows, beside pink foil 22 numerals.
+      source: https://www.instagram.com/p/DdMBn2dSqP2/
+      location: Kuala Lumpur
+      theme: 22nd birthday
+      colours:
+        - { hex: '#E8B4B2', name: Pink }
+        - { hex: '#F4EEE2', name: Cream }
+        - { hex: '#B3202F', name: Red }
+    - image: ../../assets/work/gallery-05.jpg
+      alt: A red and gold balloon backdrop with gold 00 foil numerals and a Chinese 100th-day banner on a stage.
+      source: https://www.instagram.com/p/DUnoahckjPh/
+      location: Event hall
+      theme: 100th-day celebration
+      colours:
+        - { hex: '#C8402A', name: Red }
+        - { hex: '#D1A93B', name: Gold }
+    - image: ../../assets/work/gallery-06.jpg
+      alt: Blue and silver balloons on a bed beside a window, with a silver Happy Birthday foil banner.
+      source: https://www.instagram.com/p/DVqGfAlkoxG/
+      location: Condo bedroom
+      theme: Birthday surprise
+      colours:
+        - { hex: '#2F6EA8', name: Chrome blue }
+        - { hex: '#C7CCD4', name: Silver }
+    - image: ../../assets/work/gallery-07.jpg
+      alt: A pink and cream floral setup with butterflies, pink tulle, scattered petals and a glowing Happy Birthday sign.
+      source: https://www.instagram.com/p/DbCzWYSSPC-/
+      location: Kuala Lumpur
+      theme: Butterfly birthday
+      colours:
+        - { hex: '#E8B4B2', name: Pink }
+        - { hex: '#F6EBDD', name: Cream }
+    - image: ../../assets/work/gallery-08.jpg
+      alt: A hoop arch with a neon Happy Birthday sign, framed by gold, chocolate brown, sand and white balloons.
+      source: https://www.instagram.com/p/DUCfcPHkgsx/
+      location: Indoor event space
+      theme: Birthday
+      colours:
+        - { hex: '#C9A227', name: Chrome gold }
+        - { hex: '#6B4128', name: Chocolate brown }
+        - { hex: '#D9C2AA', name: Sand }
+        - { hex: '#F4F1EA', name: White }
+    - image: ../../assets/work/gallery-09.jpg
+      alt: Red and white balloons beside a draped cream backdrop with small red bows and a glowing Happy Birthday sign.
+      source: https://www.instagram.com/p/DY9zUWASOrP/
+      location: Seri Kembangan
+      theme: 21st birthday
+      colours:
+        - { hex: '#B5222F', name: Red }
+        - { hex: '#F4F1EA', name: White }
+        - { hex: '#F3E9C6', name: Cream }
+    - image: ../../assets/work/gallery-10.jpg
+      alt: Sage, olive, powder blue and cream balloons around an arched panel for a 100-day celebration.
+      source: https://www.instagram.com/p/DZKilXdSmBM/
+      location: Indoor event space
+      theme: 100-day celebration
+      colours:
+        - { hex: '#86998B', name: Sage }
+        - { hex: '#5A8450', name: Olive }
+        - { hex: '#9DC4E8', name: Powder blue }
+        - { hex: '#EDDCC8', name: Cream }
+    - image: ../../assets/work/gallery-11.jpg
+      alt: Dusty pink and black balloons with small black bows around a dark brown arched panel.
+      source: https://www.instagram.com/p/DVQkmF-ErXW/
+      location: Indoor event space
+      theme: 21st birthday
+      colours:
+        - { hex: '#D5A5A5', name: Dusty pink }
+        - { hex: '#1B1B1F', name: Black }
+        - { hex: '#4A342B', name: Chocolate brown }
+    - image: ../../assets/work/gallery-12.jpg
+      alt: A pastel rainbow balloon garland in pink, blue, mint and yellow around a white arched panel.
+      source: https://www.instagram.com/p/DTaUUawkiJ2/
+      location: Indoor event space
+      theme: Children's birthday
+      colours:
+        - { hex: '#F4B6C8', name: Pink }
+        - { hex: '#9FCBF0', name: Powder blue }
+        - { hex: '#A8E0C0', name: Mint }
+        - { hex: '#F5EA9A', name: Butter yellow }
+sculptures:
+  title: Balloon sculptures
+  lede: Twisted by hand, one balloon at a time.
+  pieces:
+    - { id: dog, name: Balloon dog }
+    - { id: tulips, name: Tulip bouquet }
+    - { id: cake, name: Balloon cake }
+  photos:
+    - image: ../../assets/work/sculpture-lion-dance.jpg
+      alt: A lion dance head sculpted from red balloons with gold details, on a gold and white balloon column that continues out of frame.
+      source: https://www.instagram.com/p/DKwnkaHSwgy/
+      caption: Lion dance, for openings and festive wishes
+    - image: ../../assets/work/sculpture-roses.jpg
+      alt: A red twisted-balloon rose on a green stem, held up against a blue sky.
+      source: https://www.instagram.com/p/DF7tqUcSShg/
+      caption: Hand-twisted rose
+venues:
+  title: Where we set up
+  items:
+    - Hotel suites
+    - Airbnbs
+    - Homes
+    - KTV rooms
+    - Restaurants and private dining rooms
+    - Offices and showrooms
+    - Live-stream rooms
+    - Event halls
+steps:
+  draft: true
+  title: How it works
+  items:
+    - title: Message us on WhatsApp
+      body: Share the date, venue, occasion and the palette you love.
+    - title: Get a design and quote
+      body: We suggest a setup that fits your space.
+    - title: We style it on site
+      body: Our team sets everything up at your venue.
+faq:
+  title: Questions
+  items:
+    - question: Which areas do you cover?
+      answer: Kuala Lumpur and Selangor.
+      draft: false
+    - question: Can I choose my own colours?
+      answer: Yes. Every setup is custom; tell us your palette or pick one above.
+      draft: false
+    - question: How far ahead should I book?
+      answer: Pending confirmation from one23balloon.
+      draft: true
+    - question: How long does setup take?
+      answer: Pending confirmation from one23balloon.
+      draft: true
+    - question: Do you take the decorations down afterwards?
+      answer: Pending confirmation from one23balloon.
+      draft: true
+    - question: Do you require a deposit?
+      answer: Pending confirmation from one23balloon.
+      draft: true
+closing:
+  title: Compose your celebration
+  body: Pick a palette, tell us the occasion, and we will take it from there.
+  cta: Start on WhatsApp
+  message: Hi one23balloon, I'd like to plan a celebration.
+  photo:
+    image: ../../assets/work/closing.jpg
+    alt: A pink and white balloon garland around an arched backdrop for an 18th birthday, beside silver 18 foil numerals.
+    source: https://www.instagram.com/p/DTDWSuDkj1g/

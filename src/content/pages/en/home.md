@@ -1,14 +1,15 @@
 ---
-title: A starting point for your next website
-description: Demonstration content for a reusable static website starter.
+title: Balloon installations in Kuala Lumpur and Selangor
+description: one23balloon designs custom balloon installations for weddings, grand openings, milestone birthdays, baby celebrations and car handovers across KL and Selangor.
 slug: home
 draft: false
+structuredData:
+  type: LocalBusiness
+  name: one23balloon
+  url: https://chowxingshao.github.io/one23balloon/
+  telephone: '+60 10-901 7633'
+  address: Kuala Lumpur and Selangor, Malaysia
+  sameAs:
+    - https://www.instagram.com/one23balloon/
+    - https://xhslink.com/m/625h2gZKgy6
 ---
-
-This is demonstration copy. Replace it with the project's approved introduction.
-
-Canvas Base provides a starting point for a static site with validated content. This sample describes the starter, not a client's services or achievements.
-
-## Make it your own
-
-Begin with your brief, choose a visual direction, and replace these sample pages with approved copy. The navigation, articles, and project entries are here to demonstrate a content-driven static site.

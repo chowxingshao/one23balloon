@@ -33,21 +33,26 @@ const links = [
     label: ui.nav.contact,
   },
 ];
+const hasExtra = Astro.slots.has('extra');
+const hasLinks = links.some((link) => link.route);
 ---
 
 <footer class="site-footer shell">
   <p class="site-name">{site.name}</p>
-  <p>{site.description}</p>
-  <nav aria-label={ui.accessibility.footerNavigation}>
-    <ul class="nav-list">
-      {links.map(
-        ({ route, label }) =>
-          route && (
-            <li>
-              <a href={route.path}>{label}</a>
-            </li>
-          ),
-      )}
-    </ul>
-  </nav>
+  {!hasExtra && <p>{site.description}</p>}
+  <slot name="extra" />
+  {hasLinks && (
+    <nav aria-label={ui.accessibility.footerNavigation}>
+      <ul class="nav-list">
+        {links.map(
+          ({ route, label }) =>
+            route && (
+              <li>
+                <a href={route.path}>{label}</a>
+              </li>
+            ),
+        )}
+      </ul>
+    </nav>
+  )}
 </footer>

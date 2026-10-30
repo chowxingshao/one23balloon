@@ -8,8 +8,9 @@ import type { RouteRecord } from '../lib/routing/types.ts';
 interface Props {
   locale: string;
   current?: RouteRecord;
+  cta?: { href: string; label: string };
 }
-const { locale, current } = Astro.props;
+const { locale, current, cta } = Astro.props;
 const site = getSiteConfig();
 const ui = await getUi(locale);
 const routes = (await getRouteManifest()).filter(
@@ -42,34 +43,53 @@ const links = [
   },
 ];
 const locales = enabledLocales(site);
+// A lone "Home" link adds nothing on a one-page site.
+const showNav = links.some((link) => link.route && link.route !== home);
 ---
 
-<header class="site-header shell">
-  {home ? (
-    <a class="site-name" href={home.path}>
-      {site.name}
-    </a>
-  ) : (
-    <span class="site-name">{site.name}</span>
-  )}
-  <nav aria-label={ui.accessibility.primaryNavigation}>
-    <ul class="nav-list">
-      {links.map(
-        ({ route, label }) =>
-          route && (
-            <li>
-              <a
-                href={route.path}
-                aria-current={current?.path === route.path ? 'page' : undefined}
-              >
-                {label}
-              </a>
-            </li>
-          ),
-      )}
-    </ul>
-  </nav>
-  {current && locales.length > 1 && (
-    <LanguageSwitcher current={current} locales={locales} />
-  )}
+<header class="site-header">
+  <div class="shell site-header-inner">
+    {home ? (
+      <a class="site-name" href={home.path}>
+        {site.name}
+      </a>
+    ) : (
+      <span class="site-name">{site.name}</span>
+    )}
+    {showNav && (
+      <nav class="nav-primary" aria-label={ui.accessibility.primaryNavigation}>
+        <ul class="nav-list">
+          {links.map(
+            ({ route, label }) =>
+              route && (
+                <li>
+                  <a
+                    href={route.path}
+                    aria-current={
+                      current?.path === route.path ? 'page' : undefined
+                    }
+                  >
+                    {label}
+                  </a>
+                </li>
+              ),
+          )}
+        </ul>
+      </nav>
+    )}
+    {current && locales.length > 1 && (
+      <LanguageSwitcher current={current} locales={locales} />
+    )}
+    {cta && (
+      <a
+        class="header-cta"
+        href={cta.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-palette-link
+      >
+        {cta.label}
+      </a>
+    )}
+  </div>
 </header>

@@ -1,0 +1,272 @@
+whatsapp: '60109017633'
+meta:
+  instagramLabel: Instagram
+  xiaohongshuLabel: 小红书
+  registration: SSM CT0152510-K
+  rights: 版权所有。
+intro:
+  skip: 跳过动画
+hero:
+  eyebrow: 吉隆坡 · 雪兰莪
+  title: 为每一场盛大时刻，精心布置
+  lede: 婚礼、开业、生日与宝宝宴的定制气球布置。从配色出发，为你的场地量身打造。
+  cta: WhatsApp 联系我们
+  message: 你好 one23balloon，我想咨询气球布置。
+  photo:
+    image: ../../assets/work/hero-arch.jpg
+    alt: 奶油珍珠色气球旁的白色拱形背景板，配上超大的蜜桃粉缎面蝴蝶结与白色花艺。
+    source: https://www.instagram.com/p/Dd0QfR4yIIR/
+palettes:
+  label: 选择配色
+  items:
+    - id: blush-champagne
+      name: 腮红香槟
+      message: 你好 one23balloon，我想要「腮红香槟」配色的布置。
+    - id: chrome-blue
+      name: 镜面蓝银
+      message: 你好 one23balloon，我想要「镜面蓝银」配色的布置。
+    - id: sage-cream
+      name: 鼠尾草奶油
+      message: 你好 one23balloon，我想要「鼠尾草奶油」配色的布置。
+    - id: rose-gold
+      name: 玫瑰金
+      message: 你好 one23balloon，我想要「玫瑰金」配色的布置。
+    - id: jewel
+      name: 宝石色
+      message: 你好 one23balloon，我想要「宝石色」配色的布置。
+services:
+  title: 我们布置的场合
+  lede: 每一场布置都从你的场合、场地与配色开始。
+  cta: WhatsApp 咨询
+  items:
+    - id: weddings
+      title: 婚礼与求婚
+      body: 求婚、注册、单身派对到婚礼当天的气球拱门与花束。
+      palette: rose-gold
+      message: 你好 one23balloon，我想咨询婚礼或求婚的气球布置。
+      photo:
+        image: ../../assets/work/service-weddings.jpg
+        alt: 酒店大堂里，镜面蓝与银色气球花环衬着拱形迎宾背景板。
+        source: https://www.instagram.com/p/DaDTmrpSMZP/
+    - id: openings
+      title: 开业与企业活动
+      body: 开业、周年庆、年会、新品发布与直播间的大气背景布置。
+      palette: chrome-blue
+      message: 你好 one23balloon，我想咨询开业或企业活动的气球布置。
+      photo:
+        image: ../../assets/work/service-openings.jpg
+        alt: 透明大气球内装着蓝色与银色气球，立在镜面气球底座上，后方是 Grand Opening 手写体字样。
+        source: https://www.instagram.com/p/DS434OuklLZ/
+    - id: birthdays
+      title: 生日惊喜
+      body: 酒店、Airbnb、KTV、餐厅包厢与家中的生日布置，从18岁到90岁。
+      palette: blush-champagne
+      message: 你好 one23balloon，我想咨询生日气球布置。
+      photo:
+        image: ../../assets/work/service-birthdays.jpg
+        alt: 酒店房间的生日布置，浅蓝、白与银色气球，搭配银色月亮与垂挂的星星串饰。
+        source: https://www.instagram.com/p/De1fts-ya9W/
+    - id: baby
+      title: 宝宝宴与性别揭晓
+      body: 满月、百日宴、周岁宴与性别揭晓派对，温柔耐看的配色。
+      palette: sage-cream
+      message: 你好 one23balloon，我想咨询宝宝宴或性别揭晓的气球布置。
+      photo:
+        image: ../../assets/work/service-baby.jpg
+        alt: 海洋主题的周岁背景板，绘有海龟与水母，周围是蓝色、深蓝与奶油色气球。
+        source: https://www.instagram.com/p/Db-zyU_Skzy/
+    - id: cars
+      title: 提车仪式
+      body: 大蝴蝶结、气球与满满仪式感的新车交付，在家或在展厅。
+      palette: jewel
+      message: 你好 one23balloon，我想咨询提车仪式的气球布置。
+      photo:
+        image: ../../assets/work/service-cars.jpg
+        alt: 展厅里一辆系着红色大蝴蝶结的白色汽车，周围是银白色气球与气球礼物盒。
+        source: https://www.instagram.com/p/DSRfJm9ksre/
+    - id: bouquets
+      title: 气球花束与造型
+      body: 手工扭制的玫瑰、郁金香、巨型气球蛋糕与醒狮，送礼正合适。
+      palette: blush-champagne
+      message: 你好 one23balloon，我想咨询气球花束或气球造型。
+      photo:
+        image: ../../assets/work/service-bouquets.jpg
+        alt: 一只手捧着白色扭扭气球郁金香花束，绿色花茎，系着白色蝴蝶结。
+        source: https://www.instagram.com/p/DJRXloTyrxN/
+gallery:
+  title: 近期作品
+  lede: 最近布置的几场庆祝。
+  more: 在 Instagram 查看更多
+  items:
+    - image: ../../assets/work/gallery-01.jpg
+      alt: 餐厅露台上，白色与香槟古铜色气球花环环绕着拱形名牌背景板。
+      source: https://www.instagram.com/p/Dcc7YApSTZ2/
+      location: 吉隆坡餐厅
+      theme: 21岁生日
+      colours:
+        - { hex: '#C29A74', name: 香槟古铜 }
+        - { hex: '#F7F3EC', name: 白色 }
+    - image: ../../assets/work/gallery-02.jpg
+      alt: 粉白气球花环环绕圆环拱架，配发光的 Happy Birthday 灯牌。
+      source: https://www.instagram.com/p/DcsLChQyV8G/
+      location: 吉隆坡
+      theme: 21岁生日
+      colours:
+        - { hex: '#E8A0A8', name: 粉色 }
+        - { hex: '#FFF5EE', name: 白色 }
+    - image: ../../assets/work/gallery-03.jpg
+      alt: 镜面蓝与金色气球花环环绕拱形背景板，旁边立着巨大的金色数字。
+      source: https://www.instagram.com/p/Dcpi_vnS3oh/
+      location: 家庭聚餐
+      theme: 90岁寿宴
+      colours:
+        - { hex: '#3F6FA3', name: 镜面蓝 }
+        - { hex: '#C9A24A', name: 镜面金 }
+    - image: ../../assets/work/gallery-04.jpg
+      alt: 奶油色垂坠布帘上挂着巨大的粉色缎面蝴蝶结与红色小蝴蝶结，旁边是粉色铝膜数字22。
+      source: https://www.instagram.com/p/DdMBn2dSqP2/
+      location: 吉隆坡
+      theme: 22岁生日
+      colours:
+        - { hex: '#E8B4B2', name: 粉色 }
+        - { hex: '#F4EEE2', name: 奶油色 }
+        - { hex: '#B3202F', name: 红色 }
+    - image: ../../assets/work/gallery-05.jpg
+      alt: 舞台上的红金色气球背景，配金色铝膜数字00与「百日宴」中式背景板。
+      source: https://www.instagram.com/p/DUnoahckjPh/
+      location: 宴会厅
+      theme: 百日宴
+      colours:
+        - { hex: '#C8402A', name: 红色 }
+        - { hex: '#D1A93B', name: 金色 }
+    - image: ../../assets/work/gallery-06.jpg
+      alt: 窗边的床上摆满蓝色与银色气球，墙上挂着银色铝膜 Happy Birthday 字母串。
+      source: https://www.instagram.com/p/DVqGfAlkoxG/
+      location: 公寓卧室
+      theme: 生日惊喜
+      colours:
+        - { hex: '#2F6EA8', name: 镜面蓝 }
+        - { hex: '#C7CCD4', name: 银色 }
+    - image: ../../assets/work/gallery-07.jpg
+      alt: 粉色与奶油色花艺布置，点缀蝴蝶、粉色纱幔、散落的花瓣与发光的 Happy Birthday 灯牌。
+      source: https://www.instagram.com/p/DbCzWYSSPC-/
+      location: 吉隆坡
+      theme: 蝴蝶主题生日
+      colours:
+        - { hex: '#E8B4B2', name: 粉色 }
+        - { hex: '#F6EBDD', name: 奶油色 }
+    - image: ../../assets/work/gallery-08.jpg
+      alt: 圆环拱架上挂着霓虹 Happy Birthday 灯牌，周围是金色、巧克力棕、沙色与白色气球。
+      source: https://www.instagram.com/p/DUCfcPHkgsx/
+      location: 室内活动场地
+      theme: 生日
+      colours:
+        - { hex: '#C9A227', name: 镜面金 }
+        - { hex: '#6B4128', name: 巧克力棕 }
+        - { hex: '#D9C2AA', name: 沙色 }
+        - { hex: '#F4F1EA', name: 白色 }
+    - image: ../../assets/work/gallery-09.jpg
+      alt: 红色与白色气球旁是奶油色垂坠布景，点缀红色小蝴蝶结与发光的 Happy Birthday 灯牌。
+      source: https://www.instagram.com/p/DY9zUWASOrP/
+      location: Seri Kembangan
+      theme: 21岁成人礼
+      colours:
+        - { hex: '#B5222F', name: 红色 }
+        - { hex: '#F4F1EA', name: 白色 }
+        - { hex: '#F3E9C6', name: 奶油色 }
+    - image: ../../assets/work/gallery-10.jpg
+      alt: 鼠尾草绿、橄榄绿、粉蓝与奶油色气球环绕拱形背景板，庆祝宝宝百日。
+      source: https://www.instagram.com/p/DZKilXdSmBM/
+      location: 室内活动场地
+      theme: 宝宝百日宴
+      colours:
+        - { hex: '#86998B', name: 鼠尾草绿 }
+        - { hex: '#5A8450', name: 橄榄绿 }
+        - { hex: '#9DC4E8', name: 粉蓝 }
+        - { hex: '#EDDCC8', name: 奶油色 }
+    - image: ../../assets/work/gallery-11.jpg
+      alt: 灰粉色与黑色气球系着黑色小蝴蝶结，环绕深棕色拱形背景板。
+      source: https://www.instagram.com/p/DVQkmF-ErXW/
+      location: 室内活动场地
+      theme: 21岁生日
+      colours:
+        - { hex: '#D5A5A5', name: 灰粉色 }
+        - { hex: '#1B1B1F', name: 黑色 }
+        - { hex: '#4A342B', name: 巧克力棕 }
+    - image: ../../assets/work/gallery-12.jpg
+      alt: 粉、蓝、薄荷绿与奶黄色的马卡龙彩虹气球花环，环绕白色拱形背景板。
+      source: https://www.instagram.com/p/DTaUUawkiJ2/
+      location: 室内活动场地
+      theme: 儿童生日
+      colours:
+        - { hex: '#F4B6C8', name: 粉色 }
+        - { hex: '#9FCBF0', name: 粉蓝 }
+        - { hex: '#A8E0C0', name: 薄荷绿 }
+        - { hex: '#F5EA9A', name: 奶黄 }
+sculptures:
+  title: 气球造型
+  lede: 一颗一颗，手工扭制。
+  pieces:
+    - { id: dog, name: 气球狗 }
+    - { id: tulips, name: 郁金香花束 }
+    - { id: cake, name: 气球蛋糕 }
+  photos:
+    - image: ../../assets/work/sculpture-lion-dance.jpg
+      alt: 以红色气球扭成、点缀金色细节的醒狮头，下方是延伸出画面的金白色气球柱。
+      source: https://www.instagram.com/p/DKwnkaHSwgy/
+      caption: 气球醒狮，开业与节庆的好意头
+    - image: ../../assets/work/sculpture-roses.jpg
+      alt: 一朵绿色花茎的红色扭扭气球玫瑰，高举在蓝天之下。
+      source: https://www.instagram.com/p/DF7tqUcSShg/
+      caption: 手工扭制的玫瑰
+venues:
+  title: 布置场地
+  items:
+    - 酒店套房
+    - Airbnb
+    - 家中
+    - KTV 包厢
+    - 餐厅与包厢
+    - 办公室与展厅
+    - 直播间
+    - 宴会厅
+steps:
+  draft: true
+  title: 预约流程
+  items:
+    - title: WhatsApp 联系我们
+      body: 告诉我们日期、场地、场合和喜欢的配色。
+    - title: 获取设计与报价
+      body: 我们会根据场地建议布置方案。
+    - title: 现场布置
+      body: 我们的团队到场完成全部布置。
+faq:
+  title: 常见问题
+  items:
+    - question: 服务哪些地区？
+      answer: 吉隆坡与雪兰莪。
+      draft: false
+    - question: 可以自选颜色吗？
+      answer: 可以。每一场布置都是定制的，告诉我们你的配色，或在上方选择一款。
+      draft: false
+    - question: 需要提前多久预约？
+      answer: 待 one23balloon 确认。
+      draft: true
+    - question: 布置需要多长时间？
+      answer: 待 one23balloon 确认。
+      draft: true
+    - question: 活动结束后会帮忙拆除吗？
+      answer: 待 one23balloon 确认。
+      draft: true
+    - question: 需要支付订金吗？
+      answer: 待 one23balloon 确认。
+      draft: true
+closing:
+  title: 开始你的庆祝
+  body: 选一款配色，告诉我们场合，其余交给我们。
+  cta: 在 WhatsApp 开始
+  message: 你好 one23balloon，我想策划一场庆祝布置。
+  photo:
+    image: ../../assets/work/closing.jpg
+    alt: 18岁生日的拱形背景板，粉白气球花环环绕，旁边立着银色铝膜数字18。
+    source: https://www.instagram.com/p/DTDWSuDkj1g/

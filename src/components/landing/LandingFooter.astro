@@ -1,0 +1,29 @@
+---
+import { getSiteConfig } from '../../lib/config/site.ts';
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  data: LandingData;
+}
+const { data } = Astro.props;
+const site = getSiteConfig();
+const links = [
+  { href: site.social.instagram, label: data.meta.instagramLabel },
+  { href: site.social.xiaohongshu, label: data.meta.xiaohongshuLabel },
+].filter((link) => Boolean(link.href));
+---
+
+<div class="landing-footer">
+  <ul class="nav-list">
+    {links.map((link) => (
+      <li>
+        <a href={link.href} rel="noopener">
+          {link.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+  <p>{data.meta.registration}</p>
+  <p>
+    © {new Date().getFullYear()} {site.name}. {data.meta.rights}
+  </p>
+</div>

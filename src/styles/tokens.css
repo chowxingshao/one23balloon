@@ -1,52 +1,66 @@
-/* Replace this demonstration direction with the approved client direction. */
+/* Gala atelier (see design-direction.md). Palette tints come from src/lib/landing/palettes.ts. */
 :root {
   color-scheme: light dark;
-  --color-page: #f8f6f1;
-  --color-surface: #efede6;
-  --color-text: #242724;
-  --color-muted: #565b55;
-  --color-link: #2153b8;
-  --color-border: #c8cac1;
-  --color-focus: #17469f;
-  --font-body: 'Source Sans 3', system-ui, sans-serif;
+  --color-page: #f7f1ea;
+  --color-surface: #efe6dc;
+  --color-text: #221b17;
+  --color-muted: #5a4d45;
+  --color-link: #9c4f5c;
+  --color-border: #d9cbbd;
+  --color-focus: #7d2338;
+  --color-on-ink: #f7f1ea;
+  --font-body: 'Source Sans 3', 'Noto Sans SC', system-ui, sans-serif;
+  --font-display: 'Fraunces', 'Noto Serif SC', Georgia, serif;
   --font-size-body: 1.125rem;
   --font-size-small: 1rem;
-  --font-size-title: clamp(2.25rem, 5.5vw, 4rem);
-  --font-size-heading: clamp(1.5rem, 3vw, 2rem);
-  --font-size-lead: clamp(1.25rem, 2vw, 1.5rem);
+  --font-size-display: clamp(2.75rem, 7.5vw, 7.5rem);
+  --font-size-title: clamp(2.25rem, 5.5vw, 4.5rem);
+  --font-size-heading: clamp(1.75rem, 3.5vw, 3rem);
+  --font-size-lead: clamp(1.2rem, 1.8vw, 1.45rem);
   --weight-body: 400;
-  --weight-heading: 600;
+  --weight-heading: 400;
+  --weight-display: 300;
   --line-body: 1.65;
-  --line-title: 1.08;
-  --line-heading: 1.2;
-  --tracking-title: -0.025em;
+  --line-title: 1.04;
+  --line-heading: 1.15;
+  --tracking-title: -0.02em;
+  --tracking-eyebrow: 0.16em;
   --space-xs: 0.5rem;
   --space-sm: 1rem;
   --space-md: 1.5rem;
   --space-lg: 2.5rem;
-  --space-xl: clamp(3rem, 7vw, 6rem);
-  --space-page: clamp(1.25rem, 5vw, 3rem);
-  --width-site: 70rem;
+  --space-2xl: 4rem;
+  --space-xl: clamp(5rem, 10vw, 9rem);
+  --space-page: clamp(1rem, 5vw, 3rem);
+  --width-site: 80rem;
   --width-reading: 44rem;
   --width-thumbnail: 16rem;
   --height-main: 50vh;
+  --radius-arch: 999px 999px 0.75rem 0.75rem;
+  --radius-card: 1.25rem;
   --border-width: 1px;
   --focus-width: 3px;
   --focus-offset: 4px;
   --link-underline: 0.08em;
   --link-offset: 0.18em;
   --skip-offset: 1rem;
-  --skip-layer: 10;
+  --skip-layer: 30;
+  --header-layer: 5;
+  --header-height: 4.5rem;
+  --intro-layer: 20;
+  --tint: var(--color-page);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-page: #1d211f;
-    --color-surface: #292f2b;
-    --color-text: #f3f1e9;
-    --color-muted: #bfc5bb;
-    --color-link: #a0bfff;
-    --color-border: #626a61;
-    --color-focus: #b6ceff;
+    --color-page: #171311;
+    --color-surface: #241e1b;
+    --color-text: #f4ede4;
+    --color-muted: #c9bcb1;
+    --color-link: #e9a8b4;
+    --color-border: #4a3f39;
+    --color-focus: #f3c6cf;
+    --color-on-ink: #171311;
   }
 }
 

@@ -1,0 +1,17 @@
+---
+import { paletteIds, palettes } from '../../lib/landing/palettes.ts';
+// One CSS source for tints, generated from palettes.ts so colours never drift.
+// Bands and cards wear a fixed palette; the picker's choice lives on the
+// landing root but only tints the hero and closing ([data-palette-follow]),
+// so the root itself is excluded from the fixed rule.
+const rules = (scheme: 'tint' | 'tintDark') =>
+  paletteIds
+    .map(
+      (id) =>
+        `[data-palette='${id}']:not([data-landing]),.landing[data-palette='${id}'] [data-palette-follow]{--tint:${palettes[id][scheme]}}`,
+    )
+    .join('');
+const css = `${rules('tint')}@media (prefers-color-scheme: dark){${rules('tintDark')}}`;
+---
+
+<style is:inline set:html={css} />

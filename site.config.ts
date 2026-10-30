@@ -1,26 +1,29 @@
 import type { SiteConfig } from './src/lib/config/schema.ts';
 
-// Demo identity only: replace these four values for each client project.
 export const siteConfig = {
-  name: 'Canvas Base',
-  shortName: 'Canvas',
-  description: 'A reusable static website starter.',
-  url: 'https://example.com',
-  base: '/',
+  name: 'one23balloon',
+  shortName: 'one23balloon',
+  description:
+    'Balloon installations for weddings, launches, openings and milestone celebrations across Kuala Lumpur and Selangor.',
+  url: 'https://chowxingshao.github.io',
+  base: '/one23balloon/',
   language: 'en',
-  author: '',
+  author: 'one23balloon',
   email: '',
   formEndpoint: '',
-  social: {},
+  social: {
+    instagram: 'https://www.instagram.com/one23balloon/',
+    xiaohongshu: 'https://xhslink.com/m/625h2gZKgy6',
+  },
   analyticsId: '',
-  defaultOgImage: '/og-default.png',
-  i18n: { defaultLocale: 'en', locales: ['en'] },
+  defaultOgImage: '/og-one23balloon.jpg',
+  i18n: { defaultLocale: 'en', locales: ['en', 'zh'] },
   features: {
-    blog: true,
-    projects: true,
-    rss: true,
+    blog: false,
+    projects: false,
+    rss: false,
     motion: true,
-    i18n: false,
-    deploy: 'none',
+    i18n: true,
+    deploy: 'github-pages',
   },
 } satisfies SiteConfig;

@@ -1,0 +1,230 @@
+import type { Capability } from './capability.ts';
+
+export type IslandScene = {
+  start(): void;
+  stop(): void;
+  resize(width: number, height: number): void;
+  dispose(): void;
+};
+export type SceneFactory = (
+  canvas: HTMLCanvasElement,
+  capability: Capability,
+) => Promise<IslandScene>;
+export type IslandState = 'idle' | 'loading' | 'live' | 'fallback' | 'disposed';
+export type Observe = (
+  element: Element,
+  onChange: (visible: boolean) => void,
+) => () => void;
+export type Schedule = (run: () => void) => () => void;
+export type IslandOptions = {
+  element: HTMLElement;
+  load: () => Promise<SceneFactory>;
+  capability: Capability;
+  allowReducedMotion?: boolean;
+  observe?: Observe;
+  /** Defers the first load; defaults to waiting for the browser to be idle. */
+  idle?: Schedule;
+  onState?: (state: IslandState) => void;
+};
+export type Island = { readonly state: IslandState; dispose(): void };
+
+export const observeIntersection: Observe = (element, onChange) => {
+  if (typeof IntersectionObserver === 'undefined') {
+    onChange(true);
+    return () => undefined;
+  }
+  // Start loading a little before the island scrolls into view. Entries are
+  // queued in time order, so the last one is the element's current state.
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const latest = entries.at(-1);
+      if (latest) onChange(latest.isIntersecting);
+    },
+    { rootMargin: '200px 0px' },
+  );
+  observer.observe(element);
+  return () => observer.disconnect();
+};
+
+// Runs once the main thread is idle (at most 2 s later), so scene chunks never
+// compete with first paint and input.
+export const whenIdle: Schedule = (run) => {
+  if (typeof globalThis.requestIdleCallback === 'function') {
+    const handle = globalThis.requestIdleCallback(() => run(), {
+      timeout: 2000,
+    });
+    return () => globalThis.cancelIdleCallback?.(handle);
+  }
+  const timer = setTimeout(run, 200);
+  return () => clearTimeout(timer);
+};
+
+// Hands over to `next` once the window load event has fired, so heavy work
+// never competes with the page's own resources and first paint.
+export function afterLoad(doc: Document, next: Schedule = whenIdle): Schedule {
+  return (run) => {
+    const win = doc.defaultView;
+    if (!win || doc.readyState === 'complete') return next(run);
+    let cancelNext: (() => void) | undefined;
+    const onLoad = () => {
+      cancelNext = next(run);
+    };
+    win.addEventListener('load', onLoad, { once: true });
+    return () => {
+      win.removeEventListener('load', onLoad);
+      cancelNext?.();
+    };
+  };
+}
+
+// Signals that the visitor is engaging with the page. Scroll is listened for
+// in the capture phase because a document scroll does not bubble to the window.
+const interactionEvents = [
+  'pointerdown',
+  'pointermove',
+  'keydown',
+  'touchstart',
+  'wheel',
+  'scroll',
+] as const;
+
+// Hands over to `next` on the visitor's first interaction, for work that is
+// too heavy to start unprompted on low-end devices.
+export function afterInteraction(
+  target: EventTarget,
+  next: Schedule = whenIdle,
+): Schedule {
+  return (run) => {
+    const options = { capture: true, passive: true };
+    let cancelNext: (() => void) | undefined;
+    const stopListening = () => {
+      for (const type of interactionEvents)
+        target.removeEventListener(type, onInteraction, options);
+    };
+    function onInteraction() {
+      stopListening();
+      cancelNext = next(run);
+    }
+    for (const type of interactionEvents)
+      target.addEventListener(type, onInteraction, options);
+    return () => {
+      stopListening();
+      cancelNext?.();
+    };
+  };
+}
+
+export function mountIsland(options: IslandOptions): Island {
+  const {
+    element,
+    load,
+    capability,
+    allowReducedMotion = false,
+    observe = observeIntersection,
+    idle = whenIdle,
+    onState,
+  } = options;
+  const doc = element.ownerDocument;
+  const canvas = element.querySelector('canvas');
+  const cleanups: Array<() => void> = [];
+  let state: IslandState = 'idle';
+  let scene: IslandScene | undefined;
+  let visible = false;
+  // Read through a function: async steps change state behind TypeScript's back.
+  const current = () => state;
+  const setState = (next: IslandState) => {
+    state = next;
+    element.dataset.islandState = next;
+    onState?.(next);
+  };
+  const release = () => {
+    const active = scene;
+    scene = undefined;
+    active?.stop();
+    active?.dispose();
+  };
+  const dispose = () => {
+    if (current() === 'disposed') return;
+    for (const cleanup of cleanups.splice(0)) cleanup();
+    release();
+    setState('disposed');
+  };
+  const island: Island = {
+    get state() {
+      return current();
+    },
+    dispose,
+  };
+
+  if (
+    !canvas ||
+    (capability.reducedMotion && !allowReducedMotion) ||
+    // Checked last: answering it may create a probe context.
+    !capability.webgl
+  ) {
+    setState('fallback');
+    return island;
+  }
+  setState('idle');
+
+  const sync = () => {
+    if (!scene) return;
+    if (visible && doc.visibilityState !== 'hidden') scene.start();
+    else scene.stop();
+  };
+  const resize = () => scene?.resize(canvas.clientWidth, canvas.clientHeight);
+  const ensureLoaded = async () => {
+    if (current() !== 'idle') return;
+    setState('loading');
+    try {
+      const factory = await load();
+      if (current() !== 'loading') return;
+      const created = await factory(canvas, capability);
+      if (current() !== 'loading') {
+        created.dispose();
+        return;
+      }
+      scene = created;
+      resize();
+      setState('live');
+      sync();
+    } catch (error) {
+      if (current() === 'disposed') return;
+      console.warn('3D scene unavailable; showing the photo instead.', error);
+      release();
+      setState('fallback');
+    }
+  };
+
+  let idleScheduled = false;
+  cleanups.push(
+    observe(element, (isVisible) => {
+      visible = isVisible;
+      if (isVisible && !idleScheduled) {
+        idleScheduled = true;
+        cleanups.push(idle(() => void ensureLoaded()));
+      }
+      sync();
+    }),
+  );
+  const onVisibility = () => sync();
+  doc.addEventListener('visibilitychange', onVisibility);
+  cleanups.push(() =>
+    doc.removeEventListener('visibilitychange', onVisibility),
+  );
+  const onContextLost = (event: Event) => {
+    event.preventDefault();
+    release();
+    if (current() !== 'disposed') setState('fallback');
+  };
+  canvas.addEventListener('webglcontextlost', onContextLost);
+  cleanups.push(() =>
+    canvas.removeEventListener('webglcontextlost', onContextLost),
+  );
+  if (typeof ResizeObserver !== 'undefined') {
+    const observer = new ResizeObserver(() => resize());
+    observer.observe(canvas);
+    cleanups.push(() => observer.disconnect());
+  }
+  return island;
+}

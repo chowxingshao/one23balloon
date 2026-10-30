@@ -4,6 +4,11 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EntryList from './EntryList.astro';
 import ContactForm from './ContactForm.astro';
+import LandingFooter from './landing/LandingFooter.astro';
+import LandingView from './landing/LandingView.astro';
+import PaletteStyles from './landing/PaletteStyles.astro';
+import { whatsappUrl } from '../lib/contact/whatsapp.ts';
+import { getLanding } from '../lib/landing/content.ts';
 import { getSiteConfig } from '../lib/config/site.ts';
 import { getUi, localeDirection } from '../lib/i18n/ui.ts';
 import { getRouteManifest } from '../lib/routing/manifest.ts';
@@ -14,6 +19,14 @@ interface Props {
 const { route } = Astro.props;
 const ui = await getUi(route.locale);
 const site = getSiteConfig();
+const landing =
+  route.kind === 'page' && route.slug === 'home'
+    ? await getLanding(route.locale)
+    : undefined;
+const headerCta = landing && {
+  href: whatsappUrl(landing.data.whatsapp, landing.data.hero.message),
+  label: landing.data.hero.cta,
+};
 const indexCopy = route.kind === 'post-index' ? ui.blog : ui.projects;
 const title = route.entry?.data.title ?? indexCopy.title;
 const description = route.entry?.data.description ?? indexCopy.description;
@@ -39,65 +52,72 @@ const entries = Content
       ? route.entry.data.structuredData
       : undefined
   }
+  headerCta={headerCta}
 >
-  <article
-    class="page-content shell"
-    data-page-motion
-    lang={route.contentLocale}
-    dir={localeDirection(route.contentLocale)}
-  >
-    <header class="page-intro" data-reveal>
-      <h1>{title}</h1>
-      <p class="lead">{description}</p>
-      {route.entry && 'publishedAt' in route.entry.data && (
-        <time
-          lang={route.locale}
-          dir={localeDirection(route.locale)}
-          datetime={route.entry.data.publishedAt.toISOString()}
-        >
-          {new Intl.DateTimeFormat(route.locale, {
-            dateStyle: 'long',
-            timeZone: 'UTC',
-          }).format(route.entry.data.publishedAt)}
-        </time>
-      )}
-    </header>
-    {Content ? (
-      <>
-        {route.entry?.data.cover && (
-          <div data-reveal>
-            <Image
-              src={route.entry.data.cover}
-              alt={route.entry.data.coverAlt!}
-              class="article-cover"
-              loading="lazy"
-            />
-          </div>
+  {landing && <PaletteStyles slot="head" />}
+  {landing ? (
+    <LandingView data={landing.data} contentLocale={landing.locale} />
+  ) : (
+    <article
+      class="page-content shell"
+      data-page-motion
+      lang={route.contentLocale}
+      dir={localeDirection(route.contentLocale)}
+    >
+      <header class="page-intro" data-reveal>
+        <h1>{title}</h1>
+        <p class="lead">{description}</p>
+        {route.entry && 'publishedAt' in route.entry.data && (
+          <time
+            lang={route.locale}
+            dir={localeDirection(route.locale)}
+            datetime={route.entry.data.publishedAt.toISOString()}
+          >
+            {new Intl.DateTimeFormat(route.locale, {
+              dateStyle: 'long',
+              timeZone: 'UTC',
+            }).format(route.entry.data.publishedAt)}
+          </time>
         )}
-        <div class="prose" data-reveal>
-          <Content />
+      </header>
+      {Content ? (
+        <>
+          {route.entry?.data.cover && (
+            <div data-reveal>
+              <Image
+                src={route.entry.data.cover}
+                alt={route.entry.data.coverAlt!}
+                class="article-cover"
+                loading="lazy"
+              />
+            </div>
+          )}
+          <div class="prose" data-reveal>
+            <Content />
+          </div>
+          {route.kind === 'page' && route.slug === 'contact' && (
+            <div lang={route.locale} dir={localeDirection(route.locale)}>
+              <ContactForm endpoint={site.formEndpoint} ui={ui} />
+            </div>
+          )}
+          {route.kind === 'page' && route.slug === 'contact' && site.email && (
+            <p>
+              <a href={`mailto:${site.email}`}>{site.email}</a>
+            </p>
+          )}
+        </>
+      ) : (
+        <div data-reveal>
+          <EntryList
+            entries={entries}
+            locale={route.locale}
+            emptyLabel={indexCopy.empty}
+          />
         </div>
-        {route.kind === 'page' && route.slug === 'contact' && (
-          <div lang={route.locale} dir={localeDirection(route.locale)}>
-            <ContactForm endpoint={site.formEndpoint} ui={ui} />
-          </div>
-        )}
-        {route.kind === 'page' && route.slug === 'contact' && site.email && (
-          <p>
-            <a href={`mailto:${site.email}`}>{site.email}</a>
-          </p>
-        )}
-      </>
-    ) : (
-      <div data-reveal>
-        <EntryList
-          entries={entries}
-          locale={route.locale}
-          emptyLabel={indexCopy.empty}
-        />
-      </div>
-    )}
-  </article>
+      )}
+    </article>
+  )}
+  {landing && <LandingFooter slot="footer" data={landing.data} />}
 </BaseLayout>
 
 <script>

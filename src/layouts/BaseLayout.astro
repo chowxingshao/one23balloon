@@ -3,6 +3,7 @@ import SiteHeader from '../components/SiteHeader.astro';
 import SeoHead from '../components/SeoHead.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import { getSiteConfig } from '../lib/config/site.ts';
+import { cjkUnicodeRange } from '../lib/fonts/charset.ts';
 import { getUi, localeDirection } from '../lib/i18n/ui.ts';
 import { withBase } from '../lib/routing/paths.ts';
 import type { RouteRecord } from '../lib/routing/types.ts';
@@ -17,6 +18,7 @@ interface Props {
   noindex?: boolean;
   image?: string;
   structuredData?: Record<string, unknown>;
+  headerCta?: { href: string; label: string };
 }
 const {
   title,
@@ -26,10 +28,46 @@ const {
   noindex = false,
   image,
   structuredData,
+  headerCta,
 } = Astro.props;
 const site = getSiteConfig();
 const ui = await getUi(locale);
-const fontPath = withBase('/fonts/source-sans-3-latin.woff2', site);
+type FontFace = {
+  family: string;
+  file: string;
+  weight: string;
+  chinese?: boolean;
+};
+const fonts: FontFace[] = [
+  {
+    family: 'Source Sans 3',
+    file: 'source-sans-3-latin.woff2',
+    weight: '200 900',
+  },
+  { family: 'Fraunces', file: 'fraunces-latin.woff2', weight: '100 900' },
+  {
+    family: 'Noto Serif SC',
+    file: 'noto-serif-sc-subset.woff2',
+    weight: '400',
+    chinese: true,
+  },
+  {
+    family: 'Noto Sans SC',
+    file: 'noto-sans-sc-subset.woff2',
+    weight: '400',
+    chinese: true,
+  },
+];
+const fontPath = (font: FontFace) => withBase(`/fonts/${font.file}`, site);
+const chinesePage = locale.toLowerCase().startsWith('zh');
+const preloads = fonts.filter((font) => !font.chinese || chinesePage);
+// Chinese faces carry a unicode-range, so Latin pages never download them.
+const fontFaces = fonts
+  .map(
+    (font) =>
+      `@font-face { font-family: '${font.family}'; src: url(${JSON.stringify(encodeURI(fontPath(font)))}) format('woff2'); font-style: normal; font-weight: ${font.weight}; font-display: swap;${font.chinese ? ` unicode-range: ${cjkUnicodeRange};` : ''} }`,
+  )
+  .join(' ');
 ---
 
 <!doctype html>
@@ -63,26 +101,32 @@ const fontPath = withBase('/fonts/source-sans-3-latin.woff2', site);
       type="image/svg+xml"
       href={withBase('/favicon.svg', site)}
     />
-    <link
-      rel="preload"
-      href={fontPath}
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <style
-      is:inline
-      set:html={`@font-face { font-family: 'Source Sans 3'; src: url(${JSON.stringify(encodeURI(fontPath))}) format('woff2'); font-style: normal; font-weight: 200 900; font-display: swap; }`}
-    />
+    {preloads.map((font) => (
+      <link
+        rel="preload"
+        href={fontPath(font)}
+        as="font"
+        type="font/woff2"
+        crossorigin
+      />
+    ))}
+    <style is:inline set:html={fontFaces} />
+    <slot name="head" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">
       {ui.accessibility.skipContent}
     </a>
-    <SiteHeader locale={locale} current={route} />
+    <SiteHeader locale={locale} current={route} cta={headerCta} />
     <main id="main-content" class="site-main" tabindex="-1">
       <slot />
     </main>
-    <SiteFooter locale={locale} />
+    {Astro.slots.has('footer') ? (
+      <SiteFooter locale={locale}>
+        <slot name="footer" slot="extra" />
+      </SiteFooter>
+    ) : (
+      <SiteFooter locale={locale} />
+    )}
   </body>
 </html>
