@@ -11,20 +11,12 @@ const cacheDir = join(root, '.cache', 'fonts');
 const commit = '9862abc066c9b83bf84c3e8ed1fc2d8d48f9bbf0';
 const fonts = [
   {
-    source: 'ofl/fraunces/Fraunces%5BSOFT,WONK,opsz,wght%5D.ttf',
-    license: 'ofl/fraunces/OFL.txt',
-    output: 'fraunces-latin.woff2',
-    licenseOutput: 'OFL-Fraunces.txt',
+    source: 'ofl/unbounded/Unbounded%5Bwght%5D.ttf',
+    license: 'ofl/unbounded/OFL.txt',
+    output: 'unbounded-latin.woff2',
+    licenseOutput: 'OFL-Unbounded.txt',
     script: 'latin',
-    axes: { SOFT: 0, WONK: 0 },
-  },
-  {
-    source: 'ofl/notoserifsc/NotoSerifSC%5Bwght%5D.ttf',
-    license: 'ofl/notoserifsc/OFL.txt',
-    output: 'noto-serif-sc-subset.woff2',
-    licenseOutput: 'OFL-NotoSerifSC.txt',
-    script: 'chinese',
-    axes: { wght: 400 },
+    axes: { wght: 900 },
   },
   {
     source: 'ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf',
@@ -33,6 +25,14 @@ const fonts = [
     licenseOutput: 'OFL-NotoSansSC.txt',
     script: 'chinese',
     axes: { wght: 400 },
+  },
+  {
+    source: 'ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf',
+    license: 'ofl/notosanssc/OFL.txt',
+    output: 'noto-sans-sc-black-subset.woff2',
+    licenseOutput: 'OFL-NotoSansSC.txt',
+    script: 'chinese',
+    axes: { wght: 900 },
   },
 ] as const;
 

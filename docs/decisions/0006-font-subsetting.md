@@ -9,3 +9,7 @@ Upstream files come from a pinned google/fonts commit and are cached under the g
 Source Sans 3, the body face inherited from the template, shipped as a 170 KB WOFF2 that held far more than its `-latin` name suggests. On 2026-10-30 it was subset once, from that committed file, to the same Latin set the script uses for Fraunces (U+0020–007E, U+00A0–00FF and common typographic punctuation), keeping the `wght` axis: 44 KB. Every built page was checked for characters outside that set first (none; Chinese text uses the Noto faces). `pnpm fonts:subset` does not manage this file; to add characters, subset the original from the initial commit again. It was the largest request ahead of the largest contentful paint on the one23balloon landing (see `docs/quality-report.md`).
 
 Exact `subset-font@2.9.0` is a development dependency because it is the only tool the script needs (HarfBuzz subsetting with variable-axis pinning and WOFF2 output). It runs only on a maintainer machine, never in the build.
+
+## Amendment, 2026-10-30
+
+The showcase redesign replaces Fraunces and Noto Serif SC with Unbounded (OFL, weight 900, subset to the same Latin set) and adds Noto Sans SC at weight 900 for Chinese display, subset from the same `zh` sources as the 400 weight. The pipeline shape is unchanged: one pinned google/fonts commit, `subset-font`, licence files copied next to the output. Alimama FangYuanTi was considered as a rounder Chinese match for Unbounded and rejected because its licence is not OFL.

@@ -1,4 +1,4 @@
-import { readFileSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { collectCjk, zhCharsetSources } from '../../src/lib/fonts/charset.ts';
 
@@ -26,12 +26,21 @@ describe('Chinese font subsets', () => {
 
   it.each([
     'source-sans-3-latin.woff2',
-    'fraunces-latin.woff2',
-    'noto-serif-sc-subset.woff2',
+    'unbounded-latin.woff2',
     'noto-sans-sc-subset.woff2',
+    'noto-sans-sc-black-subset.woff2',
   ])('ships %s under 400 KB', (file) => {
     const size = statSync(new URL(`public/fonts/${file}`, root)).size;
     expect(size).toBeGreaterThan(1_000);
     expect(size).toBeLessThan(400_000);
+  });
+
+  it.each([
+    'fraunces-latin.woff2',
+    'OFL-Fraunces.txt',
+    'noto-serif-sc-subset.woff2',
+    'OFL-NotoSerifSC.txt',
+  ])('no longer ships %s', (file) => {
+    expect(existsSync(new URL(`public/fonts/${file}`, root))).toBe(false);
   });
 });
