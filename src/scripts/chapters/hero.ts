@@ -6,9 +6,11 @@ import type { ChapterSetup } from './types.ts';
 // The headline splits apart from its middle as the balloons push forward.
 export const hero: ChapterSetup = (section, { root, desktop }) => {
   const header = root.ownerDocument.querySelector<HTMLElement>('.site-header');
-  // toggleClass leaves the header opaque at scroll 0 (progress 0 is not
-  // active), so the class follows progress directly.
-  if (header) {
+  // Created after the pin trigger, so its end is measured with the pin spacer
+  // in place. toggleClass would leave the header opaque at scroll 0 (progress 0
+  // is not active), so the class follows progress directly.
+  const trackHeader = () => {
+    if (!header) return;
     const sync = (self: ScrollTrigger) =>
       header.classList.toggle('is-over-hero', self.progress < 1);
     ScrollTrigger.create({
@@ -18,9 +20,12 @@ export const hero: ChapterSetup = (section, { root, desktop }) => {
       onRefresh: sync,
       onUpdate: sync,
     });
-  }
+  };
   const lines = [...section.querySelectorAll<HTMLElement>('[data-hero-line]')];
-  if (!lines.length) return () => header?.classList.remove('is-over-hero');
+  if (!lines.length) {
+    trackHeader();
+    return () => header?.classList.remove('is-over-hero');
+  }
   const splits = lines.map((line) =>
     SplitText.create(line, { type: 'chars', charsClass: 'hero-char' }),
   );
@@ -59,6 +64,7 @@ export const hero: ChapterSetup = (section, { root, desktop }) => {
       );
   }
   timeline.to(section.querySelector('.hero-lede'), { autoAlpha: 0, y: -40 }, 0);
+  trackHeader();
   return () => {
     header?.classList.remove('is-over-hero');
     for (const split of splits) split.revert();

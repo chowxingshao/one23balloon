@@ -22,7 +22,9 @@ export const closing: ChapterSetup = (section, { root }) => {
     );
   gsap.from(section.querySelectorAll('.chapter-title, .closing-actions > *'), {
     y: 80,
-    autoAlpha: 0,
+    // Opacity, not autoAlpha: the actions must stay reachable by Tab before the
+    // trigger fires.
+    opacity: 0,
     stagger: 0.08,
     duration: 1,
     ease: 'expo.out',

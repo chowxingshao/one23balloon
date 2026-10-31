@@ -12,7 +12,9 @@ export const services: ChapterSetup = (section, { desktop }) => {
   cards.forEach((card, index) => {
     gsap.from(card.querySelectorAll('.service-copy > *'), {
       y: 60,
-      autoAlpha: 0,
+      // Opacity, not autoAlpha: the links must stay reachable by Tab before the
+      // trigger fires.
+      opacity: 0,
       stagger: 0.08,
       duration: 0.9,
       ease: 'expo.out',
@@ -51,19 +53,18 @@ export const services: ChapterSetup = (section, { desktop }) => {
   });
   if (!last || cards.length < 2) return;
   // Under ScrollSmoother a pin is a transform, so the tilted cards' perspective
-  // flares their lower edges. Once the last card has covered the stack, make the
-  // cards under it transparent so those edges never show below it as it scrolls away.
+  // flares their lower edges. While the last card covers the stack, hide the
+  // cards under it (visibility also takes their links out of the tab order, so
+  // focus never lands on something the viewer cannot see).
   const covered = cards.slice(0, -1);
-  const reset = () => {
-    for (const card of covered) card.style.opacity = '';
+  const setCovered = (hidden: boolean) => {
+    for (const card of covered) card.style.visibility = hidden ? 'hidden' : '';
   };
   ScrollTrigger.create({
     trigger: last,
     start: 'top top',
     end: 'max',
-    onToggle: (self) => {
-      for (const card of covered) card.style.opacity = self.isActive ? '0' : '';
-    },
+    onToggle: (self) => setCovered(self.isActive),
   });
-  return reset;
+  return () => setCovered(false);
 };
