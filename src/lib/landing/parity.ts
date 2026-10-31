@@ -11,39 +11,43 @@ const photoKey = (photo: Photo) => [photo.source, imageKey(photo.image)];
 
 export type ParityInput = {
   whatsapp: string;
-  hero: { photo: Photo };
-  palettes: { items: Array<{ id: string }> };
-  services: { items: Array<{ id: string; palette: string; photo: Photo }> };
-  gallery: { items: Photo[] };
-  sculptures: { pieces: Array<{ id: string }>; photos: Photo[] };
-  venues: { items: string[] };
-  steps: { draft: boolean; items: unknown[] };
-  faq: { items: Array<{ draft: boolean }> };
-  closing: { photo: Photo };
+  statement: {
+    parts: Array<{ text: string } | { word: string; photo: Photo }>;
+  };
+  services: { items: Array<{ id: string; colour: string; photo: Photo }> };
+  signature: {
+    marquee: string[];
+    pieces: Array<{ id: string; photo: Photo }>;
+  };
+  celebrations: { items: Array<{ id: string; photo: Photo }> };
 };
 
 // Translations may change words, never structure, photos or the contact number.
 function fingerprint(data: ParityInput): Record<string, string> {
   return {
     whatsapp: data.whatsapp,
-    hero: JSON.stringify(photoKey(data.hero.photo)),
-    palettes: JSON.stringify(data.palettes.items.map((item) => item.id)),
+    statement: JSON.stringify(
+      data.statement.parts.flatMap((part) =>
+        'photo' in part ? [photoKey(part.photo)] : [],
+      ),
+    ),
     services: JSON.stringify(
       data.services.items.map((item) => [
         item.id,
-        item.palette,
+        item.colour,
         ...photoKey(item.photo),
       ]),
     ),
-    gallery: JSON.stringify(data.gallery.items.map(photoKey)),
-    sculptures: JSON.stringify([
-      data.sculptures.pieces.map((piece) => piece.id),
-      data.sculptures.photos.map(photoKey),
+    signature: JSON.stringify([
+      data.signature.marquee.length,
+      data.signature.pieces.map((piece) => [
+        piece.id,
+        ...photoKey(piece.photo),
+      ]),
     ]),
-    venues: String(data.venues.items.length),
-    steps: JSON.stringify([data.steps.draft, data.steps.items.length]),
-    faq: JSON.stringify(data.faq.items.map((item) => item.draft)),
-    closing: JSON.stringify(photoKey(data.closing.photo)),
+    celebrations: JSON.stringify(
+      data.celebrations.items.map((item) => [item.id, ...photoKey(item.photo)]),
+    ),
   };
 }
 

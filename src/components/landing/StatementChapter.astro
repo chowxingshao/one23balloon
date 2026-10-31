@@ -1,0 +1,38 @@
+---
+import { Image } from 'astro:assets';
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  data: LandingData;
+  contentLocale: string;
+}
+const { data, contentLocale } = Astro.props;
+// Chinese runs on without spaces between words.
+const joiner = contentLocale.toLowerCase().startsWith('zh') ? '' : ' ';
+const parts = data.statement.parts;
+---
+
+<section class="chapter statement" data-chapter="statement">
+  <p class="statement-text" data-statement>
+    {parts.map((part, index) => (
+      <>
+        {'photo' in part ? (
+          <span class="statement-word">
+            <Image
+              class="statement-pill"
+              src={part.photo.image}
+              alt=""
+              width={240}
+              height={136}
+              fit="cover"
+              loading="lazy"
+            />
+            {part.word}
+          </span>
+        ) : (
+          <span>{part.text}</span>
+        )}
+        {index < parts.length - 1 && joiner}
+      </>
+    ))}
+  </p>
+</section>

@@ -6,7 +6,6 @@ interface Props {
   label: string;
   accessibleLabel?: string;
   variant?: 'primary' | 'quiet';
-  paletteLink?: boolean;
 }
 const {
   number,
@@ -14,7 +13,6 @@ const {
   label,
   accessibleLabel,
   variant = 'quiet',
-  paletteLink = false,
 } = Astro.props;
 ---
 
@@ -24,7 +22,6 @@ const {
   target="_blank"
   rel="noopener noreferrer"
   aria-label={accessibleLabel}
-  data-palette-link={paletteLink ? '' : undefined}
 >
   {label}
 </a>

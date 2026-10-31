@@ -77,14 +77,14 @@ describe('one23balloon site build', () => {
       preset: 'project',
       content: {
         'src/content/landing/zh.yaml': zh.replace(
-          'palette: rose-gold',
-          'palette: neon',
+          'colour: cobalt',
+          'colour: neon',
         ),
       },
     });
     try {
       expect(invalid.exitCode).not.toBe(0);
-      expect(invalid.stdout + invalid.stderr).toContain('palette');
+      expect(invalid.stdout + invalid.stderr).toContain('colour');
     } finally {
       await invalid.dispose();
     }
@@ -134,91 +134,48 @@ describe('one23balloon site build', () => {
     );
   });
 
-  it('renders every landing section in static HTML', async () => {
+  it('renders every chapter and photo in static HTML, without removed sections', async () => {
     for (const path of ['index.html', 'zh/index.html']) {
       const document = await page(path);
-      expect(document.querySelectorAll('h1'), path).toHaveLength(1);
-      expect(document.querySelectorAll('.service'), path).toHaveLength(6);
-      expect(document.querySelectorAll('.gallery-item img'), path).toHaveLength(
-        12,
-      );
       expect(
-        document.querySelectorAll('.sculpture-photos img'),
-        path,
-      ).toHaveLength(2);
-      expect(
-        [...document.querySelectorAll('[data-island]')].map((island) =>
-          island.getAttribute('data-island'),
+        [...document.querySelectorAll('[data-chapter]')].map(
+          (section) => (section as HTMLElement).dataset.chapter,
         ),
         path,
-      ).toEqual(['hero', 'sculptures', 'release']);
-      for (const image of document.querySelectorAll('main img'))
-        expect(image.getAttribute('alt'), path).toBeTruthy();
-      expect(document.querySelectorAll('.faq details'), path).toHaveLength(2);
-      expect(document.querySelector('.steps'), path).toBeNull();
-      expect(
-        document.querySelector('[data-palette-picker]')?.hasAttribute('hidden'),
-        path,
-      ).toBe(true);
-    }
-  });
-
-  it('gives each band a fixed palette and lets only hero and closing follow the picker', async () => {
-    for (const path of ['index.html', 'zh/index.html']) {
-      const document = await page(path);
-      expect(
-        [...document.querySelectorAll('.landing > section')].map((section) => [
-          section.classList[0],
-          section.getAttribute('data-palette'),
-          section.hasAttribute('data-palette-follow'),
-        ]),
-        path,
       ).toEqual([
-        ['hero', null, true],
-        ['services', null, false],
-        ['gallery', 'chrome-blue', false],
-        ['sculptures', 'blush-champagne', false],
-        ['venues', 'sage-cream', false],
-        ['faq', 'rose-gold', false],
-        ['closing', null, true],
+        'hero',
+        'statement',
+        'services',
+        'signature',
+        'celebrations',
+        'closing',
       ]);
-      // Every service card keeps its own palette inside the neutral band.
+      expect(document.querySelectorAll('[data-hero-line]')).toHaveLength(2);
+      expect(document.querySelectorAll('.statement-pill')).toHaveLength(4);
+      expect(document.querySelectorAll('[data-service-card]')).toHaveLength(6);
       expect(
-        document.querySelectorAll('.services .service[data-palette]'),
-        path,
-      ).toHaveLength(6);
-
-      const css = [...document.querySelectorAll('style')]
-        .map((style) => style.textContent ?? '')
-        .find((text) => text.includes('--tint:'));
-      expect(css, path).toBeDefined();
-      const selectors = [...css!.matchAll(/([^{}]+)\{--tint:[^}]+\}/g)].map(
-        (match) => match[1]!,
-      );
-      expect(selectors.length, path).toBeGreaterThan(0);
-      const landing = document.querySelector<HTMLElement>('[data-landing]')!;
-      const followers = [...document.querySelectorAll('[data-palette-follow]')];
-      for (const id of [
-        'blush-champagne',
-        'chrome-blue',
-        'sage-cream',
-        'rose-gold',
-        'jewel',
-      ]) {
-        landing.setAttribute('data-palette', id);
-        // The picker's choice on the root must never tint the root itself,
-        // or it would cascade into every fixed band.
-        for (const selector of selectors)
-          expect(landing.matches(selector), `${path} ${selector}`).toBe(false);
-        for (const follower of followers)
-          expect(
-            selectors.some(
-              (selector) =>
-                selector.includes(`'${id}'`) && follower.matches(selector),
-            ),
-            `${path} ${id}`,
-          ).toBe(true);
-      }
+        document.querySelectorAll('[data-celebrations-column]'),
+      ).toHaveLength(4);
+      const celebrations = document.querySelectorAll(
+        '[data-celebrations-column] img',
+      ).length;
+      expect(celebrations).toBeGreaterThanOrEqual(30);
+      expect(celebrations).toBeLessThanOrEqual(50);
+      for (const image of document.querySelectorAll('.landing img'))
+        expect(image.hasAttribute('alt'), path).toBe(true);
+      for (const removed of [
+        '[data-palette]',
+        '[data-intro]',
+        '.faq',
+        '.venues',
+        '.steps',
+        '[data-gallery]',
+      ])
+        expect(
+          document.querySelector(removed),
+          `${path} ${removed}`,
+        ).toBeNull();
+      expect(document.body.textContent).not.toMatch(/[–—]/);
     }
   });
 
@@ -229,7 +186,7 @@ describe('one23balloon site build', () => {
     const links = [...en.querySelectorAll('a[href^="https://wa.me/"]')].map(
       (link) => link.getAttribute('href'),
     );
-    expect(links).toHaveLength(9);
+    expect(links).toHaveLength(8);
     expect(links).toContain(
       wa("Hi one23balloon, I'd like to plan a balloon setup."),
     );
@@ -242,7 +199,7 @@ describe('one23balloon site build', () => {
         .querySelector('.site-header a[href^="https://wa.me/"]')
         ?.getAttribute('href'),
     ).toBe(wa('你好 one23balloon，我想咨询气球布置。'));
-    expect(zh.querySelector('.landing-footer')?.textContent).toContain(
+    expect(zh.querySelector('.closing-actions')?.textContent).toContain(
       '小红书',
     );
   });

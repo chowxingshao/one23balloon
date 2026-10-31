@@ -1,0 +1,19 @@
+---
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  data: LandingData;
+}
+const { data } = Astro.props;
+---
+
+<section class="chapter hero" data-chapter="hero" aria-labelledby="hero-title">
+  <h1 id="hero-title" class="hero-title">
+    <span class="hero-line" data-hero-line>
+      {data.hero.title[0]}
+    </span>{' '}
+    <span class="hero-line" data-hero-line>
+      {data.hero.title[1]}
+    </span>
+  </h1>
+  <p class="hero-lede">{data.hero.lede}</p>
+</section>

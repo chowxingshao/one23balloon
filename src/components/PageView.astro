@@ -6,7 +6,6 @@ import EntryList from './EntryList.astro';
 import ContactForm from './ContactForm.astro';
 import LandingFooter from './landing/LandingFooter.astro';
 import LandingView from './landing/LandingView.astro';
-import PaletteStyles from './landing/PaletteStyles.astro';
 import { whatsappUrl } from '../lib/contact/whatsapp.ts';
 import { getLanding } from '../lib/landing/content.ts';
 import { getSiteConfig } from '../lib/config/site.ts';
@@ -24,8 +23,8 @@ const landing =
     ? await getLanding(route.locale)
     : undefined;
 const headerCta = landing && {
-  href: whatsappUrl(landing.data.whatsapp, landing.data.hero.message),
-  label: landing.data.hero.cta,
+  href: whatsappUrl(landing.data.whatsapp, landing.data.closing.message),
+  label: landing.data.header.whatsapp,
 };
 const indexCopy = route.kind === 'post-index' ? ui.blog : ui.projects;
 const title = route.entry?.data.title ?? indexCopy.title;
@@ -55,7 +54,6 @@ const entries = Content
   headerCta={headerCta}
   smooth={Boolean(landing)}
 >
-  {landing && <PaletteStyles slot="head" />}
   {landing ? (
     <LandingView data={landing.data} contentLocale={landing.locale} />
   ) : (

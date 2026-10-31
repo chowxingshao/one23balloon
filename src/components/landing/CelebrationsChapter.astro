@@ -1,0 +1,44 @@
+---
+import { Image } from 'astro:assets';
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  data: LandingData;
+}
+const { data } = Astro.props;
+// Four column lists so each column can scroll at its own speed on wide screens.
+const columns = [0, 1, 2, 3].map((column) =>
+  data.celebrations.items.filter((_, index) => index % 4 === column),
+);
+---
+
+<section
+  class="chapter celebrations"
+  data-chapter="celebrations"
+  aria-labelledby="celebrations-title"
+>
+  <div class="celebrations-plane" data-celebrations-plane>
+    <h2 id="celebrations-title" class="chapter-title">
+      {data.celebrations.title}
+    </h2>
+    <div class="celebrations-grid">
+      {columns.map((items) => (
+        <ul class="celebrations-column" data-celebrations-column>
+          {items.map((item) => (
+            <li>
+              <figure>
+                <Image
+                  src={item.photo.image}
+                  alt={item.photo.alt}
+                  widths={[360, 720, 1080]}
+                  sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 45vw, 92vw"
+                  loading="lazy"
+                />
+                <figcaption>{item.occasion}</figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+      ))}
+    </div>
+  </div>
+</section>

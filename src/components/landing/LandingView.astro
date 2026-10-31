@@ -1,15 +1,12 @@
 ---
-import ClosingSection from './ClosingSection.astro';
-import FaqSection from './FaqSection.astro';
-import GallerySection from './GallerySection.astro';
-import HeroSection from './HeroSection.astro';
-import SculpturesSection from './SculpturesSection.astro';
-import ServicesSection from './ServicesSection.astro';
-import StepsSection from './StepsSection.astro';
-import VenuesSection from './VenuesSection.astro';
+import CelebrationsChapter from './CelebrationsChapter.astro';
+import ClosingChapter from './ClosingChapter.astro';
+import HeroChapter from './HeroChapter.astro';
+import ServicesChapter from './ServicesChapter.astro';
+import SignatureChapter from './SignatureChapter.astro';
+import StatementChapter from './StatementChapter.astro';
 import { localeDirection } from '../../lib/i18n/ui.ts';
 import type { LandingData } from '../../lib/landing/content.ts';
-import { defaultPaletteId } from '../../lib/landing/palettes.ts';
 import '../../styles/landing.css';
 interface Props {
   data: LandingData;
@@ -22,21 +19,17 @@ const { data, contentLocale } = Astro.props;
   class="landing"
   data-landing
   data-page-motion
-  data-intro
-  data-palette={defaultPaletteId}
+  data-formation="hero"
   data-whatsapp-number={data.whatsapp}
-  data-intro-skip={data.intro.skip}
   lang={contentLocale}
   dir={localeDirection(contentLocale)}
 >
-  <HeroSection data={data} />
-  <ServicesSection data={data} />
-  <GallerySection data={data} />
-  <SculpturesSection data={data} />
-  <VenuesSection data={data} />
-  {!data.steps.draft && <StepsSection steps={data.steps} />}
-  <FaqSection faq={data.faq} />
-  <ClosingSection data={data} />
+  <HeroChapter data={data} />
+  <StatementChapter data={data} contentLocale={contentLocale} />
+  <ServicesChapter data={data} />
+  <SignatureChapter data={data} />
+  <CelebrationsChapter data={data} />
+  <ClosingChapter data={data} />
 </div>
 
 <script>
