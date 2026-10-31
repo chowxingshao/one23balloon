@@ -4,7 +4,7 @@
 .site-main:has(> .landing) {
   min-block-size: 0;
 }
-.site-header {
+body:has(.landing) .site-header {
   position: fixed;
   inset-block-start: 0;
   inset-inline: 0;
@@ -15,17 +15,17 @@
   backdrop-filter: none;
   transition: background-color 0.35s var(--ease-out);
 }
-.site-header.is-over-hero {
+body:has(.landing) .site-header.is-over-hero {
   background: transparent;
 }
-.site-header .site-name {
+body:has(.landing) .site-header .site-name {
   font-family: var(--font-display);
   font-weight: 900;
   font-size: 1.05rem;
   letter-spacing: -0.02em;
   text-decoration: none;
 }
-.site-header .header-cta {
+body:has(.landing) .site-header .header-cta {
   border-radius: 999px;
   background: var(--color-text);
   color: var(--color-on-ink);
@@ -35,26 +35,26 @@
   text-decoration: none;
 }
 /* Name, language switch and pill stay on one 64px row down to 360px. */
-.site-header .site-header-inner {
+body:has(.landing) .site-header .site-header-inner {
   flex-wrap: nowrap;
 }
-.site-header .site-name {
+body:has(.landing) .site-header .site-name {
   min-inline-size: 0;
 }
 @media (max-width: 29.99rem) {
-  .site-header .site-header-inner {
+  body:has(.landing) .site-header .site-header-inner {
     gap: var(--space-xs);
   }
-  .site-header .site-name {
+  body:has(.landing) .site-header .site-name {
     font-size: 0.9rem;
   }
-  .site-header .language-switcher {
+  body:has(.landing) .site-header .language-switcher {
     font-size: 0.875rem;
   }
-  .site-header .language-switcher .nav-list {
+  body:has(.landing) .site-header .language-switcher .nav-list {
     gap: 0.75rem;
   }
-  .site-header .header-cta {
+  body:has(.landing) .site-header .header-cta {
     padding-inline: 0.8rem;
   }
 }
@@ -66,29 +66,30 @@
   max-inline-size: none;
   padding-inline: var(--gutter);
   border-block-start: 0;
+  --color-focus: var(--color-text);
 }
 
 /* Stage layers: back canvas behind content, front canvas above it. */
-.stage-canvas {
+body:has(.landing) .stage-canvas {
   position: fixed;
   inset: 0;
   inline-size: 100vw;
   block-size: 100dvh;
   pointer-events: none;
 }
-.stage-back {
+body:has(.landing) .stage-back {
   z-index: var(--stage-back-layer);
 }
-.stage {
+body:has(.landing) .stage {
   position: fixed;
   inset: 0;
   z-index: var(--stage-layer);
   pointer-events: none;
 }
-.stage .stage-canvas {
+body:has(.landing) .stage .stage-canvas {
   position: absolute;
 }
-#smooth-wrapper,
+body:has(.landing) #smooth-wrapper,
 .landing {
   position: relative;
   z-index: var(--content-layer);
@@ -101,7 +102,7 @@
 .chapter {
   position: relative;
 }
-.chapter-title {
+.landing .chapter-title {
   font-family: var(--font-display);
   font-weight: var(--weight-display);
   font-size: var(--font-size-display);
@@ -169,8 +170,8 @@
 }
 @media (max-width: 47.99rem) {
   /* Unbounded is wide: smaller titles keep "celebrations" and "weddings," on a line at 360px. */
-  .chapter-title,
-  .statement-text {
+  .landing .chapter-title,
+  .landing .statement-text {
     font-size: clamp(1.75rem, 9vw, 2.75rem);
   }
   /* An inline block keeps each pill on the line of its first word. */
@@ -210,6 +211,9 @@
   background: var(--block);
   color: var(--block-text);
   transform-origin: 50% 0;
+}
+.service-card {
+  --color-focus: var(--color-text);
 }
 .service-card[data-block='cobalt'] {
   --color-focus: #ffffff;
@@ -303,12 +307,12 @@
   object-fit: cover;
   border-radius: var(--radius-photo);
 }
-.signature-pieces figure,
-.celebrations figure {
+.landing .signature-pieces figure,
+.landing .celebrations figure {
   margin: 0;
 }
-.signature-pieces figcaption,
-.celebrations figcaption {
+.landing .signature-pieces figcaption,
+.landing .celebrations figcaption {
   margin-block-start: var(--space-xs);
   font-size: var(--font-size-small);
   color: var(--color-muted);
@@ -330,7 +334,7 @@
 .celebrations-plane {
   transform-origin: 50% 0;
 }
-.celebrations .chapter-title {
+.landing .celebrations .chapter-title {
   margin-block-end: var(--space-lg);
 }
 .celebrations-grid {
@@ -344,7 +348,7 @@
   break-inside: avoid;
   margin-block-end: var(--space-md);
 }
-.celebrations img {
+.landing .celebrations img {
   display: block;
   inline-size: 100%;
   block-size: auto;
@@ -379,6 +383,7 @@
 
 /* 6. Closing and footer */
 .closing-flood {
+  --color-focus: var(--color-text);
   min-block-size: 100dvh;
   display: grid;
   align-content: center;
@@ -392,8 +397,8 @@
   flex-wrap: wrap;
   gap: var(--space-sm);
 }
-.whatsapp.primary,
-.button-outline {
+.landing .whatsapp.primary,
+.landing .button-outline {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
@@ -403,17 +408,17 @@
   text-decoration: none;
   white-space: nowrap;
 }
-.whatsapp.primary {
+.landing .whatsapp.primary {
   background: var(--color-text);
   color: var(--color-on-ink);
 }
-.button-outline {
+.landing .button-outline {
   border: 2px solid currentColor;
   color: inherit;
 }
-.whatsapp.primary:active,
-.button-outline:active,
-.header-cta:active {
+.landing .whatsapp.primary:active,
+.landing .button-outline:active,
+body:has(.landing) .header-cta:active {
   transform: translateY(1px);
 }
 .landing-footer .wordmark {
