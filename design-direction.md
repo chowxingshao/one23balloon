@@ -56,6 +56,13 @@ Scale (from `src/styles/tokens.css`):
 - Shell up to 90rem with a `--gutter` of `max(1rem, 4vw)`. Chapters run 100dvh or taller.
 - Every multi-column layout collapses to one column below 768px, with full-width photos and no tilt. The one exception is the celebrations grid, which keeps two multi-columns from 40rem (640px) and becomes one column below that.
 
+Fit values confirmed in the browser (Task 5), at 360, 390, 768, 1280, 1440 and 1920px in English and Chinese:
+
+- Hero headline stays at `clamp(2.75rem, 10vw, 12rem)`. "Every party," measures 1084px of 1325px available at 1440px, so 12vw would also fit but leaves under 2% spare. At 360px the 2.75rem floor applies and the line ends about 3px past the gutter, still inside the viewport.
+- Footer wordmark is `8.5vw`, about 0.89 of the viewport width, against 0.92 available. The landing footer drops the 90rem shell cap so the wordmark keeps that ratio above 1440px.
+- Below 48rem, chapter titles and the statement use `clamp(1.75rem, 9vw, 2.75rem)` so "celebrations" and "weddings," never split or clip at 360px, and each statement pill stays on the line of its first word.
+- The header is one 60px row at every width. Below 30rem the name, switcher and pill tighten their gaps and sizes to fit 360px.
+
 ## Chapters and motion
 
 1. Hero: two-line headline at hero size with balloons in front of and behind the letters. On scroll the headline splits left and right while the cluster pushes toward the camera.
