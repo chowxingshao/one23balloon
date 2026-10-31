@@ -10,16 +10,12 @@ import {
   type Schedule,
   type SceneFactory,
 } from '../lib/canvas-island/lifecycle.ts';
-import { playIntro, type IntroLoader } from './intro.ts';
-import { initPalettePicker } from './palette-picker.ts';
 
 export type SceneLoaders = Record<string, () => Promise<SceneFactory>>;
 export type LandingOptions = {
   /** A value, or a probe that runs only once the page may start 3D work. */
   capability?: Capability | (() => Capability);
-  storage?: Storage;
   loaders?: SceneLoaders;
-  intro?: IntroLoader;
   motion?: (root: HTMLElement) => () => void;
   /** When 3D and motion work may begin; defaults to after load and idle. */
   start?: Schedule;
@@ -29,21 +25,10 @@ export type LandingOptions = {
 
 // Dynamic imports keep Three.js out of the initial page script.
 export const sceneLoaders: SceneLoaders = {
-  hero: async () => (await import('../scenes/hero.ts')).createHeroScene,
-  sculptures: async () =>
-    (await import('../scenes/sculptures.ts')).createSculptureScene,
-  release: async () =>
-    (await import('../scenes/release.ts')).createReleaseScene,
+  stage: async () => (await import('../scenes/stage.ts')).createStageScene,
 };
 
-export const introLoader: IntroLoader = async (onDone) => {
-  const { createIntroScene } = await import('../scenes/intro.ts');
-  return (canvas, capability) =>
-    createIntroScene(canvas, capability, { onDone });
-};
-
-// The gallery pin and marquee are below the fold, so their module (and its
-// layout reads) loads after first paint instead of with the page script.
+// Chapter motion reads layout, so its module loads after first paint.
 export function loadLandingMotion(root: HTMLElement): () => void {
   let dispose: (() => void) | undefined;
   let cancelled = false;
@@ -59,14 +44,6 @@ export function loadLandingMotion(root: HTMLElement): () => void {
   };
 }
 
-function sessionStore(): Storage | undefined {
-  try {
-    return globalThis.sessionStorage;
-  } catch {
-    return undefined;
-  }
-}
-
 export function initLanding(
   root: HTMLElement,
   options: LandingOptions = {},
@@ -76,12 +53,9 @@ export function initLanding(
   const start = options.start ?? afterLoad(doc);
   const engage =
     options.engage ?? afterInteraction(doc.defaultView ?? globalThis);
-  const cleanups: Array<() => void> = [initPalettePicker(root)];
+  const cleanups: Array<() => void> = [];
   let disposed = false;
 
-  // Nothing below runs before the load event and an idle period, so the
-  // WebGL probe (whose context creation can stall the page) and scene chunks
-  // never compete with first paint.
   const begin = () => {
     if (disposed) return;
     const capability =
@@ -89,39 +63,30 @@ export function initLanding(
         ? options.capability()
         : (options.capability ?? detectCapability(browserProbe()));
     cleanups.push((options.motion ?? loadLandingMotion)(root));
-    // On the low tier the in-view hero would build at once, blocking the phone
-    // while the page is being read, so no island (and no WebGL probe) starts
-    // until the visitor engages. The photos show until then, as without WebGL.
+    // Phones keep the poster still until the visitor engages, so the stage
+    // build never blocks the page while it is being read.
     if (capability.tier === 'low')
       cleanups.push(engage(() => islands(capability)));
     else islands(capability);
   };
+  // The stage lives outside the landing root (beside the smooth-scroll
+  // wrapper), so islands are looked up in the whole document.
   const islands = (capability: Capability) => {
     if (disposed) return;
-    const mount = (element: HTMLElement) => {
+    for (const element of doc.querySelectorAll<HTMLElement>('[data-island]')) {
       const load = loaders[element.dataset.island ?? ''];
-      if (!load || disposed) return;
-      const island = mountIsland({ element, load, capability });
+      if (!load) continue;
+      const island = mountIsland({
+        element,
+        load,
+        capability,
+        onState: (state) => {
+          if (state === 'live') root.dataset.stage = 'live';
+          else delete root.dataset.stage;
+        },
+      });
       cleanups.push(() => island.dispose());
-    };
-    // The hero scene sits under the intro overlay, so it is built only once the
-    // intro is over (playIntro reports that at once when the intro does not play).
-    const deferred: HTMLElement[] = [];
-    for (const element of root.querySelectorAll<HTMLElement>('[data-island]')) {
-      if (element.dataset.island === 'hero' && root.hasAttribute('data-intro'))
-        deferred.push(element);
-      else mount(element);
     }
-    if (root.hasAttribute('data-intro'))
-      cleanups.push(
-        playIntro({
-          root,
-          capability,
-          storage: options.storage ?? sessionStore(),
-          load: options.intro ?? introLoader,
-          onFinish: () => deferred.forEach(mount),
-        }),
-      );
   };
   cleanups.push(start(begin));
   return () => {

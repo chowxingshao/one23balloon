@@ -5,6 +5,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import EntryList from './EntryList.astro';
 import ContactForm from './ContactForm.astro';
 import LandingFooter from './landing/LandingFooter.astro';
+import LandingStage from './landing/LandingStage.astro';
 import LandingView from './landing/LandingView.astro';
 import { whatsappUrl } from '../lib/contact/whatsapp.ts';
 import { getLanding } from '../lib/landing/content.ts';
@@ -54,6 +55,7 @@ const entries = Content
   headerCta={headerCta}
   smooth={Boolean(landing)}
 >
+  {landing && <LandingStage slot="stage" />}
   {landing ? (
     <LandingView data={landing.data} contentLocale={landing.locale} />
   ) : (

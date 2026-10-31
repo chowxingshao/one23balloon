@@ -1,4 +1,4 @@
-import type { Material } from '../lib/landing/palettes.ts';
+import type { Material } from '../lib/landing/blocks.ts';
 
 export type SurfaceParams = {
   metalness: number;

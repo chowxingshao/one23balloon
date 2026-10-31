@@ -89,6 +89,13 @@ body:has(.landing) .stage {
 body:has(.landing) .stage .stage-canvas {
   position: absolute;
 }
+/* The captured hero poster (an .hero-poster image) gives way to the live stage. */
+body:has(.landing) .hero-poster {
+  transition: opacity 0.4s var(--ease-out);
+}
+body:has(.landing[data-stage='live']) .hero-poster {
+  opacity: 0;
+}
 body:has(.landing) #smooth-wrapper,
 .landing {
   position: relative;
