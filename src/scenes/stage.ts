@@ -29,6 +29,7 @@ import {
   CAMERA_Z,
   familyOf,
 } from './formations.ts';
+import { largestFreeRect, type Rect } from './formation-anchor.ts';
 import { FrameLoop } from './loop.ts';
 import { surface } from './material-params.ts';
 import { compileScene, createRenderer, fitCamera } from './renderer.ts';
@@ -128,6 +129,60 @@ export async function createStageScene(
   let parked = false;
   const pointer = { x: 0, y: 0 };
 
+  // The free screen area beside the active card's text and photo, as fractions
+  // of the viewport. Layout offsets are used, so the card's scale and tilt
+  // animations do not disturb the measurement.
+  const serviceAnchor = (id: FormationId) => {
+    const card = doc.querySelectorAll<HTMLElement>('[data-service-card]')[
+      Number(id.slice('service-'.length))
+    ];
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    if (!card || !width || !height) return undefined;
+    const offsetIn = (element: HTMLElement): Rect => {
+      let left = 0;
+      let top = 0;
+      for (
+        let node: HTMLElement | null = element;
+        node && node !== card;
+        node = node.offsetParent as HTMLElement | null
+      ) {
+        left += node.offsetLeft;
+        top += node.offsetTop;
+      }
+      return {
+        left,
+        top,
+        right: left + element.offsetWidth,
+        bottom: top + element.offsetHeight,
+      };
+    };
+    const obstacles = ['h3', 'p', 'a', '.service-photo']
+      .map((selector) => card.querySelector<HTMLElement>(selector))
+      .filter((element): element is HTMLElement => element !== null)
+      .map(offsetIn);
+    // Layout height, not the rect: the header may be translated away mid-scroll.
+    const header =
+      doc.querySelector<HTMLElement>('.site-header')?.offsetHeight ?? 0;
+    const edge = 14;
+    const free = largestFreeRect(
+      {
+        left: edge,
+        top: header + edge,
+        right: Math.min(width, card.offsetWidth) - edge,
+        bottom: height - edge,
+      },
+      obstacles,
+      edge,
+    );
+    if (!free) return undefined;
+    return {
+      left: free.left / width,
+      right: free.right / width,
+      top: free.top / height,
+      bottom: free.bottom / height,
+    };
+  };
   const apply = (id: FormationId) => {
     formation = resolveFormation(id, capability.tier);
     const slots = buildFormation(formation, {
@@ -135,6 +190,9 @@ export async function createStageScene(
       aspect,
       tier: capability.tier,
       serviceBlocks,
+      anchor: formation.startsWith('service-')
+        ? serviceAnchor(formation)
+        : undefined,
     });
     slots.forEach((slot, index) => {
       const body = bodies[index]!;
@@ -207,7 +265,8 @@ export async function createStageScene(
       mesh.instanceMatrix.needsUpdate = true;
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     }
-    if (formation === 'hidden' && !moving) {
+    // Hidden and released balloons end off screen: stop drawing until they move.
+    if ((formation === 'hidden' || formation === 'release') && !moving) {
       parked = true;
       setVisible(false);
     }
