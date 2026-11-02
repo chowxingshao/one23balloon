@@ -30,6 +30,7 @@ import {
   familyOf,
 } from './formations.ts';
 import { largestFreeRect, type Rect } from './formation-anchor.ts';
+import { BALLOON_STRETCH } from './formation-layout.ts';
 import { FrameLoop } from './loop.ts';
 import { surface } from './material-params.ts';
 import { compileScene, createRenderer, fitCamera } from './renderer.ts';
@@ -313,9 +314,27 @@ export async function createStageScene(
       step(now, 0);
       clip.normal.set(0, 0, 1);
       clip.constant = 1000;
+      // Widen the view just enough that every balloon sits inside the frame
+      // with a small margin; the live stage deliberately bleeds past it.
+      const liveFov = camera.fov;
+      const tanHalf = Math.tan(((CAMERA_FOV / 2) * Math.PI) / 180);
+      let need = tanHalf;
+      for (const body of bodies) {
+        const depth = CAMERA_Z - body.position.z;
+        const across =
+          (Math.abs(body.position.x) + body.radius) / camera.aspect;
+        const up =
+          Math.abs(body.position.y) + 0.1 + body.radius * BALLOON_STRETCH;
+        need = Math.max(need, Math.max(across, up) / depth / 0.94);
+      }
+      camera.fov = (2 * Math.atan(need) * 180) / Math.PI;
+      camera.updateProjectionMatrix();
       renderer.clear();
       renderer.render(scene, camera);
-      return canvas.toDataURL('image/webp', 0.9);
+      const url = canvas.toDataURL('image/webp', 0.9);
+      camera.fov = liveFov;
+      camera.updateProjectionMatrix();
+      return url;
     };
 
   apply(isFormationId(initial) ? initial : 'hero');

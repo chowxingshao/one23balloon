@@ -1,24 +1,44 @@
 ---
-import { Image } from 'astro:assets';
+import { getImage } from 'astro:assets';
 import type { LandingData } from '../../lib/landing/content.ts';
 import poster from '../../assets/stage/hero-poster.webp';
+import posterPortrait from '../../assets/stage/hero-poster-portrait.webp';
 interface Props {
   data: LandingData;
 }
 const { data } = Astro.props;
+
+// Two art-directed posters, so a phone downloads only the portrait one.
+const posterWidths = [800, 1200, 1600];
+const landscape = await Promise.all(
+  posterWidths.map((width) => getImage({ src: poster, width })),
+);
+const portrait = await getImage({ src: posterPortrait, width: 562 });
+const largest = landscape[landscape.length - 1]!;
 ---
 
 <section class="chapter hero" data-chapter="hero" aria-labelledby="hero-title">
-  <Image
-    class="hero-poster"
-    src={poster}
-    alt=""
-    aria-hidden="true"
-    widths={[800, 1200, 1600]}
-    sizes="100vw"
-    loading="eager"
-    decoding="async"
-  />
+  <picture>
+    <source
+      media="(max-width: 47.99rem)"
+      srcset={portrait.src}
+      type="image/webp"
+    />
+    <img
+      class="hero-poster"
+      src={largest.src}
+      srcset={landscape
+        .map((image, index) => `${image.src} ${posterWidths[index]}w`)
+        .join(', ')}
+      sizes="100vw"
+      width={largest.attributes.width}
+      height={largest.attributes.height}
+      alt=""
+      aria-hidden="true"
+      loading="eager"
+      decoding="async"
+    />
+  </picture>
   <h1 id="hero-title" class="hero-title">
     <span class="hero-line" data-hero-line>
       {data.hero.title[0]}
