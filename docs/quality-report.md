@@ -1,5 +1,85 @@
 # Release quality evidence
 
+## one23balloon showcase redesign (2026-11-02)
+
+This section covers the redesigned landing page on branch `redesign-showcase`: six chapters, one balloon stage, GSAP chapter motion, Unbounded and Noto Sans SC Black, 40 celebration photos and captured poster stills. The 2026-10-29 and 2026-10-30 sections further down describe the landing page this redesign replaced (intro, palette picker, FAQ, venues, steps, three small 3D islands). They are kept as history, and their Lighthouse and browser findings no longer apply.
+
+Environment: Windows 11 Pro 10.0.26200, Node 24.19.0, pnpm 12.8.1, Astro 7.3.7, the in-app browser (Chromium) for viewport checks, and Lighthouse 13.5.0 (`pnpm dlx lighthouse@13.5.0`) driving headless Google Chrome at `C:\Program Files\Google\Chrome\Application\chrome.exe`. All browser and Lighthouse runs used `astro preview` at `http://localhost:4322/one23balloon/`, serving the `dist/` built for the run. Astro allows one preview per project, so the preview server already running from this repository was used; its served HTML was compared with `dist/index.html` after each build.
+
+### Gates
+
+| Gate                             | Result                                                          |
+| -------------------------------- | --------------------------------------------------------------- |
+| `pnpm install --frozen-lockfile` | Clean; the lockfile is up to date and unchanged.                |
+| `pnpm lint`                      | ESLint and Prettier clean.                                      |
+| `pnpm check`                     | 136 files, 0 errors, 0 warnings, 0 hints; `tsc --noEmit` clean. |
+| `pnpm test`                      | **436 passed in 30 files** (about 2 minutes).                   |
+| `pnpm build`                     | 3 pages (`/`, `/zh/`, `404`) plus the sitemap.                  |
+
+The gates ran from clean before the evidence work and again after the three fix commits below, with the same counts.
+
+### Fixes found by the evidence work
+
+Running Lighthouse showed problems that no earlier task could see, so they were fixed before the scores were recorded.
+
+- **Celebrations wall projected to millions of pixels** (`fix(motion)`). The wall is taller than the fixed 1400px perspective distance, so its lower rows passed behind the camera and their boxes measured up to 736,000 by 21,700,000 px on a 412px phone, and tens of thousands of pixels at 1440. Nothing visible was wrong, but axe-core's contrast check spent minutes on those boxes, so Lighthouse mobile never finished gathering its accessibility data. The tilt now runs only from 64rem, as the design direction already said, and its perspective grows with the wall's height. The largest box is now about 7,100 px tall at 1440 and the check takes about 0.2 s.
+- **ARIA and contrast defects** (`fix(a11y)`). Lighthouse accessibility was 87 on desktop. SplitText put `aria-label` on a `span` (the hero lines) and a `p` (the statement), which ARIA forbids; the hero heading now carries the label and the statement keeps its words in reading order. The pinned service cards sat in an `ol` whose ScrollTrigger pin spacers are `div`s, which broke the list structure; they are now `article`s in a `div`. The unread statement words started at 16% opacity (contrast 1.4:1); they now start at 50% (3.4:1, above the 3:1 large-text minimum).
+- **LCP discovery** (`perf(hero)`). The hero poster is fetched with `fetchpriority="high"`.
+
+Task 12 measured the 90th percentile frame time of the hero and of a service card transition at 13.4 ms at 1440 wide, which is the browser pane's vsync floor and under the 20 ms limit. The back render pass therefore stays on for every formation that has balloons behind the headline.
+
+### Lighthouse
+
+Lighthouse 13.5.0 with default simulated throttling (mobile 412x823, 150 ms RTT, 1,638 Kbps, 4x CPU; desktop preset 1350x940), run as `pnpm dlx lighthouse@13.5.0 <url> [--preset=desktop] --only-categories=performance,accessibility,best-practices,seo --chrome-flags="--headless=new"`, three runs per configuration against a build that includes the fixes. Scores are performance, accessibility, best practices and SEO; the metrics come from the median-score run (the first one on a tie).
+
+| Page        | Form factor | Performance (3 runs) | A11y | Best practices | SEO | FCP   | LCP   | TBT      | CLS |
+| ----------- | ----------- | -------------------- | ---- | -------------- | --- | ----- | ----- | -------- | --- |
+| `/` (en)    | mobile      | **99** (99/94/99)    | 100  | 100            | 100 | 1.0 s | 1.7 s | 100 ms   | 0   |
+| `/zh/` (zh) | mobile      | **96** (96/96/96)    | 100  | 100            | 100 | 1.2 s | 2.6 s | 80 ms    | 0   |
+| `/` (en)    | desktop     | **71** (71/71/71)    | 100  | 100            | 100 | 0.4 s | 0.6 s | 1,060 ms | 0   |
+| `/zh/` (zh) | desktop     | **72** (72/72/72)    | 100  | 100            | 100 | 0.3 s | 0.6 s | 860 ms   | 0   |
+
+Targets met: mobile performance 90 or higher in both locales (the English run of 94 had an LCP of 2.8 s), accessibility, best practices and SEO 100 in all twelve runs, and CLS 0 everywhere (target below 0.1).
+
+What the numbers do and do not include:
+
+- **Mobile (low tier).** Lighthouse mobile emulates touch, so the stage takes the low tier and loads no Three.js until the visitor's first interaction, which Lighthouse never performs. The portrait poster (12,482 B) is the hero image. Scripts requested during load are the landing script (3,023 B transferred), the page script (1,018 B), the GSAP chunk (69,952 B), `landing-motion` (10,428 B) and `formations` (978 B). The stage chunk (136,996 B gzip, 549,294 B raw) is not requested. Transfer is 518 KiB (en) and 578 KiB (zh). On a phone the stage's build cost moves to the first scroll or tap and is not measured here.
+- **Desktop (high tier).** Performance is 71 to 72, below the 91 and 90 recorded for the previous landing page on 2026-10-30. This task states no desktop target. The cost is the stage: one 509 ms task in the stage chunk plus a 754 ms unattributed task (environment map and shader compilation) between about 0.9 and 1.6 s, which gives 860 to 1,330 ms of blocking time. LCP is 0.6 s and CLS 0. A follow-up could build the environment map and compile the materials in smaller steps, or after the poster has painted. It was not attempted because it changes the stage's start-up behaviour and the targets concern mobile.
+- Lighthouse also lists missing source maps and unused JavaScript in the stage and GSAP chunks, and 40 ms of render-blocking CSS. These do not count against the scores above.
+
+Mobile poster fetch (production preview, 375x812 emulation, 2x pixel ratio): only `hero-poster-portrait` is requested. The landscape `hero-poster` files appear in no network entry or resource timing, and the image's `currentSrc` is the portrait file. The landscape fetch seen in the dev server was the dev toolbar.
+
+### Browser checks
+
+In-app browser against the production preview, `/` and `/zh/` at 360x780 (mobile emulation), 768x1024, 1280x800 and 1440x900. At each width and locale the page was scrolled to the top, the middle of each chapter and the bottom, and every position was checked:
+
+| Check                                 | Result at all eight combinations                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Header on one line, at most 64px tall | One row of 60 px at every scroll position, including 360px: the name, language switch and WhatsApp pill do not wrap.                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| No horizontal overflow                | `scrollWidth` equals `clientWidth` at every position (360: 360; 768: 753; 1280: 1265; 1440: 1425). Where the emulated browser shows a classic scrollbar (768 and wider), `innerWidth` is 15 px larger than `clientWidth`, so the literal `scrollWidth === innerWidth` is true only below that width; there is no overflow in either reading.                                                                                                                                                                                                                                     |
+| Every CTA on one line                 | 104 link and button checks per page (header, service links, closing actions, footer links): none wraps, in English or Chinese.                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Balloons do not intersect             | Resting formations are collision-free by construction and unit-tested (centre distance at least 1.1 times the radii sum plus 4%, all formations, both tiers). In screenshots of the hero and the first service card at every size, no balloon passes through another or through the card's heading, text, link or photo once the formation has settled. Balloons sit in front of and behind the headline by design. While the cluster travels between formations (about 1.5 s after a jump scroll), small balloons cross card text; that is the transition, not a resting state. |
+
+Screenshots per size and locale: hero at rest, hero mid-split, first service card settled, a service card transition, the celebrations entry (tilted at 1280 and 1440, flat below 1024) and the closing flood. What they show: the 360px English and Chinese hero headlines fit without clipping; at 768 and wider the service cluster sits in the free space above or beside the card text; at 1280 the closing balloons rise above the pink flood; Chinese text renders in Noto Sans SC Black at every size.
+
+The screenshots are not committed, because the earlier evidence in this repository was not committed either (raw reports stayed in the ignored `.superpowers` workspace). They are kept in the scratchpad folder `C:\Users\user\AppData\Local\Temp\claude\C--Users-user-Desktop-JackyProject-chowxingshao-one23balloon\9a03607a-162e-4e90-a5d1-e548c1dd8286\scratchpad\task15\screens` (63 images, named by capture time by the browser tool; a few from the 1440x900 attempts are blank, see the limitations). The Lighthouse JSON is in `...\task15\lh2` in the same folder.
+
+### Reduced motion and JavaScript off
+
+The in-app browser cannot emulate `prefers-reduced-motion`, so reduced motion was verified by tests and code reading, not by emulation. Every chapter and the smoother run inside `motionQueries` media queries (the landing-motion unit test), and the stage refuses to mount when `capability.reducedMotion` is set (the "keeps the poster when WebGL or motion is unavailable" test), so the poster remains the visual. No chapter content depends on JavaScript: the integration test "renders every chapter and photo in static HTML" covers the built HTML. JavaScript-off was not run in a browser.
+
+### Limitations
+
+- Reduced motion was verified by tests and code reading, not emulation. WebGL-unavailable is covered by unit tests only.
+- At 1440x900 the browser tool returned blank screenshots after the first scroll, while the DOM state, scroll position and canvas contexts were correct, and the same page at 1440x800 rendered normally. The 1440 service, celebrations and closing screenshots were therefore taken at 1440x800. The 1440x900 DOM checks (header, overflow, CTAs) were not affected. The cause was not found and is probably the tool's capture at that size, not the page.
+- The browser pane renders at its own frame rate. The frame-time figure comes from Task 12 and is the pane's vsync floor, not a mid-range device.
+- Desktop Lighthouse performance is 71 to 72 and was not improved.
+- The split hero heading and the statement (`aria: 'none'`) were checked with axe-core and by reading the DOM, not with a screen reader.
+- On wide screens the celebrations wall still has ragged column bottoms and a gap of 500 to 700 px before the closing flood.
+- actionlint is not installed, so `deploy.yml` and `ci.yml` were not linted. The Docker engine was not running, so `docker compose up` and `pnpm verify:container one23balloon` were not run. These are limitations, not passes.
+- Emulated widths, not physical devices; Lighthouse used simulated throttling on a developer machine.
+- Client sign-off items (photos with faces or printed names, the new English and Chinese copy, the poster stills, the WhatsApp number and the Xiaohongshu URL) remain open in `brief.md`. The governance review described below is also still open.
+
 ## one23balloon client acceptance (2026-10-29)
 
 Environment: Windows 11 Pro 10.0.26200, Node 24.19.0, pnpm 12.8.1, Astro 7.3.7. Browser checks used the in-app browser (Chromium 152.0.7977.167) against `astro preview` at `http://localhost:4322/one23balloon/`; Lighthouse 13.5.0 (`pnpm dlx`) drove headless Google Chrome 155. The preview server was one already running from this repository, serving the `dist/` built for this run (Astro allows only one preview per project).
