@@ -340,7 +340,29 @@ export async function createStageScene(
   apply(isFormationId(initial) ? initial : 'hero');
   for (const body of bodies)
     body.position.copy(body.target).add(new Vector3(0, -12, 0));
-  await compileScene(renderer, scene, camera);
+  // Everything a failed build or a disposed stage leaves behind. The canvases
+  // end hidden and the back frame cleared, so a stale frame never stays behind
+  // the content after a context loss or a fallback to the poster.
+  const teardown = () => {
+    loop.stop();
+    doc.removeEventListener(formationEvent, onFormation);
+    doc.removeEventListener('pointermove', onPointer);
+    backContext?.clearRect(0, 0, back?.width ?? 0, back?.height ?? 0);
+    setVisible(false);
+    for (const { mesh, material } of meshes) {
+      mesh.dispose();
+      material.dispose();
+    }
+    geometry.dispose();
+    environment.dispose();
+    renderer.dispose();
+  };
+  try {
+    await compileScene(renderer, scene, camera);
+  } catch (error) {
+    teardown();
+    throw error;
+  }
   return {
     start: () => loop.start(),
     stop: () => loop.stop(),
@@ -355,18 +377,6 @@ export async function createStageScene(
       step(now, 0);
       draw();
     },
-    dispose: () => {
-      loop.stop();
-      doc.removeEventListener(formationEvent, onFormation);
-      doc.removeEventListener('pointermove', onPointer);
-      setVisible(true);
-      for (const { mesh, material } of meshes) {
-        mesh.dispose();
-        material.dispose();
-      }
-      geometry.dispose();
-      environment.dispose();
-      renderer.dispose();
-    },
+    dispose: teardown,
   };
 }

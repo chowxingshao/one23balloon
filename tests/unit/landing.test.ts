@@ -33,6 +33,27 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllGlobals());
 
+// A controllable (prefers-reduced-motion: reduce) query on the test window.
+function reduceQuery() {
+  const handlers = new Set<(event: { matches: boolean }) => void>();
+  const query = {
+    matches: false,
+    addEventListener: (_type: string, handler: never) => handlers.add(handler),
+    removeEventListener: (_type: string, handler: never) =>
+      handlers.delete(handler),
+  };
+  vi.stubGlobal('matchMedia', undefined);
+  (dom.window as unknown as { matchMedia: () => unknown }).matchMedia = () =>
+    query;
+  return {
+    listeners: () => handlers.size,
+    change(matches: boolean) {
+      query.matches = matches;
+      for (const handler of [...handlers]) handler({ matches });
+    },
+  };
+}
+
 async function load() {
   return import('../../src/scripts/landing.ts');
 }
@@ -89,16 +110,118 @@ describe('initLanding', () => {
     await vi.waitFor(() => expect(load3d).toHaveBeenCalled());
   });
 
-  it('keeps the poster when WebGL or motion is unavailable', async () => {
+  it.each([
+    ['WebGL is unavailable', { webgl: false }],
+    ['the visitor prefers reduced motion', { reducedMotion: true }],
+  ])('keeps the poster when %s', async (_name, overrides) => {
     const { initLanding } = await load();
     const load3d = vi.fn();
     initLanding(root(), {
-      capability: capability({ webgl: false }),
+      capability: capability(overrides),
       start: now,
       loaders: { stage: load3d },
       motion: () => () => undefined,
     });
     expect(load3d).not.toHaveBeenCalled();
     expect(root().dataset.stage).toBeUndefined();
+  });
+
+  it('keeps the poster when the motion config is off', async () => {
+    const { initLanding } = await load();
+    const load3d = vi.fn();
+    initLanding(root(), {
+      capability: capability(),
+      start: now,
+      motionEnabled: () => false,
+      loaders: { stage: load3d },
+      motion: () => () => undefined,
+    });
+    expect(load3d).not.toHaveBeenCalled();
+    expect(root().dataset.stage).toBeUndefined();
+  });
+
+  it('returns to the poster when reduced motion is switched on mid-visit', async () => {
+    const { initLanding } = await load();
+    const media = reduceQuery();
+    const created = scene();
+    initLanding(root(), {
+      capability: capability(),
+      start: now,
+      loaders: { stage: async () => async () => created },
+      motion: () => () => undefined,
+    });
+    await vi.waitFor(() => expect(root().dataset.stage).toBe('live'));
+    media.change(true);
+    expect(created.dispose).toHaveBeenCalled();
+    expect(root().dataset.stage).toBeUndefined();
+  });
+
+  it('does not start a low-tier stage after reduced motion was switched on', async () => {
+    const { initLanding } = await load();
+    const media = reduceQuery();
+    let engage: () => void = () => undefined;
+    const load3d = vi.fn(async () => async () => scene());
+    initLanding(root(), {
+      capability: capability({ tier: 'low' }),
+      start: now,
+      engage: (run) => {
+        engage = run;
+        return () => undefined;
+      },
+      loaders: { stage: load3d },
+      motion: () => () => undefined,
+    });
+    media.change(true);
+    engage();
+    await Promise.resolve();
+    expect(load3d).not.toHaveBeenCalled();
+  });
+
+  it('stops listening for reduced motion once disposed', async () => {
+    const { initLanding } = await load();
+    const media = reduceQuery();
+    const dispose = initLanding(root(), {
+      capability: capability(),
+      start: now,
+      loaders: { stage: async () => async () => scene() },
+      motion: () => () => undefined,
+    });
+    expect(media.listeners()).toBe(1);
+    dispose();
+    expect(media.listeners()).toBe(0);
+  });
+
+  it('drops the stage when the chapter motion is unavailable', async () => {
+    const { initLanding } = await load();
+    const created = scene();
+    let unavailable: () => void = () => undefined;
+    initLanding(root(), {
+      capability: capability(),
+      start: now,
+      loaders: { stage: async () => async () => created },
+      motion: (_root, onUnavailable) => {
+        unavailable = onUnavailable;
+        return () => undefined;
+      },
+    });
+    await vi.waitFor(() => expect(root().dataset.stage).toBe('live'));
+    unavailable();
+    expect(created.dispose).toHaveBeenCalled();
+    expect(root().dataset.stage).toBeUndefined();
+  });
+});
+
+describe('loadLandingMotion', () => {
+  afterEach(() => vi.doUnmock('../../src/scripts/landing-motion.ts'));
+
+  it('reports a chunk that fails to load', async () => {
+    vi.doMock('../../src/scripts/landing-motion.ts', () => {
+      throw new Error('chunk failed');
+    });
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { loadLandingMotion } = await import('../../src/scripts/landing.ts');
+    const onUnavailable = vi.fn();
+    loadLandingMotion(root(), onUnavailable);
+    await vi.waitFor(() => expect(onUnavailable).toHaveBeenCalledTimes(1));
   });
 });
