@@ -38,14 +38,8 @@ export const hero: ChapterSetup = (section, { root, desktop }) => {
       aria: 'hidden',
     }),
   );
-  const chars = splits.flatMap((split) => split.chars);
-  gsap.from(chars, {
-    y: '0.35em',
-    autoAlpha: 0,
-    duration: 1.1,
-    ease: 'expo.out',
-    stagger: 0.03,
-  });
+  // No entrance tween: the headline is already painted in the static HTML, and
+  // hiding it once motion starts would make it blink out and back in.
   const travel = () => innerWidth * (desktop ? 0.55 : 0.3);
   const timeline = gsap.timeline({
     defaults: { ease: 'none' },

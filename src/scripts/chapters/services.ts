@@ -9,8 +9,9 @@ export const services: ChapterSetup = (section, { desktop }) => {
     section.querySelectorAll('[data-service-card]'),
   );
   const last = cards.at(-1);
+  const stops: Array<() => void> = [];
   cards.forEach((card, index) => {
-    gsap.from(card.querySelectorAll('.service-copy > *'), {
+    const reveal = gsap.from(card.querySelectorAll('.service-copy > *'), {
       y: 60,
       // Opacity, not autoAlpha: the links must stay reachable by Tab before the
       // trigger fires.
@@ -20,6 +21,10 @@ export const services: ChapterSetup = (section, { desktop }) => {
       ease: 'expo.out',
       scrollTrigger: { trigger: card, start: 'top 60%' },
     });
+    // A focused link must be visible: Tab can arrive before the trigger fires.
+    const showFocused = () => reveal.progress(1);
+    card.addEventListener('focusin', showFocused);
+    stops.push(() => card.removeEventListener('focusin', showFocused));
     const next = cards[index + 1];
     if (!next || !last) return;
     ScrollTrigger.create({
@@ -51,14 +56,19 @@ export const services: ChapterSetup = (section, { desktop }) => {
       scrollTrigger: scroll,
     });
   });
-  if (!last || cards.length < 2) return;
+  const stopAll = () => {
+    for (const stop of stops.splice(0)) stop();
+  };
+  if (!last || cards.length < 2) return stopAll;
   // Under ScrollSmoother a pin is a transform, so the tilted cards' perspective
-  // flares their lower edges. While the last card covers the stack, hide the
-  // cards under it (visibility also takes their links out of the tab order, so
-  // focus never lands on something the viewer cannot see).
+  // flares their lower edges. While the last card covers the stack, clip the
+  // cards under it away. Clipping is visual only: the cards keep their
+  // headings and links in the accessibility tree, and a focused link scrolls
+  // its card back into view, which lifts the clip.
   const covered = cards.slice(0, -1);
-  const setCovered = (hidden: boolean) => {
-    for (const card of covered) card.style.visibility = hidden ? 'hidden' : '';
+  const setCovered = (clipped: boolean) => {
+    for (const card of covered)
+      card.style.clipPath = clipped ? 'inset(0 0 100% 0)' : '';
   };
   ScrollTrigger.create({
     trigger: last,
@@ -66,5 +76,8 @@ export const services: ChapterSetup = (section, { desktop }) => {
     end: 'max',
     onToggle: (self) => setCovered(self.isActive),
   });
-  return () => setCovered(false);
+  return () => {
+    setCovered(false);
+    stopAll();
+  };
 };

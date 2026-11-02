@@ -20,19 +20,27 @@ export const closing: ChapterSetup = (section, { root }) => {
         },
       },
     );
-  gsap.from(section.querySelectorAll('.chapter-title, .closing-actions > *'), {
-    y: 80,
-    // Opacity, not autoAlpha: the actions must stay reachable by Tab before the
-    // trigger fires.
-    opacity: 0,
-    stagger: 0.08,
-    duration: 1,
-    ease: 'expo.out',
-    scrollTrigger: { trigger: section, start: 'top 40%' },
-  });
+  const reveal = gsap.from(
+    section.querySelectorAll('.chapter-title, .closing-actions > *'),
+    {
+      y: 80,
+      // Opacity, not autoAlpha: the actions must stay reachable by Tab before
+      // the trigger fires.
+      opacity: 0,
+      stagger: 0.08,
+      duration: 1,
+      ease: 'expo.out',
+      scrollTrigger: { trigger: section, start: 'top 40%' },
+    },
+  );
+  // A focused action must be visible: Tab can arrive before the trigger fires.
+  const actions = section.querySelector<HTMLElement>('.closing-actions');
+  const showFocused = () => reveal.progress(1);
+  actions?.addEventListener('focusin', showFocused);
+  const stopFocus = () => actions?.removeEventListener('focusin', showFocused);
   const wordmark =
     root.ownerDocument.querySelector<HTMLElement>('[data-wordmark]');
-  if (!wordmark) return;
+  if (!wordmark) return stopFocus;
   const split = SplitText.create(wordmark, { type: 'chars' });
   gsap.from(split.chars, {
     yPercent: -130,
@@ -42,5 +50,8 @@ export const closing: ChapterSetup = (section, { root }) => {
     stagger: 0.04,
     scrollTrigger: { trigger: wordmark, start: 'top 92%' },
   });
-  return () => split.revert();
+  return () => {
+    stopFocus();
+    split.revert();
+  };
 };
