@@ -2,13 +2,17 @@ import { gsap } from 'gsap';
 import { SplitText } from 'gsap/SplitText';
 import type { ChapterSetup } from './types.ts';
 
-// Words fill in reading order; each photo pill pops in with its word.
+// Words fill in reading order; each photo pill pops in with its word. The
+// unread words start at half strength, which keeps large text above 3:1.
 export const statement: ChapterSetup = (section) => {
   const text = section.querySelector<HTMLElement>('[data-statement]');
   if (!text) return;
+  // The default adds aria-label to the paragraph, which ARIA does not allow
+  // there; the words stay in reading order, so nothing needs hiding.
   const split = SplitText.create(text, {
     type: 'words',
     wordsClass: 'statement-split',
+    aria: 'none',
   });
   gsap
     .timeline({
@@ -21,7 +25,7 @@ export const statement: ChapterSetup = (section) => {
     })
     .fromTo(
       split.words,
-      { opacity: 0.16 },
+      { opacity: 0.5 },
       { opacity: 1, stagger: 0.1, ease: 'none' },
       0,
     )

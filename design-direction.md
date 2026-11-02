@@ -66,10 +66,10 @@ Fit values confirmed in the browser (Task 5), at 360, 390, 768, 1280, 1440 and 1
 ## Chapters and motion
 
 1. Hero: two-line headline at hero size with balloons in front of and behind the letters. On scroll the headline splits left and right while the cluster pushes toward the camera.
-2. Statement: one large sentence with four inline photo pills. Words fill from muted to ink in reading order as each pill scales in.
+2. Statement: one large sentence with four inline photo pills. Words fill from half strength to ink in reading order as each pill scales in; the starting strength keeps the large text above 3:1 contrast.
 3. What we do: six full-screen colour cards in a pinned stack. Each next card slides over the previous one, which scales back, tilts and dims.
 4. Signature pieces: one giant marquee line that reverses with scroll direction, crossed by two sculpture photos at different parallax speeds.
-5. Recent celebrations: a masonry grid that enters tilted and flattens on scroll, with columns moving at different speeds.
+5. Recent celebrations: a masonry grid that, from 64rem, enters tilted and flattens on scroll, with columns moving at different speeds. Narrower screens keep it flat. The tilt's perspective grows with the height of the wall so no row passes behind the camera.
 6. Closing: a pink curtain wipe floods the viewport, balloons rise out of frame, and a giant footer wordmark drops in letter by letter.
 
 ## 3D rules

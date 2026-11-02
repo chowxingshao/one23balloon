@@ -16,9 +16,9 @@ const { data } = Astro.props;
   <h2 id="services-title" class="chapter-title services-title">
     {data.services.title}
   </h2>
-  <ol class="service-stack">
+  <div class="service-stack">
     {data.services.items.map((service) => (
-      <li
+      <article
         class="service-card"
         data-service-card
         data-block={service.colour}
@@ -42,7 +42,7 @@ const { data } = Astro.props;
           loading="lazy"
         />
         <span class="service-dim" aria-hidden="true" />
-      </li>
+      </article>
     ))}
-  </ol>
+  </div>
 </section>

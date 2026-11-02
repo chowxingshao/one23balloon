@@ -26,8 +26,17 @@ export const hero: ChapterSetup = (section, { root, desktop }) => {
     trackHeader();
     return () => header?.classList.remove('is-over-hero');
   }
+  // aria-label is not allowed on the line spans, so the heading carries the
+  // name and the split characters stay hidden from assistive technology.
+  const title = section.querySelector<HTMLElement>('h1');
+  const titleText = title?.textContent?.replace(/\s+/g, ' ').trim();
+  if (title && titleText) title.setAttribute('aria-label', titleText);
   const splits = lines.map((line) =>
-    SplitText.create(line, { type: 'chars', charsClass: 'hero-char' }),
+    SplitText.create(line, {
+      type: 'chars',
+      charsClass: 'hero-char',
+      aria: 'hidden',
+    }),
   );
   const chars = splits.flatMap((split) => split.chars);
   gsap.from(chars, {
@@ -68,5 +77,6 @@ export const hero: ChapterSetup = (section, { root, desktop }) => {
   return () => {
     header?.classList.remove('is-over-hero');
     for (const split of splits) split.revert();
+    title?.removeAttribute('aria-label');
   };
 };
