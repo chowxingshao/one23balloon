@@ -89,13 +89,6 @@ body:has(.landing) .stage {
 body:has(.landing) .stage .stage-canvas {
   position: absolute;
 }
-/* The captured hero poster (an .hero-poster image) gives way to the live stage. */
-body:has(.landing) .hero-poster {
-  transition: opacity 0.4s var(--ease-out);
-}
-body:has(.landing[data-stage='live']) .hero-poster {
-  opacity: 0;
-}
 body:has(.landing) #smooth-wrapper,
 .landing {
   position: relative;
@@ -133,6 +126,24 @@ body:has(.landing) #smooth-wrapper,
   padding: calc(var(--header-height) + var(--space-lg)) var(--gutter)
     var(--space-2xl);
   isolation: isolate;
+}
+/* The captured poster stands in until the live stage takes over, and stays as the fallback. */
+.hero-poster {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  z-index: -1;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-poster {
+    transition: opacity 0.4s var(--ease-out);
+  }
+}
+.landing[data-stage='live'] .hero-poster {
+  opacity: 0;
 }
 .hero-title {
   font-family: var(--font-display);

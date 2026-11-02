@@ -1,5 +1,7 @@
 ---
+import { Image } from 'astro:assets';
 import type { LandingData } from '../../lib/landing/content.ts';
+import poster from '../../assets/stage/hero-poster.webp';
 interface Props {
   data: LandingData;
 }
@@ -7,6 +9,16 @@ const { data } = Astro.props;
 ---
 
 <section class="chapter hero" data-chapter="hero" aria-labelledby="hero-title">
+  <Image
+    class="hero-poster"
+    src={poster}
+    alt=""
+    aria-hidden="true"
+    widths={[800, 1200, 1600]}
+    sizes="100vw"
+    loading="eager"
+    decoding="async"
+  />
   <h1 id="hero-title" class="hero-title">
     <span class="hero-line" data-hero-line>
       {data.hero.title[0]}

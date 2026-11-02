@@ -66,3 +66,9 @@ Task 4 reuses the occasion labels in each row's Notes exactly. One label is not 
 | en            | zh       |
 | ------------- | -------- |
 | Balloon decor | 气球装饰 |
+
+## Generated images
+
+| File                              | How it was made                                                                                                                                                                                                                                 |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| src/assets/stage/hero-poster.webp | Captured on 2026-11-02 from the live stage's hero formation (30 balloons, one pass, transparent background) at 1600x1000 in the dev build through `globalThis.__one23Poster()`. Recapture after any change to formations, colours or materials. |
