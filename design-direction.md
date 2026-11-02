@@ -85,4 +85,4 @@ Fit values confirmed in the browser (Task 5), at 360, 390, 768, 1280, 1440 and 1
 - `prefers-reduced-motion: reduce` gives a static page: no smoother, pins, tilt, marquee movement or 3D, with the poster still shown.
 - All content is in the static HTML and visible without JavaScript.
 - 3D canvases and decorative balloons are `aria-hidden`. Every control is a real button or link.
-- Keyboard focus uses a 3px outline with a 4px offset in cobalt, and the skip link appears on focus.
+- Keyboard focus uses a 3px outline with a 4px offset: ink on the colour blocks and white on cobalt blocks. The skip link appears on focus.

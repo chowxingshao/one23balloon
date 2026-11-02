@@ -66,7 +66,7 @@ The screenshots are not committed, because the earlier evidence in this reposito
 
 ### Reduced motion and JavaScript off
 
-The in-app browser cannot emulate `prefers-reduced-motion`, so reduced motion was verified by tests and code reading, not by emulation. Every chapter and the smoother run inside `motionQueries` media queries (the landing-motion unit test), and the stage refuses to mount when `capability.reducedMotion` is set (the "keeps the poster when WebGL or motion is unavailable" test), so the poster remains the visual. No chapter content depends on JavaScript: the integration test "renders every chapter and photo in static HTML" covers the built HTML. JavaScript-off was not run in a browser.
+The in-app browser cannot emulate `prefers-reduced-motion`, so reduced motion was verified by tests and code reading, not by emulation. Every chapter and the smoother run inside `motionQueries` media queries (the landing-motion unit test), and the stage refuses to mount when `capability.reducedMotion` is set or the motion config is off, and is disposed when reduced motion is switched on mid-visit or the motion chunk fails (the "keeps the poster when ..." and mid-visit cases in `tests/unit/landing.test.ts`; the island lifecycle itself is covered by `tests/unit/canvas-island.test.ts`), so the poster remains the visual. No chapter content depends on JavaScript: the integration test "renders every chapter and photo in static HTML" covers the built HTML. JavaScript-off was not run in a browser.
 
 ### Limitations
 

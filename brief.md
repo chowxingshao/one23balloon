@@ -85,6 +85,7 @@ Header: wordmark, EN / 中文 switch, pinned WhatsApp pill. Then six chapters an
   - [ ] `gallery-33.jpg`: customer first name.
   - [ ] `gallery-36.jpg`: child's name.
   - [ ] `gallery-37.jpg`: a name partly visible on the cake board at the right edge.
+- [ ] Sign-off on incidental equipment and venue marks visible in photos (not customer brands, but visible): a Rubbermaid mark on the high chair in `gallery-23.jpg`; a Daikin air conditioner and a UNION fire extinguisher label in `gallery-37.jpg`; a Martin Audio speaker mark in `gallery-20.jpg`; venue cake boxes and a framed certificate, not legible, in `gallery-27.jpg`; "HI PERFORMANCE" printed on the foil tyre in `gallery-17.jpg`.
 - [ ] Permission to show the registration number on the site.
 
 ## Tone and voice

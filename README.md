@@ -68,7 +68,7 @@ Versions were resolved from the npm registry on 2026-10-08. Every direct depende
 | `@astrojs/mdx`             | 8.0.3         | Compile MDX through Astro's supported integration.                                                                                                             |
 | `@astrojs/sitemap`         | 3.7.4         | Generate canonical sitemap artifacts.                                                                                                                          |
 | `@astrojs/rss`             | 4.0.19        | Generate static RSS feeds.                                                                                                                                     |
-| `gsap`                     | 3.15.0        | Provide scoped animation and ScrollTrigger APIs.                                                                                                               |
+| `gsap`                     | 3.15.0        | Provide scoped animation, and the ScrollTrigger, SplitText and ScrollSmoother plugins that ship in the same package.                                           |
 | `sharp`                    | 0.35.5        | Process content images through Astro's real build-time Image pipeline under pnpm.                                                                              |
 | `typescript`               | 6.0.3         | Type-check source with the newest stable release compatible with Astro check and TypeScript ESLint.                                                            |
 | `@astrojs/check`           | 0.9.10        | Diagnose Astro templates and their TypeScript.                                                                                                                 |
