@@ -129,6 +129,57 @@ describe('landing schema', () => {
     expect(schema.safeParse(duplicate).success).toBe(false);
   });
 
+  it.each(['+60 10-901 7633', '010-9017633', '60109017633 '])(
+    'rejects the formatted whatsapp number %j',
+    (number) => {
+      const data = valid();
+      data.whatsapp = number;
+      expect(schema.safeParse(data).success).toBe(false);
+    },
+  );
+
+  it('rejects a duplicate service id', () => {
+    const data = valid();
+    data.services.items[1]!.id = data.services.items[0]!.id;
+    expect(schema.safeParse(data).success).toBe(false);
+  });
+
+  it.each([
+    [
+      'at the top level',
+      (data: ReturnType<typeof valid>) => ({ ...data, extra: 1 }),
+    ],
+    [
+      'in a photo',
+      (data: ReturnType<typeof valid>) => {
+        Object.assign(data.statement.parts[1]!.photo!, { credit: 'x' });
+        return data;
+      },
+    ],
+    [
+      'in a service',
+      (data: ReturnType<typeof valid>) => {
+        Object.assign(data.services.items[0]!, { price: 'RM1' });
+        return data;
+      },
+    ],
+  ])('rejects an unknown field %s', (_place, mutate) => {
+    expect(schema.safeParse(mutate(valid())).success).toBe(false);
+  });
+
+  it.each(['', '   '])('rejects an empty photo alt %j', (alt) => {
+    const data = valid();
+    data.celebrations.items[0]!.photo.alt = alt;
+    expect(schema.safeParse(data).success).toBe(false);
+  });
+
+  it('rejects a celebration source used twice', () => {
+    const data = valid();
+    data.celebrations.items[1]!.photo.source =
+      data.celebrations.items[0]!.photo.source;
+    expect(schema.safeParse(data).success).toBe(false);
+  });
+
   it('rejects em and en dashes in visible text', () => {
     const data = valid();
     data.hero.lede = 'Balloons — for you';
