@@ -62,13 +62,33 @@ export const services: ChapterSetup = (section, { desktop }) => {
   if (!last || cards.length < 2) return stopAll;
   // Under ScrollSmoother a pin is a transform, so the tilted cards' perspective
   // flares their lower edges. While the last card covers the stack, clip the
-  // cards under it away. Clipping is visual only: the cards keep their
-  // headings and links in the accessibility tree, and a focused link scrolls
-  // its card back into view, which lifts the clip.
+  // cards under it away. The clip is visual only: headings and links stay in
+  // the accessibility tree, so the covered cards' links leave the tab order
+  // while they are clipped, and focus never lands on an invisible element.
   const covered = cards.slice(0, -1);
+  const savedTabIndex = new Map<HTMLElement, string | null>();
+  const takeOutOfTabOrder = (element: HTMLElement) => {
+    if (savedTabIndex.has(element)) return;
+    savedTabIndex.set(element, element.getAttribute('tabindex'));
+    element.setAttribute('tabindex', '-1');
+  };
+  const restoreTabOrder = () => {
+    for (const [element, value] of savedTabIndex) {
+      if (value === null) element.removeAttribute('tabindex');
+      else element.setAttribute('tabindex', value);
+    }
+    savedTabIndex.clear();
+  };
   const setCovered = (clipped: boolean) => {
-    for (const card of covered)
+    for (const card of covered) {
       card.style.clipPath = clipped ? 'inset(0 0 100% 0)' : '';
+      if (clipped)
+        for (const element of card.querySelectorAll<HTMLElement>(
+          'a[href], button, [tabindex]:not([tabindex="-1"])',
+        ))
+          takeOutOfTabOrder(element);
+    }
+    if (!clipped) restoreTabOrder();
   };
   ScrollTrigger.create({
     trigger: last,
