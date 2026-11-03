@@ -1,4 +1,4 @@
-import type { Material } from '../lib/landing/palettes.ts';
+import type { Material } from '../lib/landing/blocks.ts';
 
 export type SurfaceParams = {
   metalness: number;
@@ -35,28 +35,3 @@ export const surface: Record<Material, SurfaceParams> = {
     envMapIntensity: 1.25,
   },
 };
-
-const clamp = (value: number) => Math.min(1, Math.max(0, value));
-
-export function easeInOut(t: number): number {
-  const k = clamp(t);
-  return k * k * (3 - 2 * k);
-}
-
-export function mixSurface(
-  from: SurfaceParams,
-  to: SurfaceParams,
-  t: number,
-): SurfaceParams {
-  const k = clamp(t);
-  const mix = (key: keyof SurfaceParams) =>
-    from[key] + (to[key] - from[key]) * k;
-  return {
-    metalness: mix('metalness'),
-    roughness: mix('roughness'),
-    clearcoat: mix('clearcoat'),
-    clearcoatRoughness: mix('clearcoatRoughness'),
-    iridescence: mix('iridescence'),
-    envMapIntensity: mix('envMapIntensity'),
-  };
-}

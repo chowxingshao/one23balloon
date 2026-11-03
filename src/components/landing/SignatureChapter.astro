@@ -1,0 +1,51 @@
+---
+import { Image } from 'astro:assets';
+import { blockIds } from '../../lib/landing/blocks.ts';
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  data: LandingData;
+}
+const { data } = Astro.props;
+const words = data.signature.marquee;
+---
+
+<section
+  class="chapter signature"
+  data-chapter="signature"
+  aria-labelledby="signature-title"
+>
+  <h2 id="signature-title" class="visually-hidden">
+    {words.join(', ')}
+  </h2>
+  <div class="signature-marquee" data-marquee aria-hidden="true">
+    {[0, 1].map(() => (
+      <p class="marquee-run">
+        {words.map((word, index) => (
+          <>
+            <span>{word}</span>
+            <span
+              class="marquee-sep"
+              style={`--sep: var(--block-${blockIds[index % blockIds.length]})`}
+            />
+          </>
+        ))}
+      </p>
+    ))}
+  </div>
+  <ul class="signature-pieces">
+    {data.signature.pieces.map((piece) => (
+      <li>
+        <figure data-piece>
+          <Image
+            src={piece.photo.image}
+            alt={piece.photo.alt}
+            widths={[480, 800, 1100]}
+            sizes="(min-width: 48rem) 40vw, 92vw"
+            loading="lazy"
+          />
+          <figcaption>{piece.caption}</figcaption>
+        </figure>
+      </li>
+    ))}
+  </ul>
+</section>

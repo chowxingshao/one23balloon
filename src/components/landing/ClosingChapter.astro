@@ -1,0 +1,39 @@
+---
+import WhatsAppLink from './WhatsAppLink.astro';
+import { getSiteConfig } from '../../lib/config/site.ts';
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  data: LandingData;
+}
+const { data } = Astro.props;
+const site = getSiteConfig();
+const links = [
+  { href: site.social.instagram, label: data.meta.instagramLabel },
+  { href: site.social.xiaohongshu, label: data.meta.xiaohongshuLabel },
+].filter((link) => Boolean(link.href));
+---
+
+<section
+  class="chapter closing"
+  data-chapter="closing"
+  aria-labelledby="closing-title"
+>
+  <div class="closing-flood" data-closing-flood>
+    <h2 id="closing-title" class="chapter-title">
+      {data.closing.title}
+    </h2>
+    <div class="closing-actions">
+      <WhatsAppLink
+        number={data.whatsapp}
+        message={data.closing.message}
+        label={data.closing.whatsapp}
+        variant="primary"
+      />
+      {links.map((link) => (
+        <a class="button-outline" href={link.href} rel="noopener">
+          {link.label}
+        </a>
+      ))}
+    </div>
+  </div>
+</section>

@@ -4,18 +4,9 @@ interface Props {
   number: string;
   message: string;
   label: string;
-  accessibleLabel?: string;
   variant?: 'primary' | 'quiet';
-  paletteLink?: boolean;
 }
-const {
-  number,
-  message,
-  label,
-  accessibleLabel,
-  variant = 'quiet',
-  paletteLink = false,
-} = Astro.props;
+const { number, message, label, variant = 'quiet' } = Astro.props;
 ---
 
 <a
@@ -23,8 +14,6 @@ const {
   href={whatsappUrl(number, message)}
   target="_blank"
   rel="noopener noreferrer"
-  aria-label={accessibleLabel}
-  data-palette-link={paletteLink ? '' : undefined}
 >
   {label}
 </a>

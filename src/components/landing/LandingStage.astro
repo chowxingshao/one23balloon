@@ -1,0 +1,13 @@
+---
+// Fixed, decorative canvases. They sit outside the smooth-scroll wrapper so
+// fixed positioning is not broken by its transform.
+---
+
+<canvas
+  class="stage-canvas stage-back"
+  data-stage-back
+  aria-hidden="true"
+></canvas>
+<div class="stage" data-island="stage">
+  <canvas class="stage-canvas stage-front" aria-hidden="true"></canvas>
+</div>

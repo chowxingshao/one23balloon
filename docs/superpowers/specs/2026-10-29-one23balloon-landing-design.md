@@ -2,6 +2,8 @@
 
 Date: 2026-10-29. Status: approved in brainstorming, pending implementation plan.
 
+Superseded in part on 2026-10-30 by [the showcase redesign](2026-10-30-one23balloon-redesign-design.md), which replaces the visual direction, page structure, 3D scenes and content model.
+
 Related: [brief](../../../brief.md), [design direction](../../../design-direction.md), [architecture](../../architecture.md), [i18n](../../i18n.md), [content](../../content.md).
 
 ## Goal

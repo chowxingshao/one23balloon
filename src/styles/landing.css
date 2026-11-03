@@ -1,486 +1,460 @@
-/* Bands wear their own fixed palette; the services band stays neutral so the
-   six service-card tints read. Only hero and closing follow the picker. */
-.landing .band,
-.landing .venues,
-.landing .hero,
-.landing .closing {
-  background: var(--tint);
+/* Colour block landing (see design-direction.md). One theme; colours come from tokens.css. */
+
+/* Page chrome on the landing page */
+.site-main:has(> .landing) {
+  min-block-size: 0;
 }
-.landing .band {
-  padding-block: var(--space-xl);
+body:has(.landing) .site-header {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: var(--header-layer);
+  padding-block: 0.5rem;
+  background: var(--color-page);
+  border-block-end: 0;
+  backdrop-filter: none;
+  transition: background-color 0.35s var(--ease-out);
 }
-.eyebrow {
-  margin-block: 0 var(--space-sm);
-  color: var(--color-muted);
-  font-size: var(--font-size-small);
-  letter-spacing: var(--tracking-eyebrow);
-  text-transform: uppercase;
+body:has(.landing) .site-header.is-over-hero {
+  background: transparent;
 }
-.landing:lang(zh) .eyebrow {
-  letter-spacing: 0.3em;
-  text-transform: none;
+body:has(.landing) .site-header .site-name {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  text-decoration: none;
 }
-.display {
-  /* Break only between words, and keep display lines evenly filled. */
-  overflow-wrap: break-word;
-  text-wrap: balance;
+body:has(.landing) .site-header .header-cta {
+  border-radius: 999px;
+  background: var(--color-text);
+  color: var(--color-on-ink);
+  padding: 0.5rem 1.05rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+}
+/* Name, language switch and pill stay on one 64px row down to 360px. */
+body:has(.landing) .site-header .site-header-inner {
+  flex-wrap: nowrap;
+}
+body:has(.landing) .site-header .site-name {
+  min-inline-size: 0;
+}
+@media (max-width: 29.99rem) {
+  body:has(.landing) .site-header .site-header-inner {
+    gap: var(--space-xs);
+  }
+  body:has(.landing) .site-header .site-name {
+    font-size: 0.9rem;
+  }
+  body:has(.landing) .site-header .language-switcher {
+    font-size: 0.875rem;
+  }
+  body:has(.landing) .site-header .language-switcher .nav-list {
+    gap: 0.75rem;
+  }
+  body:has(.landing) .site-header .header-cta {
+    padding-inline: 0.8rem;
+  }
+}
+.site-footer:has(.landing-footer) {
+  background: var(--block-pink);
+  color: var(--block-pink-text);
+  overflow: clip;
+  /* Full width, so the vw-sized wordmark never outgrows the 90rem shell. */
+  max-inline-size: none;
+  padding-inline: var(--gutter);
+  border-block-start: 0;
+  --color-focus: var(--color-text);
+}
+
+/* Stage layers: back canvas behind content, front canvas above it. */
+body:has(.landing) .stage-canvas {
+  position: fixed;
+  inset: 0;
+  inline-size: 100vw;
+  block-size: 100dvh;
+  pointer-events: none;
+}
+body:has(.landing) .stage-back {
+  z-index: var(--stage-back-layer);
+}
+body:has(.landing) .stage {
+  position: fixed;
+  inset: 0;
+  z-index: var(--stage-layer);
+  pointer-events: none;
+}
+body:has(.landing) .stage .stage-canvas {
+  position: absolute;
+}
+body:has(.landing) #smooth-wrapper,
+.landing {
+  position: relative;
+  z-index: var(--content-layer);
+}
+
+/* Shared chapter type */
+.landing {
+  overflow-x: clip;
+}
+.chapter {
+  position: relative;
+}
+.landing .chapter-title {
   font-family: var(--font-display);
   font-weight: var(--weight-display);
-  letter-spacing: var(--tracking-title);
+  font-size: var(--font-size-display);
   line-height: var(--line-title);
+  letter-spacing: var(--tracking-title);
+  margin: 0;
 }
-.landing:lang(zh) .display {
-  /* Break Chinese headlines at punctuation, not inside words such as 时刻. */
-  word-break: keep-all;
-  letter-spacing: 0.04em;
-  line-height: 1.25;
+.landing:lang(zh) .chapter-title,
+.landing:lang(zh) .hero-title,
+.landing:lang(zh) .statement-text {
+  line-height: 1.12;
+  letter-spacing: 0;
 }
-.lede {
-  max-inline-size: 36rem;
-  color: var(--color-muted);
+
+/* 1. Hero */
+.hero {
+  min-block-size: 100dvh;
+  display: grid;
+  align-content: end;
+  gap: var(--space-md);
+  padding: calc(var(--header-height) + var(--space-lg)) var(--gutter)
+    var(--space-2xl);
+  isolation: isolate;
+}
+/* The captured poster stands in until the live stage takes over, and stays as the fallback. */
+.hero picture {
+  display: contents;
+}
+.hero-poster {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  z-index: -1;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-poster {
+    transition: opacity 0.4s var(--ease-out);
+  }
+}
+.landing[data-stage='live'] .hero-poster {
+  opacity: 0;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--font-size-hero);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.hero-line {
+  display: block;
+  white-space: nowrap;
+}
+.hero-line + .hero-line {
+  text-align: end;
+}
+.hero-lede {
+  max-inline-size: 30rem;
   font-size: var(--font-size-lead);
+  color: var(--color-muted);
+  margin: 0;
 }
-.actions {
+
+/* 2. Statement */
+.statement {
+  min-block-size: 100dvh;
+  display: grid;
+  align-items: center;
+  padding: var(--space-xl) var(--gutter);
+}
+.statement-text {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--font-size-display);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  max-inline-size: 18ch;
+  margin: 0;
+}
+.statement-word {
+  white-space: nowrap;
+}
+@media (max-width: 47.99rem) {
+  /* Unbounded is wide: smaller titles keep "celebrations" and "weddings," on a line at 360px. */
+  .landing .chapter-title,
+  .landing .statement-text {
+    font-size: clamp(1.75rem, 9vw, 2.75rem);
+  }
+  /* An inline block keeps each pill on the line of its first word. */
+  .statement-word {
+    display: inline-block;
+    white-space: normal;
+  }
+}
+.statement-pill {
+  display: inline-block;
+  inline-size: 1.7em;
+  block-size: 0.92em;
+  margin-inline-end: 0.18em;
+  border-radius: 999px;
+  object-fit: cover;
+  vertical-align: -0.06em;
+}
+
+/* 3. Services */
+.services-title {
+  padding: var(--space-xl) var(--gutter) var(--space-lg);
+}
+.service-stack {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.service-card {
+  position: relative;
+  min-block-size: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-lg);
+  padding: calc(var(--header-height) + var(--space-lg)) var(--gutter)
+    var(--space-lg);
+  background: var(--block);
+  color: var(--block-text);
+  transform-origin: 50% 0;
+}
+.service-card {
+  --color-focus: var(--color-text);
+}
+.service-card[data-block='cobalt'] {
+  --color-focus: #ffffff;
+}
+.service-copy h3 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--font-size-title);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-md);
+}
+.service-copy p {
+  font-size: var(--font-size-lead);
+  max-inline-size: 28rem;
+  margin: 0 0 var(--space-md);
+}
+.service-copy .whatsapp {
+  color: inherit;
+  font-weight: 700;
+  text-underline-offset: 0.2em;
+}
+.service-photo {
+  inline-size: 100%;
+  block-size: min(72dvh, 46rem);
+  object-fit: cover;
+  border-radius: var(--radius-photo);
+}
+.service-dim {
+  position: absolute;
+  inset: 0;
+  background: var(--color-text);
+  opacity: 0;
+  pointer-events: none;
+}
+@media (max-width: 47.99rem) {
+  .service-card {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+  }
+  .service-photo {
+    block-size: 46dvh;
+  }
+}
+
+/* 4. Signature */
+.signature {
+  padding-block: var(--space-xl);
+  overflow: clip;
+}
+.signature-marquee {
+  display: flex;
+  inline-size: max-content;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(4rem, 14vw, 16rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.marquee-run {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  padding-inline-end: 0.3em;
+  margin: 0;
+  white-space: nowrap;
+}
+.marquee-sep {
+  inline-size: 0.32em;
+  block-size: 0.38em;
+  border-radius: 50%;
+  background: var(--sep);
+  flex: none;
+}
+.signature-pieces {
+  list-style: none;
+  margin: -6vw 0 0;
+  padding: 0 var(--gutter);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-lg);
+  position: relative;
+}
+.signature-pieces li:nth-child(2) {
+  margin-block-start: var(--space-xl);
+}
+.signature-pieces img {
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: var(--radius-photo);
+}
+.landing .signature-pieces figure,
+.landing .celebrations figure {
+  margin: 0;
+}
+.landing .signature-pieces figcaption,
+.landing .celebrations figcaption {
+  margin-block-start: var(--space-xs);
+  font-size: var(--font-size-small);
+  color: var(--color-muted);
+}
+@media (max-width: 47.99rem) {
+  .signature-pieces {
+    grid-template-columns: minmax(0, 1fr);
+    margin-block-start: var(--space-lg);
+  }
+  .signature-pieces li:nth-child(2) {
+    margin-block-start: 0;
+  }
+}
+
+/* 5. Celebrations */
+.celebrations {
+  padding: var(--space-xl) var(--gutter);
+}
+.celebrations-plane {
+  transform-origin: 50% 0;
+}
+.landing .celebrations .chapter-title {
+  margin-block-end: var(--space-lg);
+}
+.celebrations-grid {
+  column-gap: var(--space-md);
+}
+.celebrations-column {
+  display: contents;
+  list-style: none;
+}
+.celebrations-column li {
+  break-inside: avoid;
+  margin-block-end: var(--space-md);
+}
+.landing .celebrations img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  border-radius: var(--radius-photo);
+}
+@media (min-width: 40rem) {
+  .celebrations-grid {
+    columns: 2;
+  }
+}
+@media (min-width: 64rem) {
+  .celebrations-grid {
+    columns: auto;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-md);
+    align-items: start;
+  }
+  .celebrations-column {
+    display: grid;
+    gap: var(--space-md);
+    margin: 0;
+    padding: 0;
+  }
+  .celebrations-column li {
+    margin: 0;
+  }
+  .celebrations-column:nth-child(even) {
+    margin-block-start: var(--space-2xl);
+  }
+}
+
+/* 6. Closing and footer */
+.closing-flood {
+  --color-focus: var(--color-text);
+  min-block-size: 100dvh;
+  display: grid;
+  align-content: center;
+  gap: var(--space-lg);
+  padding: var(--space-xl) var(--gutter);
+  background: var(--block-pink);
+  color: var(--block-pink-text);
+}
+.closing-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-sm);
-  margin-block: var(--space-md);
 }
-.whatsapp {
+.landing .whatsapp.primary,
+.landing .button-outline {
   display: inline-flex;
   align-items: center;
-  min-block-size: 2.75rem;
-  padding: 0.7em 1.4em;
   border-radius: 999px;
-  font-weight: 600;
+  padding: 0.9rem 1.6rem;
+  font-weight: 700;
+  font-size: var(--font-size-lead);
   text-decoration: none;
-  transition: transform 0.3s var(--ease-out);
+  white-space: nowrap;
 }
-.whatsapp.primary {
+.landing .whatsapp.primary {
   background: var(--color-text);
   color: var(--color-on-ink);
 }
-.whatsapp.quiet {
-  border: var(--border-width) solid currentColor;
-  color: var(--color-text);
+.landing .button-outline {
+  border: 2px solid currentColor;
+  color: inherit;
 }
-.whatsapp:hover {
-  transform: translateY(-2px);
+.landing .whatsapp.primary:active,
+.landing .button-outline:active,
+body:has(.landing) .header-cta:active {
+  transform: translateY(1px);
 }
-.photo {
-  inline-size: 100%;
-  block-size: 100%;
-  object-fit: cover;
+.landing-footer .wordmark {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 8.5vw;
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  margin: 0;
 }
-.photo-arch {
-  border-radius: var(--radius-arch);
-}
-.photo-card {
-  border-radius: var(--radius-card);
-}
-
-/* Hero and closing share the copy-plus-stage layout. */
-.hero,
-.closing {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: center;
-  overflow: hidden;
-}
-.hero {
-  min-block-size: min(100svh, 62rem);
-}
-.hero-copy,
-.closing-copy {
-  padding: var(--space-xl) var(--space-page) var(--space-lg);
-}
-.hero-copy {
-  /* The headline scales with its own column, which at wide viewports is far
-     narrower than the viewport once the shell offset is added. */
-  container-type: inline-size;
-}
-.hero h1 {
-  max-inline-size: 14ch;
-  margin-block: 0 var(--space-md);
-  font-size: clamp(2.75rem, 12cqi, 7.5rem);
-}
-.landing:lang(zh) .hero h1 {
-  /* Sized so the longest phrase (9 characters with tracking, about 9.4em)
-     always fits the column on one line. */
-  max-inline-size: 10em;
-  font-size: clamp(2rem, 10cqi, 7.5rem);
-}
-/* The hero copy is the largest contentful paint, so it is never faded in:
-   it is visible in the first frame and only rises into place, in CSS, without
-   waiting for any script. */
-@media (prefers-reduced-motion: no-preference) {
-  .hero-copy > * {
-    animation: hero-rise 0.7s var(--ease-out) both;
-  }
-  .hero-copy > :nth-child(2) {
-    animation-delay: 0.06s;
-  }
-  .hero-copy > :nth-child(3) {
-    animation-delay: 0.12s;
-  }
-  .hero-copy > :nth-child(n + 4) {
-    animation-delay: 0.18s;
-  }
-}
-@keyframes hero-rise {
-  from {
-    translate: 0 1.25rem;
-  }
-}
-.closing h2 {
-  margin-block: 0 var(--space-md);
-  font-size: var(--font-size-title);
-}
-.stage {
-  position: relative;
-  aspect-ratio: 4 / 5;
-  margin: 0 var(--space-page) var(--space-lg);
-}
-.stage > .photo {
-  position: absolute;
-  inset: 0;
-  transition: opacity 0.8s var(--ease-out);
-}
-@media (min-width: 64rem) {
-  .hero,
-  .closing {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-  }
-  .hero-copy,
-  .closing-copy {
-    padding-inline-start: max(
-      var(--space-page),
-      calc((100vw - var(--width-site)) / 2 + var(--space-page))
-    );
-  }
-  .hero .stage,
-  .closing .stage {
-    aspect-ratio: auto;
-    block-size: 100%;
-    min-block-size: 40rem;
-    margin: 0;
-  }
-}
-
-.palette-picker {
+.landing-footer-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-xs);
-  margin-block: var(--space-md);
-}
-.palette-picker[hidden] {
-  display: none;
-}
-/* With scripting on, the picker keeps its space (invisible and out of the tab
-   order) until the script enables it, so the hero does not shift. */
-@media (scripting: enabled) {
-  .palette-picker[hidden] {
-    display: flex;
-    visibility: hidden;
-  }
-}
-.picker-label {
-  flex-basis: 100%;
-  margin: 0;
-  color: var(--color-muted);
+  justify-content: space-between;
+  gap: var(--space-sm);
   font-size: var(--font-size-small);
-}
-.palette-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-block-size: 2.75rem;
-  padding: 0.35rem 0.9rem 0.35rem 0.55rem;
-  border: var(--border-width) solid var(--color-border);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-page) 75%, transparent);
-  color: var(--color-text);
-  font: inherit;
-  font-size: var(--font-size-small);
-  cursor: pointer;
-}
-.palette-option[aria-checked='true'] {
-  border-color: var(--color-text);
-  box-shadow: inset 0 0 0 1px var(--color-text);
-}
-.swatches {
-  display: inline-flex;
-}
-.swatch {
-  inline-size: 1rem;
-  block-size: 1rem;
-  margin-inline-start: -0.3rem;
-  border: 1px solid rgb(0 0 0 / 0.12);
-  border-radius: 50%;
-  background: var(--swatch);
-}
-.swatch:first-child {
-  margin-inline-start: 0;
-}
-
-.section-head {
-  max-inline-size: 48rem;
-  margin-block-end: var(--space-lg);
-}
-.section-head h2,
-.venues h2,
-.steps h2,
-.faq h2 {
-  margin-block: 0 var(--space-sm);
-  font-size: var(--font-size-title);
-}
-.service-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-  gap: var(--space-lg) var(--space-md);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.service {
-  padding: var(--space-sm) var(--space-sm) var(--space-md);
-  border-radius: var(--radius-card);
-  background: var(--tint);
-}
-.service .photo {
-  aspect-ratio: 4 / 5;
-}
-.service h3 {
-  margin-block: var(--space-md) var(--space-xs);
-  font-size: 1.6rem;
-}
-
-.gallery-viewport {
-  overflow-x: auto;
-  padding-inline: var(--space-page);
-  scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
-}
-.gallery-viewport.is-pinned {
-  overflow: hidden;
-}
-.gallery-track {
-  display: flex;
-  gap: var(--space-md);
-  inline-size: max-content;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.gallery-item {
-  /* Contains the absolutely positioned visually-hidden colour names so they
-     are clipped by the scroller instead of widening the page. */
-  position: relative;
-  inline-size: clamp(16rem, 30vw, 26rem);
-  scroll-snap-align: start;
-}
-.gallery-item .photo {
-  aspect-ratio: 4 / 5;
-}
-.gallery figure,
-.sculptures figure {
-  margin: 0;
-}
-.gallery figcaption {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  margin-block-start: var(--space-xs);
-  font-size: var(--font-size-small);
-}
-.sep {
-  inline-size: 1px;
-  block-size: 1em;
-  background: var(--color-muted);
-}
-.dots {
-  display: inline-flex;
-  gap: 0.25rem;
-  margin-inline-start: auto;
-}
-.dot {
-  inline-size: 0.75rem;
-  block-size: 0.75rem;
-  border: 1px solid rgb(0 0 0 / 0.15);
-  border-radius: 50%;
-  background: var(--dot);
-}
-.more {
-  margin-block-start: var(--space-md);
-}
-
-.sculptures-grid {
-  display: grid;
-  gap: var(--space-lg);
-}
-.sculpture-photos {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-md);
-}
-.sculpture-photos .photo {
-  aspect-ratio: 3 / 4;
-}
-.sculpture-photos figcaption {
-  margin-block-start: var(--space-xs);
-  color: var(--color-muted);
-  font-size: var(--font-size-small);
-}
-.sculpture-stage {
-  aspect-ratio: 3 / 5;
-  margin: 0;
-}
-.sculpture-stage:not([data-island-state]),
-.sculpture-stage[data-island-state='fallback'],
-.sculpture-stage[data-island-state='disposed'] {
-  display: none;
-}
-.piece-names {
-  position: absolute;
-  inset-inline: 0;
-  inset-block-end: 0;
-  display: flex;
-  justify-content: space-around;
-  margin: 0;
-  padding: 0;
-  color: var(--color-muted);
-  font-family: var(--font-display);
-  list-style: none;
-}
-@media (min-width: 40rem) {
-  .sculpture-stage {
-    aspect-ratio: 16 / 10;
-  }
-}
-@media (min-width: 64rem) {
-  .sculptures-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-    align-items: center;
-  }
-}
-
-.venues {
-  padding-block: var(--space-xl) var(--space-lg);
-}
-.marquee {
-  display: flex;
-  overflow: hidden;
-  padding-block: var(--space-md);
-  border-block: var(--border-width) solid var(--color-border);
-}
-.marquee-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-sm) var(--space-lg);
-  margin: 0;
-  padding-inline: var(--space-page);
-  font-family: var(--font-display);
-  font-size: clamp(1.5rem, 3vw, 2.5rem);
-  list-style: none;
-}
-.marquee-copy {
-  display: none;
-}
-.marquee.is-running .marquee-list {
-  flex-shrink: 0;
-  flex-wrap: nowrap;
-  padding-inline: 0 var(--space-lg);
-}
-.marquee.is-running .marquee-copy {
-  display: flex;
-}
-
-.step-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-  gap: var(--space-lg);
-  padding: 0;
-  list-style: none;
-  counter-reset: step;
-}
-.step-list li::before {
-  content: counter(step, decimal-leading-zero);
-  counter-increment: step;
-  color: var(--color-link);
-  font-family: var(--font-display);
-  font-size: var(--font-size-heading);
-}
-
-.faq details {
-  max-inline-size: var(--width-reading);
-  padding-block: var(--space-sm);
-  border-block-end: var(--border-width) solid var(--color-border);
-}
-.faq summary {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  cursor: pointer;
-}
-.faq details p {
-  margin-block: var(--space-xs) 0;
-  color: var(--color-muted);
-}
-
-.landing-footer p {
-  margin-block: var(--space-xs) 0;
-}
-
-/* 3D islands: the photo stays in the DOM; the canvas fades in over it once live. */
-.island-canvas {
-  position: absolute;
-  inset: 0;
-  inline-size: 100%;
-  block-size: 100%;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.8s var(--ease-out);
-}
-[data-island-state='live'] > .island-canvas {
-  opacity: 1;
-  pointer-events: auto;
-}
-[data-island-state='live'] > .photo {
-  opacity: 0;
-}
-/* The intro overlay is invisible and click-through until its scene is live,
-   so a slow scene chunk never leaves a blank screen (see scripts/intro.ts). */
-.intro {
-  position: fixed;
-  inset: 0;
-  z-index: var(--intro-layer);
-  background: var(--color-page);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s var(--ease-out);
-}
-.intro[data-island-state='live'] {
-  opacity: 1;
-  pointer-events: auto;
-}
-.intro .island-canvas {
-  opacity: 1;
-}
-.intro-skip {
-  position: absolute;
-  inset-block-end: var(--space-md);
-  inset-inline-end: var(--space-md);
-  min-block-size: 2.75rem;
-  padding: 0.5rem 1.2rem;
-  border: var(--border-width) solid var(--color-text);
-  border-radius: 999px;
-  background: var(--color-page);
-  color: var(--color-text);
-  font: inherit;
-  cursor: pointer;
-}
-@media (prefers-reduced-motion: reduce) {
-  .intro {
-    display: none;
-  }
 }

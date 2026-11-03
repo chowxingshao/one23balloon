@@ -4,10 +4,10 @@ import { describe, expect, it } from 'vitest';
 import { parityProblems } from '../../src/lib/landing/parity.ts';
 import {
   createLandingSchema,
-  sculptureIds,
+  pieceIds,
   serviceIds,
 } from '../../src/lib/landing/schema.ts';
-import { paletteIds } from '../../src/lib/landing/palettes.ts';
+import { blockIds } from '../../src/lib/landing/blocks.ts';
 
 const image = (() => z.string()) as unknown as SchemaContext['image'];
 const schema = createLandingSchema(image);
@@ -27,163 +27,219 @@ function valid() {
       registration: 'SSM CT0152510-K',
       rights: 'All rights reserved.',
     },
-    intro: { skip: 'Skip intro' },
-    hero: {
-      eyebrow: 'KL',
-      title: 'Title',
-      lede: 'Lede',
-      cta: 'WhatsApp us',
-      message: 'Hi',
-      photo: photo(0),
-    },
-    palettes: {
-      label: 'Choose a palette',
-      items: paletteIds.map((id) => ({ id, name: id, message: `Hi ${id}` })),
-    },
-    services: {
-      title: 'Services',
-      lede: 'Lede',
-      cta: 'Ask',
-      items: serviceIds.map((id, i) => ({
-        id,
-        title: id,
-        body: 'Body',
-        palette: paletteIds[i % 5],
-        message: `Hi ${id}`,
-        photo: photo(10 + i),
-      })),
-    },
-    gallery: {
-      title: 'Work',
-      lede: 'Lede',
-      more: 'More',
-      items: Array.from({ length: 12 }, (_, i) => ({
-        ...photo(20 + i),
-        location: 'KL',
-        theme: 'Birthday',
-        colours: [{ hex: '#E8B4B2', name: 'Pink' }],
-      })),
-    },
-    sculptures: {
-      title: 'Sculptures',
-      lede: 'Lede',
-      pieces: sculptureIds.map((id) => ({ id, name: id })),
-      photos: [
-        { ...photo(40), caption: 'Lion dance' },
-        { ...photo(41), caption: 'Roses' },
+    header: { whatsapp: 'WhatsApp' },
+    hero: { title: ['Every party,', 'bigger.'], lede: 'Balloon setups.' },
+    statement: {
+      parts: [
+        { text: 'We style' },
+        { word: 'weddings,', photo: photo(1) },
+        { word: 'openings,', photo: photo(2) },
+        { word: 'birthdays', photo: photo(3) },
+        { text: 'and' },
+        { word: '100-day parties', photo: photo(4) },
+        { text: 'across KL.' },
       ],
     },
-    venues: {
-      title: 'Venues',
-      items: ['Hotels', 'Homes', 'KTV rooms', 'Restaurants'],
+    services: {
+      title: 'What we do',
+      items: serviceIds.map((id, index) => ({
+        id,
+        colour: blockIds[index],
+        title: `Service ${id}`,
+        body: 'Body',
+        linkLabel: 'Ask on WhatsApp',
+        message: 'Hi',
+        photo: photo(10 + index),
+      })),
     },
-    steps: {
-      draft: true,
-      title: 'How it works',
-      items: [1, 2, 3].map((n) => ({ title: `Step ${n}`, body: 'Body' })),
+    signature: {
+      marquee: ['Arches', 'Garlands', 'Columns', 'Sculptures', 'Bouquets'],
+      pieces: pieceIds.map((id, index) => ({
+        id,
+        caption: 'Caption',
+        photo: photo(20 + index),
+      })),
     },
-    faq: {
-      title: 'FAQ',
-      items: [{ question: 'Where?', answer: 'KL and Selangor.', draft: false }],
+    celebrations: {
+      title: 'Recent celebrations',
+      items: Array.from({ length: 30 }, (_, index) => ({
+        id: `c${String(index + 1).padStart(2, '0')}`,
+        occasion: 'Birthday',
+        photo: photo(100 + index),
+      })),
     },
     closing: {
-      title: 'Compose',
-      body: 'Body',
-      cta: 'Start',
+      title: "Let's make yours.",
+      whatsapp: 'WhatsApp us',
       message: 'Hi',
-      photo: photo(50),
     },
   };
 }
 
 describe('landing schema', () => {
-  it('accepts complete landing content', () => {
+  it('accepts complete showcase content', () => {
     expect(schema.safeParse(valid()).success).toBe(true);
+  });
+
+  it.each(['intro', 'palettes', 'venues', 'steps', 'faq', 'gallery'])(
+    'rejects the removed %s section',
+    (key) => {
+      expect(schema.safeParse({ ...valid(), [key]: {} }).success).toBe(false);
+    },
+  );
+
+  it('requires a two-line hero title', () => {
+    const data = valid();
+    data.hero.title = ['Only one line'] as unknown as [string, string];
+    expect(schema.safeParse(data).success).toBe(false);
+  });
+
+  it('caps the header pill label at 12 characters', () => {
+    const data = valid();
+    data.header.whatsapp = 'Message us on WhatsApp';
+    expect(schema.safeParse(data).success).toBe(false);
+  });
+
+  it('requires exactly four photo pills in the statement', () => {
+    const data = valid();
+    data.statement.parts.splice(1, 1);
+    expect(schema.safeParse(data).success).toBe(false);
+  });
+
+  it('gives every service a different block colour', () => {
+    const data = valid();
+    data.services.items[1]!.colour = data.services.items[0]!.colour;
+    expect(schema.safeParse(data).success).toBe(false);
+  });
+
+  it('rejects unknown block colours', () => {
+    const data = valid() as unknown as {
+      services: { items: Array<{ colour: string }> };
+    };
+    data.services.items[0]!.colour = 'neon';
+    expect(schema.safeParse(data).success).toBe(false);
+  });
+
+  it('keeps between 30 and 50 celebrations with unique ids', () => {
+    const short = valid();
+    short.celebrations.items.pop();
+    expect(schema.safeParse(short).success).toBe(false);
+    const duplicate = valid();
+    duplicate.celebrations.items[1]!.id = 'c01';
+    expect(schema.safeParse(duplicate).success).toBe(false);
+  });
+
+  it.each(['+60 10-901 7633', '010-9017633', '60109017633 '])(
+    'rejects the formatted whatsapp number %j',
+    (number) => {
+      const data = valid();
+      data.whatsapp = number;
+      expect(schema.safeParse(data).success).toBe(false);
+    },
+  );
+
+  it('rejects a duplicate service id', () => {
+    const data = valid();
+    data.services.items[1]!.id = data.services.items[0]!.id;
+    expect(schema.safeParse(data).success).toBe(false);
   });
 
   it.each([
     [
-      'an empty alt',
-      (d: ReturnType<typeof valid>) => {
-        d.hero.photo.alt = ' ';
+      'at the top level',
+      (data: ReturnType<typeof valid>) => ({ ...data, extra: 1 }),
+    ],
+    [
+      'in a photo',
+      (data: ReturnType<typeof valid>) => {
+        Object.assign(data.statement.parts[1]!.photo!, { credit: 'x' });
+        return data;
       },
     ],
     [
-      'an unknown palette',
-      (d: ReturnType<typeof valid>) => {
-        d.services.items[0].palette = 'neon' as never;
+      'in a service',
+      (data: ReturnType<typeof valid>) => {
+        Object.assign(data.services.items[0]!, { price: 'RM1' });
+        return data;
       },
     ],
-    [
-      'a non-Instagram source',
-      (d: ReturnType<typeof valid>) => {
-        d.gallery.items[0].source = 'https://example.com/p/1/';
-      },
-    ],
-    [
-      'a formatted phone number',
-      (d: ReturnType<typeof valid>) => {
-        d.whatsapp = '010-9017633';
-      },
-    ],
-    [
-      'a missing gallery photo',
-      (d: ReturnType<typeof valid>) => {
-        d.gallery.items.pop();
-      },
-    ],
-    [
-      'a duplicated service',
-      (d: ReturnType<typeof valid>) => {
-        d.services.items[1].id = 'weddings';
-      },
-    ],
-    [
-      'a duplicated palette',
-      (d: ReturnType<typeof valid>) => {
-        d.palettes.items[1].id = 'blush-champagne';
-      },
-    ],
-    [
-      'too many colours',
-      (d: ReturnType<typeof valid>) => {
-        d.gallery.items[0].colours = Array(5).fill({
-          hex: '#FFFFFF',
-          name: 'White',
-        });
-      },
-    ],
-    [
-      'an unknown field',
-      (d: ReturnType<typeof valid>) => {
-        (d.hero as Record<string, unknown>).price = 'RM299';
-      },
-    ],
-  ])('rejects %s', (_name, mutate) => {
+  ])('rejects an unknown field %s', (_place, mutate) => {
+    expect(schema.safeParse(mutate(valid())).success).toBe(false);
+  });
+
+  it.each(['', '   '])('rejects an empty photo alt %j', (alt) => {
     const data = valid();
-    mutate(data);
+    data.celebrations.items[0]!.photo.alt = alt;
     expect(schema.safeParse(data).success).toBe(false);
+  });
+
+  it('rejects a celebration source used twice', () => {
+    const data = valid();
+    data.celebrations.items[1]!.photo.source =
+      data.celebrations.items[0]!.photo.source;
+    expect(schema.safeParse(data).success).toBe(false);
+  });
+
+  it('rejects em and en dashes in visible text', () => {
+    const data = valid();
+    data.hero.lede = 'Balloons — for you';
+    expect(schema.safeParse(data).success).toBe(false);
+  });
+
+  it('only accepts Instagram post URLs as photo sources', () => {
+    const data = valid();
+    data.celebrations.items[0]!.photo.source = 'https://example.com/a.jpg';
+    expect(schema.safeParse(data).success).toBe(false);
+  });
+
+  it('accepts a story permalink as a celebration source but not a highlight album', () => {
+    const story = valid();
+    story.celebrations.items[0]!.photo.source =
+      'https://www.instagram.com/stories/one23balloon/3899572834921993285/';
+    expect(schema.safeParse(story).success).toBe(true);
+    const album = valid();
+    album.celebrations.items[0]!.photo.source =
+      'https://www.instagram.com/stories/highlights/18463288678070950/';
+    expect(schema.safeParse(album).success).toBe(false);
   });
 });
 
 describe('landing parity', () => {
-  it('accepts translations with the same structure', () => {
+  it('accepts translated words with the same structure', () => {
     const zh = valid();
-    zh.hero.title = '标题';
+    zh.hero.title = ['每一场派对，', '更盛大。'];
+    zh.statement.parts[0] = { text: '我们为' };
+    zh.celebrations.items[0]!.occasion = '生日派对';
     expect(parityProblems(valid(), zh)).toEqual([]);
   });
 
-  it('reports structural differences by section', () => {
-    const zh = valid();
-    zh.gallery.items.reverse();
-    zh.faq.items[0].draft = true;
-    zh.whatsapp = '60123456789';
-    expect(parityProblems(valid(), zh)).toEqual(['whatsapp', 'gallery', 'faq']);
-  });
-
-  it('reports a different image file behind the same source', () => {
-    const zh = valid();
-    zh.gallery.items[3].image = 'other-photo.jpg';
-    expect(parityProblems(valid(), zh)).toEqual(['gallery']);
+  it.each([
+    [
+      'celebrations',
+      (data: ReturnType<typeof valid>) =>
+        (data.celebrations.items[3]!.photo = photo(999)),
+    ],
+    [
+      'services',
+      (data: ReturnType<typeof valid>) =>
+        (data.services.items[0]!.colour = 'lilac'),
+    ],
+    [
+      'statement',
+      (data: ReturnType<typeof valid>) =>
+        (data.statement.parts[1] = { word: 'x', photo: photo(77) }),
+    ],
+    [
+      'signature',
+      (data: ReturnType<typeof valid>) => data.signature.marquee.pop(),
+    ],
+    [
+      'whatsapp',
+      (data: ReturnType<typeof valid>) => (data.whatsapp = '60123456789'),
+    ],
+  ])('reports drift in %s', (key, mutate) => {
+    const other = valid();
+    mutate(other);
+    expect(parityProblems(valid(), other)).toContain(key);
   });
 });

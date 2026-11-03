@@ -1,0 +1,48 @@
+---
+import { Image } from 'astro:assets';
+import WhatsAppLink from './WhatsAppLink.astro';
+import type { LandingData } from '../../lib/landing/content.ts';
+interface Props {
+  data: LandingData;
+}
+const { data } = Astro.props;
+---
+
+<section
+  class="chapter services"
+  data-chapter="services"
+  aria-labelledby="services-title"
+>
+  <h2 id="services-title" class="chapter-title services-title">
+    {data.services.title}
+  </h2>
+  <div class="service-stack">
+    {data.services.items.map((service) => (
+      <article
+        class="service-card"
+        data-service-card
+        data-block={service.colour}
+        style={`--block: var(--block-${service.colour}); --block-text: var(--block-${service.colour}-text);`}
+      >
+        <div class="service-copy">
+          <h3>{service.title}</h3>
+          <p>{service.body}</p>
+          <WhatsAppLink
+            number={data.whatsapp}
+            message={service.message}
+            label={service.linkLabel}
+          />
+        </div>
+        <Image
+          class="service-photo"
+          src={service.photo.image}
+          alt={service.photo.alt}
+          widths={[480, 800, 1200]}
+          sizes="(min-width: 48rem) 45vw, 92vw"
+          loading="lazy"
+        />
+        <span class="service-dim" aria-hidden="true" />
+      </article>
+    ))}
+  </div>
+</section>

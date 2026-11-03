@@ -1,0 +1,16 @@
+---
+interface Props {
+  enabled: boolean;
+}
+const { enabled } = Astro.props;
+---
+
+{enabled ? (
+  <div id="smooth-wrapper">
+    <div id="smooth-content">
+      <slot />
+    </div>
+  </div>
+) : (
+  <slot />
+)}

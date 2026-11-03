@@ -1,259 +1,227 @@
 import { JSDOM } from 'jsdom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Capability } from '../../src/lib/canvas-island/capability.ts';
-import { markIntroPlayed } from '../../src/lib/landing/intro-plan.ts';
-import { initLanding } from '../../src/scripts/landing.ts';
+import type { IslandScene } from '../../src/lib/canvas-island/lifecycle.ts';
 
-const capable: Capability = {
-  webgl: true,
-  reducedMotion: false,
-  tier: 'high',
-  pixelRatio: 1,
-};
 let dom: JSDOM;
-beforeEach(() => {
-  dom = new JSDOM(`<div data-landing data-intro data-intro-skip="Skip">
-    <div data-palette-picker hidden></div>
-    <div data-island="hero"><canvas></canvas></div>
-    <div data-island="unknown"><canvas></canvas></div>
-  </div>`);
-  vi.stubGlobal('CustomEvent', dom.window.CustomEvent);
-  // Islands wait for idle time; run that step at once so tests only await promises.
-  vi.stubGlobal('requestIdleCallback', (run: () => void) => {
-    run();
-    return 0;
-  });
-});
-afterEach(() => {
-  dom.window.close();
-  vi.unstubAllGlobals();
-});
-const doc = () => dom.window.document;
-const root = () => doc().querySelector<HTMLElement>('[data-landing]')!;
-const hero = () => doc().querySelector<HTMLElement>('[data-island="hero"]')!;
-const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
-// Runs a scheduled step straight away, standing in for "after load and idle".
 const now = (run: () => void) => {
   run();
   return () => undefined;
 };
-function manualSchedule() {
-  let pending: (() => void) | undefined;
-  const cancel = vi.fn();
-  const schedule = vi.fn((run: () => void) => {
-    pending = run;
-    return cancel;
-  });
-  return { schedule, cancel, run: () => pending?.() };
-}
-function memoryStorage(): Storage {
-  const values = new Map<string, string>();
+const capability = (overrides: Partial<Capability> = {}): Capability => ({
+  webgl: true,
+  reducedMotion: false,
+  tier: 'high',
+  pixelRatio: 1,
+  ...overrides,
+});
+const scene = (): IslandScene => ({
+  start: vi.fn(),
+  stop: vi.fn(),
+  resize: vi.fn(),
+  dispose: vi.fn(),
+});
+
+beforeEach(() => {
+  dom = new JSDOM(`<body>
+    <div class="stage" data-island="stage"><canvas></canvas></div>
+    <div data-landing data-formation="hero"></div></body>`);
+  vi.stubGlobal('window', dom.window);
+  vi.stubGlobal('document', dom.window.document);
+  vi.stubGlobal('IntersectionObserver', undefined);
+  vi.stubGlobal('ResizeObserver', undefined);
+});
+afterEach(() => vi.unstubAllGlobals());
+
+// A controllable (prefers-reduced-motion: reduce) query on the test window.
+function reduceQuery() {
+  const handlers = new Set<(event: { matches: boolean }) => void>();
+  const query = {
+    matches: false,
+    addEventListener: (_type: string, handler: never) => handlers.add(handler),
+    removeEventListener: (_type: string, handler: never) =>
+      handlers.delete(handler),
+  };
+  vi.stubGlobal('matchMedia', undefined);
+  (dom.window as unknown as { matchMedia: () => unknown }).matchMedia = () =>
+    query;
   return {
-    getItem: (key: string) => values.get(key) ?? null,
-    setItem: (key: string, value: string) => void values.set(key, value),
-  } as unknown as Storage;
+    listeners: () => handlers.size,
+    change(matches: boolean) {
+      query.matches = matches;
+      for (const handler of [...handlers]) handler({ matches });
+    },
+  };
 }
+
+async function load() {
+  return import('../../src/scripts/landing.ts');
+}
+const root = () =>
+  dom.window.document.querySelector<HTMLElement>('[data-landing]')!;
 
 describe('initLanding', () => {
-  const fakeScene = () => ({
-    start: vi.fn(),
-    stop: vi.fn(),
-    resize: vi.fn(),
-    dispose: vi.fn(),
-  });
-  const played = () => {
-    const storage = memoryStorage();
-    markIntroPlayed(storage);
-    return storage;
-  };
-
-  it('mounts known islands, enhances pickers, starts motion, then disposes everything', async () => {
-    const scene = fakeScene();
+  it('mounts the stage outside the landing root, marks it live, then disposes', async () => {
+    const { initLanding } = await load();
+    const created = scene();
     const motionDispose = vi.fn();
-    const motion = vi.fn(() => motionDispose);
-    const intro = vi.fn();
     const dispose = initLanding(root(), {
-      capability: capable,
+      capability: capability(),
       start: now,
-      storage: played(),
-      loaders: { hero: async () => async () => scene },
-      intro,
-      motion,
+      loaders: { stage: async () => async () => created },
+      motion: () => motionDispose,
     });
-    await flush();
-    expect(hero().dataset.islandState).toBe('live');
-    expect(intro).not.toHaveBeenCalled();
-    expect(
-      doc()
-        .querySelector('[data-island="unknown"]')!
-        .hasAttribute('data-island-state'),
-    ).toBe(false);
-    expect(
-      doc().querySelector<HTMLElement>('[data-palette-picker]')!.hidden,
-    ).toBe(false);
-    expect(motion).toHaveBeenCalledWith(root());
-
+    await vi.waitFor(() => expect(created.start).toHaveBeenCalled());
+    expect(root().dataset.stage).toBe('live');
     dispose();
-    expect(scene.dispose).toHaveBeenCalledOnce();
-    expect(motionDispose).toHaveBeenCalledOnce();
-    expect(hero().dataset.islandState).toBe('disposed');
-    expect(
-      doc().querySelector<HTMLElement>('[data-palette-picker]')!.hidden,
-    ).toBe(true);
+    expect(created.dispose).toHaveBeenCalled();
+    expect(motionDispose).toHaveBeenCalled();
   });
 
-  it('builds the hero scene only after the intro finishes', async () => {
-    const scene = fakeScene();
-    const heroLoad = vi.fn(async () => async () => scene);
-    const intro = vi.fn(() => new Promise<never>(() => undefined));
-    initLanding(root(), {
-      capability: capable,
-      start: now,
-      storage: memoryStorage(),
-      loaders: { hero: heroLoad },
-      intro,
-      motion: () => () => undefined,
-    });
-    await flush();
-    expect(intro).toHaveBeenCalledOnce();
-    expect(doc().querySelector('.intro')).not.toBeNull();
-    expect(heroLoad).not.toHaveBeenCalled();
-    expect(hero().hasAttribute('data-island-state')).toBe(false);
-
-    doc().querySelector<HTMLButtonElement>('.intro-skip')!.click();
-    await flush();
-    expect(hero().dataset.islandState).toBe('live');
-  });
-
-  it('does not mount the hero when disposed while the intro plays', async () => {
-    const heroLoad = vi.fn(async () => async () => fakeScene());
-    const dispose = initLanding(root(), {
-      capability: capable,
-      start: now,
-      storage: memoryStorage(),
-      loaders: { hero: heroLoad },
-      intro: () => new Promise<never>(() => undefined),
-      motion: () => () => undefined,
-    });
-    dispose();
-    await flush();
-    expect(doc().querySelector('.intro')).toBeNull();
-    expect(heroLoad).not.toHaveBeenCalled();
-    expect(hero().hasAttribute('data-island-state')).toBe(false);
-  });
-
-  it('does no 3D, motion or WebGL probing until the page has loaded and gone idle', async () => {
-    const start = manualSchedule();
-    const detect = vi.fn(() => capable);
-    const motion = vi.fn(() => () => undefined);
-    const intro = vi.fn(() => new Promise<never>(() => undefined));
-    initLanding(root(), {
-      capability: detect,
-      start: start.schedule,
-      storage: memoryStorage(),
-      loaders: { hero: async () => async () => fakeScene() },
-      intro,
-      motion,
-    });
-    await flush();
-    expect(
-      doc().querySelector<HTMLElement>('[data-palette-picker]')!.hidden,
-    ).toBe(false);
-    expect(detect).not.toHaveBeenCalled();
-    expect(motion).not.toHaveBeenCalled();
-    expect(intro).not.toHaveBeenCalled();
-    expect(hero().hasAttribute('data-island-state')).toBe(false);
-
-    start.run();
-    await flush();
-    expect(detect).toHaveBeenCalledOnce();
-    expect(motion).toHaveBeenCalledWith(root());
-    expect(intro).toHaveBeenCalledOnce();
-  });
-
-  it('waits for the window load event by default', async () => {
-    Object.defineProperty(doc(), 'readyState', {
-      configurable: true,
-      value: 'loading',
-    });
+  it('does nothing before the start schedule fires', async () => {
+    const { initLanding } = await load();
+    const probe = vi.fn(() => capability());
     const motion = vi.fn(() => () => undefined);
     initLanding(root(), {
-      capability: capable,
-      storage: played(),
-      loaders: { hero: async () => async () => fakeScene() },
+      capability: probe,
+      start: () => () => undefined,
       motion,
     });
-    await flush();
-    expect(motion).not.toHaveBeenCalled();
-    dom.window.dispatchEvent(new dom.window.Event('load'));
-    await flush();
-    expect(motion).toHaveBeenCalledOnce();
-    expect(hero().dataset.islandState).toBe('live');
-  });
-
-  it('cancels the pending start when disposed first', () => {
-    const start = manualSchedule();
-    const motion = vi.fn(() => () => undefined);
-    const dispose = initLanding(root(), {
-      capability: capable,
-      start: start.schedule,
-      storage: played(),
-      motion,
-    });
-    dispose();
-    expect(start.cancel).toHaveBeenCalledOnce();
-    start.run();
-    expect(motion).not.toHaveBeenCalled();
-  });
-
-  it('on the low tier, skips the intro and leaves WebGL alone until the visitor engages', async () => {
-    const engage = manualSchedule();
-    const probe = vi.fn(() => true);
-    const heroLoad = vi.fn(async () => async () => fakeScene());
-    const motion = vi.fn(() => () => undefined);
-    const intro = vi.fn();
-    initLanding(root(), {
-      capability: () => ({
-        ...capable,
-        tier: 'low',
-        get webgl() {
-          return probe();
-        },
-      }),
-      start: now,
-      engage: engage.schedule,
-      storage: memoryStorage(),
-      loaders: { hero: heroLoad },
-      intro,
-      motion,
-    });
-    await flush();
-    expect(motion).toHaveBeenCalledOnce();
     expect(probe).not.toHaveBeenCalled();
-    expect(hero().hasAttribute('data-island-state')).toBe(false);
-
-    engage.run();
-    await flush();
-    expect(probe).toHaveBeenCalled();
-    expect(intro).not.toHaveBeenCalled();
-    expect(doc().querySelector('.intro')).toBeNull();
-    expect(heroLoad).toHaveBeenCalledOnce();
-    expect(hero().dataset.islandState).toBe('live');
+    expect(motion).not.toHaveBeenCalled();
   });
 
-  it('keeps photo fallbacks and skips the intro without WebGL', () => {
-    const load = vi.fn();
-    const intro = vi.fn();
+  it('on the low tier waits for engagement before loading the stage', async () => {
+    const { initLanding } = await load();
+    let engage: () => void = () => undefined;
+    const load3d = vi.fn(async () => async () => scene());
     initLanding(root(), {
-      capability: { ...capable, webgl: false },
+      capability: capability({ tier: 'low' }),
       start: now,
-      storage: memoryStorage(),
-      loaders: { hero: load },
-      intro,
+      engage: (run) => {
+        engage = run;
+        return () => undefined;
+      },
+      loaders: { stage: load3d },
       motion: () => () => undefined,
     });
-    expect(hero().dataset.islandState).toBe('fallback');
-    expect(load).not.toHaveBeenCalled();
-    expect(intro).not.toHaveBeenCalled();
+    expect(load3d).not.toHaveBeenCalled();
+    engage();
+    await vi.waitFor(() => expect(load3d).toHaveBeenCalled());
+  });
+
+  it.each([
+    ['WebGL is unavailable', { webgl: false }],
+    ['the visitor prefers reduced motion', { reducedMotion: true }],
+  ])('keeps the poster when %s', async (_name, overrides) => {
+    const { initLanding } = await load();
+    const load3d = vi.fn();
+    initLanding(root(), {
+      capability: capability(overrides),
+      start: now,
+      loaders: { stage: load3d },
+      motion: () => () => undefined,
+    });
+    expect(load3d).not.toHaveBeenCalled();
+    expect(root().dataset.stage).toBeUndefined();
+  });
+
+  it('keeps the poster when the motion config is off', async () => {
+    const { initLanding } = await load();
+    const load3d = vi.fn();
+    initLanding(root(), {
+      capability: capability(),
+      start: now,
+      motionEnabled: () => false,
+      loaders: { stage: load3d },
+      motion: () => () => undefined,
+    });
+    expect(load3d).not.toHaveBeenCalled();
+    expect(root().dataset.stage).toBeUndefined();
+  });
+
+  it('returns to the poster when reduced motion is switched on mid-visit', async () => {
+    const { initLanding } = await load();
+    const media = reduceQuery();
+    const created = scene();
+    initLanding(root(), {
+      capability: capability(),
+      start: now,
+      loaders: { stage: async () => async () => created },
+      motion: () => () => undefined,
+    });
+    await vi.waitFor(() => expect(root().dataset.stage).toBe('live'));
+    media.change(true);
+    expect(created.dispose).toHaveBeenCalled();
+    expect(root().dataset.stage).toBeUndefined();
+  });
+
+  it('does not start a low-tier stage after reduced motion was switched on', async () => {
+    const { initLanding } = await load();
+    const media = reduceQuery();
+    let engage: () => void = () => undefined;
+    const load3d = vi.fn(async () => async () => scene());
+    initLanding(root(), {
+      capability: capability({ tier: 'low' }),
+      start: now,
+      engage: (run) => {
+        engage = run;
+        return () => undefined;
+      },
+      loaders: { stage: load3d },
+      motion: () => () => undefined,
+    });
+    media.change(true);
+    engage();
+    await Promise.resolve();
+    expect(load3d).not.toHaveBeenCalled();
+  });
+
+  it('stops listening for reduced motion once disposed', async () => {
+    const { initLanding } = await load();
+    const media = reduceQuery();
+    const dispose = initLanding(root(), {
+      capability: capability(),
+      start: now,
+      loaders: { stage: async () => async () => scene() },
+      motion: () => () => undefined,
+    });
+    expect(media.listeners()).toBe(1);
+    dispose();
+    expect(media.listeners()).toBe(0);
+  });
+
+  it('drops the stage when the chapter motion is unavailable', async () => {
+    const { initLanding } = await load();
+    const created = scene();
+    let unavailable: () => void = () => undefined;
+    initLanding(root(), {
+      capability: capability(),
+      start: now,
+      loaders: { stage: async () => async () => created },
+      motion: (_root, onUnavailable) => {
+        unavailable = onUnavailable;
+        return () => undefined;
+      },
+    });
+    await vi.waitFor(() => expect(root().dataset.stage).toBe('live'));
+    unavailable();
+    expect(created.dispose).toHaveBeenCalled();
+    expect(root().dataset.stage).toBeUndefined();
+  });
+});
+
+describe('loadLandingMotion', () => {
+  afterEach(() => vi.doUnmock('../../src/scripts/landing-motion.ts'));
+
+  it('reports a chunk that fails to load', async () => {
+    vi.doMock('../../src/scripts/landing-motion.ts', () => {
+      throw new Error('chunk failed');
+    });
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { loadLandingMotion } = await import('../../src/scripts/landing.ts');
+    const onUnavailable = vi.fn();
+    loadLandingMotion(root(), onUnavailable);
+    await vi.waitFor(() => expect(onUnavailable).toHaveBeenCalledTimes(1));
   });
 });
