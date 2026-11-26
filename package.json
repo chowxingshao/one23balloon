@@ -39,7 +39,7 @@
     "eslint": "10.12.0",
     "eslint-plugin-astro": "3.2.1",
     "eslint-plugin-jsx-a11y-x": "0.2.0",
-    "jsdom": "30.1.2",
+    "jsdom": "31.0.1",
     "prettier": "3.9.9",
     "prettier-plugin-astro": "1.1.0",
     "subset-font": "2.9.0",
